@@ -56,3 +56,12 @@
 - Script reproductible ajouté : `tests/world-map-beta.test.cjs` ; son exécution dans checkout Node local n'a pas été réalisée dans ce checkpoint.
 - Test sur navigateur réel avec OpenFreeMap **non exécuté**, la documentation technique OpenFreeMap confirme les URLs mais ne garantit pas leur disponibilité sur le réseau utilisateur.
 - Le moteur de couverture et ses limitations radio n'ont pas été modifiés.
+
+
+## 2026-10-24 — Carte mondiale unifiée / redondance optionnelle
+- Script MapLibre chargé dans **la page principale** et code radio classique préservé. Les anciennes couvertures sont reprojetées avec `map.project` ; les chemins SRTM calculés sont redessinés depuis leurs échantillons aux `moveend`.
+- Tests de syntaxe app/radio/adapter/graphe PASS sur sources effectivement récupérées de GitHub.
+- Essai synthétique : projection inverse avec une carte simulée, recadrage A/B sur le Tarn, appel de zoom adapté = PASS.
+- `rfRedundancy` présent sans `checked` dans le panneau d'optimisation ; base `MeshtasticResilience` réutilisée, et rapports actuels/proposés affichés seulement sur demande.
+- Calcul d’implantations supplémentaires redondantes, moteur ITM/Longley-Rice validé, performance et rendu des couches MapLibre dans Firefox **NON EXÉCUTÉS**.
+- Ce checkpoint est une intégration fonctionnelle expérimentale, pas une version stable validée terrain.
