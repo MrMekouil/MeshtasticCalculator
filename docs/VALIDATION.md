@@ -33,3 +33,10 @@
 - Banc de tests JavaScript sur source GitHub : survol inerte, clic droit inerte, seuil de 6px, pan > seuil, relâchement, clic nœud sans déplacement, glissement nœud, annulation rétablit coordonnées, capture perdue remet état à zéro : **9/9 PASS**.
 - Navigateur Firefox de l'utilisateur : **NON EXÉCUTÉ** ; interactions tactiles et intégration future MapLibre : **NON EXÉCUTÉ**.
 - La précision radio n'a pas progressé lors de ce checkpoint : seule la spécification de migration ITM/Longley-Rice est documentée.
+
+## 2026-10-24 — CP-U1 placement et couches (partiel)
+- Nudge géographique : 100 m nord mesuré 99,99987 m par approximation géodésique ; 10 m est mesuré 10,00038 m ; retour latitude résiduel 0 m. PASS sur données simulées.
+- Interrupteurs par nœud : 2 couches de test, masquer la deuxième ne masque pas la première et n'invalide pas les valeurs RF. PASS en environnement JS sans navigateur.
+- L'interface a été vérifiée statiquement : 1 seul panneau de placement fin, 4 boutons N/O/S/E, aucun identifiant HTML dupliqué, app/radio syntaxe PASS.
+- Tests Firefox réel, clic, drag, zoom extrême et exécution script test Node : NON EXÉCUTÉS.
+- Modes cellules/contours, moteur ITM, DEM mondial : SPÉCIFIÉS, PAS IMPLÉMENTÉS.
