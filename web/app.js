@@ -176,7 +176,15 @@ function invalidate(){state.estimate=null;wipe('estimatedLayer');}
 function updateField(field,value){
  const p=site(state.selected);if(!p)return;
  p[field]=field==='name'?String(value).slice(0,80):Number(value);
- if(field!=='name'){invalidate();}renderSites();renderMarkers();
+ if(field!=='name'){
+   invalidate();
+   if(typeof rfInvalidate==='function')rfInvalidate(p.id);
+ }
+ renderSites();renderMarkers();renderEditor();
+ if(field!=='name'&&state.terrain&&typeof rfCalculateSite==='function'){
+   clearTimeout(preciseRecomputeTimer);
+   preciseRecomputeTimer=setTimeout(()=>rfCalculateSite(p.id),350);
+ }
 }
 function geometryData(buf,name){
  const hit=name.match(/([NS])(\d{1,2})([EW])(\d{1,3})/i);
@@ -276,7 +284,7 @@ async function loadCoverage(file,key){
  }catch(e){updateStatus('Import refusé : '+e.message);}
 }
 function save(){
- const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{}};
+ const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{},hiddenCoverages:typeof RADIO!=='undefined'?[...RADIO.hidden]:[]};
  const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
  a.href=url;a.download='meshtasticcalculator-projet.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),300);
 }
@@ -314,7 +322,7 @@ function wire(){
   if(!confirm('Créer un nouveau projet ? Pense à exporter le projet actuel si tu veux conserver ses points et couvertures.'))return;
   state.sites=structuredClone(HOME).map((p,i)=>({...p,name:'Station '+(i+1)}));
   state.layer={pradel:null,labru:null};state.selected='pradel';invalidate();
-  if(typeof RADIO!=='undefined'){RADIO.coverage.clear();RADIO.imports.clear();rfDraw();rfSummary();}
+  if(typeof RADIO!=='undefined'){RADIO.coverage.clear();RADIO.imports.clear();RADIO.hidden.clear();rfDraw();rfSummary();}
   render();fitSites();updateStatus('Nouveau projet : déplace les deux stations et ajoute tes relais.');
  };
  $('zoomIn').onclick=()=>zoom(.8);$('zoomOut').onclick=()=>zoom(1.25);
