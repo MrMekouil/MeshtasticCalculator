@@ -8,3 +8,8 @@
 #rfStatus{font-size:11px;min-height:2.2em;white-space:normal}
 #radioLayer path{pointer-events:none;vector-effect:non-scaling-stroke}
 .rfLinks{display:grid;gap:6px}.rf-link{padding:7px;background:#e6f6ef;border-left:3px solid #25a36e;border-radius:4px;font-size:11px;line-height:1.45}.rf-low{border-color:#d5903d;background:#fff3e4}
+
+/* Diagnostics are optional to keep the essential interface compact */
+aside section details{margin-top:8px;border:1px solid #dce7ed;border-radius:8px;padding:8px}
+aside section details summary{cursor:pointer;color:#365b6d;font-size:12px;font-weight:600}
+.estimate{fill:#899aa6!important;opacity:.36}
