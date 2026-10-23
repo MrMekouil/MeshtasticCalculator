@@ -33,3 +33,11 @@
 - La première bêta MapLibre avec fond `demotiles.maplibre.org` est jugée inutilisable à l'échelle locale (pays/frontières uniquement). Nouvelle version sur work : styles OpenFreeMap routiers Positron, Liberty, Bright ; fond blanc secours ; points Le Pradel/Labruguière par défaut ; cadrage au Tarn.
 - La bêta est **une vue cartographique seulement**, la radio et les GeoJSON restent dans l'application historique en attendant leur migration.
 - Tests synthétiques du nouveau démarrage et choix des fonds exécutés ; accès réel OpenFreeMap depuis Firefox reste à valider par l'utilisateur.
+
+
+## 2026-10-24 — Décision : interface unique et redondance opt-in
+- Retour utilisateur : la séparation « Carte mondiale »/« Application classique » n'est pas acceptable ; toutes les fonctions de la classique doivent être disponibles sur la carte mondiale **dans la même page**.
+- `web/index.html` devient la page unique. `web/world-map-adapter.js` charge MapLibre et recalcule la projection SVG des données GeoJSON et des couvertures radio déjà présentes. `world-map-beta.html` redirige vers `index.html`.
+- Panneau Optimisation contient **une case à cocher redondance vide par défaut** ; elle ajoute une simulation de panne de relais. Sans coche : optimisation classique seulement.
+- Limites : analyse de panne basée sur le modèle radio expérimental, ne cherche pas encore automatiquement le nombre/emplacement de relais additionnels pour assurer la redondance. Ne jamais afficher succès terrain certifié.
+- `main` stable, aucune fusion/PR/release. Prochain contrôle : Firefox (fonds, zoom, drag, couches importées, SRTM, bascule redondance), puis stabilisation des géométries natives MapLibre.
