@@ -1,18 +1,38 @@
 # MeshtasticCalculator
 
-Outil de planification de réseaux Meshtastic : visualisation des couvertures, analyse du relief, placement de relais et recherche d'itinéraires radio entre sites.
+Application expérimentale de planification de réseaux Meshtastic entre **Le Pradel et Labruguière** (Tarn). Deux sources sont distinguées : couvertures radio GeoJSON **importées** de Meshtastic Site Planner et **visibilité géométrique estimée localement** avec un relief SRTM.
 
-## Statut
-Projet expérimental. Les approximations SRTM/knife-edge ne sont **pas** des prévisions de couverture validées. Les résultats Meshtastic Site Planner importés doivent conserver leur provenance et leurs paramètres.
+## Ouvrir l'application
 
-## Développement
-Le travail actif est développé sur une branche `work/` avec revue avant intégration. Voir les documents `AGENTS.md`, `ASSISTANT_STATE.md` et `docs/ROADMAP.md` sur la branche de travail.
+Lancer [web/index.html](web/index.html) dans Firefox ou Chromium depuis cette branche. Aucune installation et aucune API IGN requises.
 
-## Objectifs
-- Points fixes et relais ajoutables, déplaçables et supprimables.
-- Carte lisible : fond blanc fiable, fond topographique atténué optionnel.
-- Couverture calculée par site, avec modèle/paramètres/limites indiqués.
-- Optimisation d'un chemin multi-sauts selon la marge **minimale**, pas selon la seule distance.
-- Import/export GeoJSON et préservation des simulations de référence.
+- Deux stations fixes prépositionnées, à coordonnées **approximatives**.
+- Ajout, déplacement, édition, suppression et renommage de relais ; double-clic sur la carte pour créer un point.
+- Import local de `Endless_Centipede.geojson` (Le Pradel) et `Carbonic_Lorikeet.geojson` (Labruguière), **non publiés dans ce dépôt public**.
+- Chargement de `N43E002.hgt` ou `.hgt.gz` (fichier DEM non inclus).
+- Calcul terrain LOS / 60 % de Fresnel + courbure effective ; **ce n'est pas une prévision Longley-Rice**, ni une garantie de signal.
+- Trois résolutions d'exploration ; après modification du mode, recliquer sur « Calculer ». Après glisser-déposer d'un site avec relief chargé, recalcul automatique.
+- Fond blanc hors ligne ou OpenTopoMap atténué facultatif (les serveurs externes peuvent refuser les tuiles).
+- Sauvegarde et restauration d'un projet JSON ; le gros fichier SRTM est rechargé séparément.
 
-Licence non définie ; aucun code externe ne doit être incorporé sans validation de ses conditions.
+**Attention :** les zones vertes ne sont pas une couverture radio prédite. Elles décrivent seulement des positions géométriquement favorables selon un DEM qui ne contient pas tous les arbres et bâtiments.
+
+Documentation : [Mode d'emploi](docs/USAGE.md), [Modèle radio](docs/RADIO_MODEL.md), [Roadmap](docs/ROADMAP.md), [Validation](docs/VALIDATION.md).
+
+## Méthode et développement
+
+Le kit Assistant pilote / Work V0.3 de l'utilisateur a été adapté et versionné dans `AGENTS.md`, `ASSISTANT_STATE.md`, `WORK_STATE.md`, `docs/` et `templates/`.
+
+La branche de travail est `work/project-bootstrap-v0.1`. La branche `main` reste volontairement stable. Aucun merge, tag ou release n'a été décidé.
+
+## Test
+
+```bash
+node tests/geometry.test.cjs
+```
+
+Test synthétique du terrain uniquement ; il ne remplace pas un test utilisateur ni un essai Meshtastic réel.
+
+## Confidentialité
+
+Dépôt public : ne pas y commiter une adresse exacte, une position privée, les exports utilisateur ni des tokens. Les points par défaut sont des références approximatives, non des domiciles relevés au GPS. Licence non choisie ; code externe soumis à examen avant réutilisation.
