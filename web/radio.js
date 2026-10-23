@@ -383,6 +383,8 @@ function rfPanel(){
   const data=JSON.parse(await file.text());
   await oldRestore(file);
   RADIO.coverage.clear();RADIO.imports.clear();
+  RADIO.hidden=new Set((Array.isArray(data.hiddenCoverages)?data.hiddenCoverages:[])
+    .filter(id=>typeof id==='string'&&!!site(id)));
   for(const [id,obj] of Object.entries(data.radioImports||{})){
     if(!site(id)||!obj||obj.type!=='FeatureCollection'||!Array.isArray(obj.features))continue;
     const groups={};
@@ -393,7 +395,7 @@ function rfPanel(){
     }
     if(Object.keys(groups).length)RADIO.imports.set(id,{file:'Projet importé',obj,groups});
   }
-  rfDraw();rfSummary();
+  rfDraw();rfSummary();rfRefreshVisibility();
 };
  rfSummary();rfRefreshVisibility();
  rfRestoreTiles();
