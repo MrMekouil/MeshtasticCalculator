@@ -298,7 +298,8 @@ function rfPanel(){
   '<p class="muted">Avec le terrain SRTM : chaque station peut produire sa propre couverture. Les résultats restent exploratoires.</p>'+
   '<div class="actions"><button id="rfSelected" class="primary">Calculer ce nœud</button><button id="rfAll">Calculer tous les nœuds</button></div>'+
   '<details><summary>Optimisation de l’emplacement</summary><p class="hint">Recherche indicative du relais avec la meilleure marge minimale vers ses deux voisins. Les terrains privés, routes et obstacles locaux ne sont pas vérifiés.</p><div class="actions"><button id="rfOptimize">Chercher un emplacement</button><button id="rfApply" disabled>Appliquer</button></div></details>'+
-  '<p id="rfStatus" class="hint">Charge un relief pour lancer le calcul.</p>'+
+  '<p id="rfStatus" class="hint">Pour calculer la couverture d’un nouveau point, charge d’abord son relief SRTM (si non mémorisé).</p>'+
+  '<button id="rfChooseTerrain" class="block">Charger un terrain SRTM (HGT)</button>'+
   '<div class="actions"><label class="btn">Importer GeoJSON du point sélectionné<input id="rfImport" type="file" accept=".geojson,.json" hidden></label><button id="rfClearImport">Retirer import</button></div>'+
   '<div class="toggles"><label><input id="rfShow" type="checkbox" checked> Afficher les estimations radio</label></div>'+
   '<label>Seuil du signal<select id="rfThreshold"><option value="-130">≥ −130 dBm · limite</option><option value="-117" selected>≥ −117 dBm · meilleure marge</option><option value="-109">≥ −109 dBm · signal plus fort</option></select></label>'+
@@ -318,6 +319,7 @@ function rfPanel(){
  prior.parentNode.insertBefore(sect,prior);
  const group=svg('g',{id:'radioLayer'},null);
  $('estimatedLayer').parentNode.insertBefore(group,$('estimatedLayer'));
+ $('rfChooseTerrain').onclick=()=>$('importDem').click();
  $('rfSelected').onclick=()=>{rfReadSettings();rfCalculateSite(state.selected);};
  $('rfImport').onchange=e=>{if(e.target.files[0])rfImportSite(e.target.files[0],state.selected);e.target.value='';};
  $('rfClearImport').onclick=()=>{RADIO.imports.delete(state.selected);rfDraw();rfStatus('Couverture importée retirée du nœud sélectionné.');};
