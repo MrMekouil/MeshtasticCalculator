@@ -5,7 +5,7 @@
 'use strict';
 const RADIO={
   settings:{freq:869.525,eirp:20,rxGain:0,extraLoss:12,sensitivity:-130,rxHeight:2,maxKm:25,quality:'normal',threshold:-117},
-  coverage:new Map(),versions:new Map(),enabled:true,active:true,dragPreview:null,demPersistent:false
+  coverage:new Map(),imports:new Map(),versions:new Map(),enabled:true,active:true,dragPreview:null,demPersistent:false
 };
 const RADIO_QUALITY={preview:{rays:72,step:.35,profileStep:180},normal:{rays:180,step:.15,profileStep:100},fine:{rays:360,step:.10,profileStep:70}};
 function rfPoint(lat,lon,theta,km){
@@ -118,12 +118,20 @@ function rfDraw(){
  if(!RADIO.enabled)return;
  const t=RADIO.settings.threshold;const opacity=+($('rfOpacity')?.value||35)/100;
  for(const node of state.sites){
-  const cv=RADIO.coverage.get(node.id);if(!cv||!site(node.id))continue;
-  const path=cv.paths[t];if(!path)continue;
+  if(!site(node.id))continue;
+  const imported=RADIO.imports.get(node.id);
+  const cv=RADIO.coverage.get(node.id);
+  let path='';
+  if(imported){
+    const tiers=Object.keys(imported.groups).map(Number);
+    const selected=tiers.reduce((b,x)=>Math.abs(x-t)<Math.abs(b-t)?x:b,tiers[0]);
+    path=imported.groups[selected].map(f=>rings(null,f.geometry)).join('');
+  }else if(cv)path=cv.paths[t];
+  if(!path)continue;
   const selected=node.id===state.selected;
   svg('path',{d:path,'fill-rule':'evenodd',fill:node.type==='home'?'#7c78dc':'#0ea875',
     'fill-opacity':selected?opacity:opacity*.52,stroke:selected?'#0d876b':'none',
-    'stroke-width':'.4','vector-effect':'non-scaling-stroke','data-model':cv.kind},group);
+    'stroke-width':'.4','vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind},group);
  }
 }
 function rfSummary(){
@@ -163,6 +171,7 @@ async function rfComputeAll(){
  finally{$('rfAll').disabled=false;}
 }
 function rfImportSite(file,id){
+ if(!id||!site(id))return;
  file.text().then(s=>{
   const obj=JSON.parse(s);
   if(obj.type!=='FeatureCollection'||!Array.isArray(obj.features))throw Error('GeoJSON invalide');
@@ -174,7 +183,7 @@ function rfImportSite(file,id){
   }
   const ok=Object.keys(groups).length>0;
   if(!ok)throw Error('Aucun polygone avec properties.dbm');
-  RADIO.imports ||=new Map();RADIO.imports.set(id,{file:file.name,obj,groups});
+  RADIO.imports.set(id,{file:file.name,obj,groups});rfDraw();
   rfStatus('GeoJSON Site Planner importé pour '+site(id)?.name+'. Il reste distinct du modèle local.');
  }).catch(e=>rfStatus('Import impossible : '+e.message));
 }
@@ -186,6 +195,7 @@ function rfPanel(){
   '<p class="muted">Avec le terrain SRTM : chaque station peut produire sa propre couverture. Les résultats restent exploratoires.</p>'+
   '<div class="actions"><button id="rfSelected" class="primary">Calculer ce nœud</button><button id="rfAll">Calculer tous les nœuds</button></div>'+
   '<p id="rfStatus" class="hint">Charge un relief pour lancer le calcul.</p>'+
+  '<div class="actions"><label class="btn">Importer GeoJSON du point sélectionné<input id="rfImport" type="file" accept=".geojson,.json" hidden></label><button id="rfClearImport">Retirer import</button></div>'+
   '<div class="toggles"><label><input id="rfShow" type="checkbox" checked> Afficher les estimations radio</label></div>'+
   '<label>Seuil du signal<select id="rfThreshold"><option value="-130">≥ −130 dBm · limite</option><option value="-117" selected>≥ −117 dBm · meilleure marge</option><option value="-109">≥ −109 dBm · signal plus fort</option></select></label>'+
   '<label>Résolution<select id="rfPrecision"><option value="preview">Rapide (72 directions)</option><option value="normal" selected>Standard (180 directions)</option><option value="fine">Fine (360 directions)</option></select></label>'+
@@ -205,6 +215,8 @@ function rfPanel(){
  const group=svg('g',{id:'radioLayer'},null);
  $('estimatedLayer').parentNode.insertBefore(group,$('estimatedLayer'));
  $('rfSelected').onclick=()=>{rfReadSettings();rfCalculateSite(state.selected);};
+ $('rfImport').onchange=e=>{if(e.target.files[0])rfImportSite(e.target.files[0],state.selected);e.target.value='';};
+ $('rfClearImport').onclick=()=>{RADIO.imports.delete(state.selected);rfDraw();rfStatus('Couverture importée retirée du nœud sélectionné.');};
  $('rfAll').onclick=()=>{rfReadSettings();rfComputeAll();};
  $('rfShow').onchange=e=>{RADIO.enabled=e.target.checked;rfDraw();};
  $('rfThreshold').onchange=e=>{RADIO.settings.threshold=Number(e.target.value);rfDraw();};
@@ -232,18 +244,34 @@ function rfPanel(){
     if(state.terrain)rfCalculateSite(which);
   });
  }
- $('delete').addEventListener('click',()=>{for(const id of [...RADIO.coverage.keys()])if(!site(id))RADIO.coverage.delete(id);rfDraw();rfSummary();});
+ $('delete').addEventListener('click',()=>{for(const id of [...RADIO.coverage.keys()])if(!site(id))RADIO.coverage.delete(id);for(const id of [...RADIO.imports.keys()])if(!site(id))RADIO.imports.delete(id);rfDraw();rfSummary();});
  $('add').addEventListener('click',()=>{
    if(state.terrain)setTimeout(()=>rfCalculateSite(state.selected),0);
    rfSummary();
  });
+ $('map').addEventListener('dblclick',()=>{if(state.terrain)setTimeout(()=>rfCalculateSite(state.selected),0);});
  const oldLoadDem=loadDem;
  loadDem=async(file)=>{
   await oldLoadDem(file);
   if(state.terrain){rfStatus('Terrain chargé. Calcul du relais sélectionné…');await rfCalculateSite(state.selected);rfSummary();}
  };
  const oldRestore=restore;
- restore=async(file)=>{await oldRestore(file);RADIO.coverage.clear();rfDraw();rfSummary();};
+ restore=async(file)=>{
+  const data=JSON.parse(await file.text());
+  await oldRestore(file);
+  RADIO.coverage.clear();RADIO.imports.clear();
+  for(const [id,obj] of Object.entries(data.radioImports||{})){
+    if(!site(id)||!obj||obj.type!=='FeatureCollection'||!Array.isArray(obj.features))continue;
+    const groups={};
+    for(const f of obj.features){
+      const dbm=Number(f.properties?.dbm);
+      if(Number.isFinite(dbm)&&['Polygon','MultiPolygon'].includes(f.geometry?.type))
+        (groups[dbm]??=[]).push(f);
+    }
+    if(Object.keys(groups).length)RADIO.imports.set(id,{file:'Projet importé',obj,groups});
+  }
+  rfDraw();rfSummary();
+};
  rfSummary();
 }
 rfPanel();
