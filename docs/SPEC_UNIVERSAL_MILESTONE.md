@@ -136,3 +136,11 @@ Ne jamais pousser les exports `coverages.local.js`, la position réelle d'une ma
 - En cas d'augmentation du zoom, la cible peut être placée précisément ; le moteur garde son incertitude altimétrique SRTM (30/90 m). Une précision de pointage au mètre ne signifie pas une prévision radio au mètre.
 - Cas tests : marqueur reste cliquable au zoom 10 m à 100 km ; nudge 1/10/100 m conserve une géodésique correcte ; couches désactivées n'influencent pas le calcul ; basculement cellule/zone ne modifie aucune marge dB.
 - **Validation du correctif pointeur précédent toujours attendue sur Firefox** ; pas d'obligation de bloquer ce jalon pendant l'essai.
+
+## Extension — Redondance et continuité de service (24 octobre 2026)
+- Exigence ajoutée : trouver un trajet alternatif quand un relais intermédiaire tombe hors ligne ; tolérance à une panne, puis N pannes et points de défaillance communs.
+- Référence détaillée : [REDUNDANCY.md](REDUNDANCY.md).
+- Le graphe sera bâti exclusivement à partir de **liaisons bidirectionnelles radio prédites** avec incertitude, compatibilité de modulation/slot et contraintes de sauts. Ne pas réduire l'étude à la distance géométrique.
+- Meshtastic a du flooding géré et, selon les versions, du next-hop pour les messages directs ; le calculateur évalue des chemins candidats et des pannes, sans prétendre forcer un chemin du firmware ni promettre un basculement instantané.
+- Critère de validation : avec chaque relais éliminé tour à tour, vérifier s'il subsiste un trajet A↔B admissible, identifier les relais critiques et afficher la marge du pire saut ainsi que les incertitudes.
+- Fondations techniques en développement : `web/mesh-resilience.js` et `tests/mesh-resilience.test.cjs`. Aucune conclusion terrain avant connexion au moteur RF validé.
