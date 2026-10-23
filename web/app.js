@@ -282,30 +282,58 @@ function wire(){
  $('save').onclick=save;$('openProject').onchange=e=>e.target.files[0]&&restore(e.target.files[0]);
  const map=$('map');
  map.addEventListener('dblclick',e=>{e.preventDefault();const p=localXY(e);addRelay(unproject(p.x,p.y));});
+ const DRAG_THRESHOLD_PX=6;
+ function endMapPointer(e,cancelled=false){
+  const d=state.drag;
+  if(!d||e.pointerId!==d.pointerId)return;
+  state.drag=null;
+  try{if(map.hasPointerCapture?.(e.pointerId))map.releasePointerCapture(e.pointerId);}catch(_){}
+  if(d.kind==='site'){
+   const p=site(d.id);
+   if(cancelled&&p&&d.original){p.lat=d.original.lat;p.lon=d.original.lon;}
+   if(d.active||cancelled){
+    clearTimeout(previewTimer);state.token++;invalidate();renderSites();renderEditor();renderMarkers();
+    if(state.terrain&&!cancelled)calculate();
+   }
+  }else if(d.active)mapBase();
+ }
  map.addEventListener('pointerdown',e=>{
-  const node=e.target.closest('.point');const p=localXY(e);
-  if(node){state.selected=node.dataset.id;state.drag={kind:'site',id:state.selected};renderSites();renderEditor();renderMarkers();}
-  else state.drag={kind:'pan',clientX:e.clientX,clientY:e.clientY,view:{...state.view}};
-  map.setPointerCapture(e.pointerId);
+  // Ignore secondary clicks: a map must never start moving just because the pointer is hovering.
+  if(e.button!==0||state.drag)return;
+  const node=e.target.closest?.('.point');
+  const id=node?.dataset?.id;
+  const p=id?site(id):null;
+  if(id&&!p)return;
+  if(id){state.selected=id;renderSites();renderEditor();renderMarkers();}
+  state.drag={pointerId:e.pointerId,kind:p?'site':'pan',id,
+   startX:e.clientX,startY:e.clientY,active:false,
+   view:{...state.view},original:p?{lat:p.lat,lon:p.lon}:null};
+  try{map.setPointerCapture(e.pointerId);}catch(_){state.drag=null;}
  });
  map.addEventListener('pointermove',e=>{
-  if(!state.drag)return;
-  const v=localXY(e);
-  if(state.drag.kind==='site'){
-   const p=site(state.drag.id);if(!p)return;const geo=unproject(v.x,v.y);p.lat=+geo.lat.toFixed(6);p.lon=+geo.lon.toFixed(6);renderMarkers();
+  const d=state.drag;
+  if(!d||e.pointerId!==d.pointerId)return;
+  // Recover from a missed pointerup; do not keep dragging with no primary button pressed.
+  if(e.pointerType==='mouse'&&!(e.buttons&1)){endMapPointer(e,true);return;}
+  const dx=e.clientX-d.startX,dy=e.clientY-d.startY;
+  if(!d.active&&dx*dx+dy*dy<DRAG_THRESHOLD_PX*DRAG_THRESHOLD_PX)return;
+  d.active=true;
+  e.preventDefault();
+  if(d.kind==='site'){
+   const p=site(d.id);if(!p)return;
+   const v=localXY(e),geo=unproject(v.x,v.y);
+   p.lat=+geo.lat.toFixed(6);p.lon=+geo.lon.toFixed(6);renderMarkers();
    if(state.terrain){clearTimeout(previewTimer);previewTimer=setTimeout(()=>calculate('quick'),450);}
   }else{
    const rect=map.getBoundingClientRect();
-   state.view.x=state.drag.view.x-(e.clientX-state.drag.clientX)*state.drag.view.w/rect.width;
-   state.view.y=state.drag.view.y-(e.clientY-state.drag.clientY)*state.drag.view.h/rect.height;setView();
+   state.view.x=d.view.x-dx*d.view.w/rect.width;
+   state.view.y=d.view.y-dy*d.view.h/rect.height;
+   setView();
   }
  });
- map.addEventListener('pointerup',()=>{
-  if(!state.drag)return;
-  const moved=state.drag.kind==='site';state.drag=null;
-  if(moved){clearTimeout(previewTimer);state.token++;invalidate();renderSites();renderEditor();renderMarkers();if(state.terrain)calculate();}
-  else mapBase();
- });
+ map.addEventListener('pointerup',e=>endMapPointer(e,false));
+ map.addEventListener('pointercancel',e=>endMapPointer(e,true));
+ map.addEventListener('lostpointercapture',e=>endMapPointer(e,true));
  map.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.12:.89);},{passive:false});
 }
 function fitSites(){
