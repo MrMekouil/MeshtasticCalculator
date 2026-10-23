@@ -57,3 +57,12 @@ Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototy
 - Contrôle : choix explicite du fond, repli sur autre style/fond blanc en cas d'échecs réseau répétés ; positions des nœuds conservées lors du changement.
 - Non validé : chargement réseau réel OpenFreeMap dans Firefox `file://`, détails affichés sur le terrain du Tarn, essai mobile.
 - Ensuite : intégrer le moteur radio existant et les couches GeoJSON dans MapLibre (ne pas confondre avec fond de carte).
+
+
+### 2026-10-24 — CP-U1 : convergence vers une seule application
+- **Une seule interface cible** : `web/index.html` combine carte mondiale MapLibre et tous les outils existants (nœuds, imports GeoJSON privés, SRTM, modèle radio local, affichage des couvertures, optimisation de position, sauvegardes).
+- `web/world-map-beta.html` redirige désormais vers l’application principale ; aucun développement parallèle d’une seconde UI.
+- Carte routière multi-zoom OpenFreeMap (Positron/Liberty/Bright) et fond blanc. Une surcouche SVG suit les projections MapLibre ; les contours radio calculés sont reprojetés depuis leurs échantillons après navigation.
+- **Redondance = choix facultatif** dans le panneau Optimisation, non activé au lancement : vérifie les chemins de secours et relais critiques dans le graphe issu du modèle radio simplifié, y compris pour un déplacement proposé ; n’ajoute pas de relais automatiquement.
+- **À compléter avant CP-U1 terminé** : remplacer la surcouche SVG par des couches MapLibre natives, tests Firefox/rendu et import des vrais GeoJSON, performances, comportement offline.
+- **CP-U4 non terminé** : recherche automatique 0..N relais selon objectif minimum/marge/redundance et vraie évaluation RF bidirectionnelle par nœud, source terrain mondiale automatique.
