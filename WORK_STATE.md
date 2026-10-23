@@ -39,3 +39,11 @@
 - Test tests/placement-coverage.test.cjs ajouté ; scénarios exécutés en JS de contrôle : nudge nord 100 m, est 10 m, toggle indépendant, PASS ; parse JS app/radio PASS ; doublons d'identifiants HTML corrigés.
 - Non exécuté : essai Firefox réel, vraie carte MapLibre mondiale, import SRTM du Tarn, test longue session, modes contours.
 - Suite CP-U1 : migrer la carte sur MapLibre sans perdre les données privées ni le calcul radio ; tests UI réels requis.
+
+## 2026-10-24 — Sécurité de l'existant / premiers travaux mondiale et redondance
+- Prévol : work HEAD `c4cf94bca8fe2cdcbf744f366774dbfc85848cf1` avant travail ; main `bb853cc...`, sans modifications demandées. Pas de checkout local ; statut/diff/index Git N/A et jamais supposés propres.
+- Création `docs/REDUNDANCY.md`, `web/mesh-resilience.js`, `tests/mesh-resilience.test.cjs` : tolérance à la coupure de relais sur un **graphe de liens bidirectionnels déjà estimés**, pas une calculatrice RF complète.
+- Prototype MapLibre mondial isolé `web/world-map-beta.html`, lié depuis `web/index.html` ; la page principale, imports et couvertures privées restent inchangés.
+- Tests manuels en JavaScript : réseaux parallèles/chaîne/liaison insuffisante et 70 graphes comparés à recherche exhaustive PASS ; syntaxe du module bêta PASS, démarrage et ajout d'un relais et changement A via DOM/MapLibre simulés PASS.
+- Tests réellement dans Firefox de l'utilisateur, WebGL/CDN/tuiles, radio réelle, intégration de couvertures dans MapLibre : NON EXÉCUTÉS.
+- Ne pas intégrer `main`, publier, créer release/tag sans validation.
