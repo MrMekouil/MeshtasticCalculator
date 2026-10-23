@@ -197,6 +197,47 @@ function rfImportSite(file,id){
   rfStatus('GeoJSON Site Planner importé pour '+site(id)?.name+'. Il reste distinct du modèle local.');
  }).catch(e=>rfStatus('Import impossible : '+e.message));
 }
+function rfFailureReport(override={}){
+ if(!state.terrain||!globalThis.MeshtasticResilience)return null;
+ const nodes=state.sites.map(n=>override[n.id]?{...n,...override[n.id]}:n);
+ const links=[];let unknown=0;
+ for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+  const ab=rfTerrainLink(nodes[i],nodes[j]),ba=rfTerrainLink(nodes[j],nodes[i]);
+  if(!ab||!ba){unknown++;continue;}
+  links.push({from:nodes[i].id,to:nodes[j].id,marginForwardDb:ab.margin,marginReverseDb:ba.margin});
+ }
+ const minMarginDb=Number($('rfMinMargin').value);
+ const maxLinks=Number($('rfMaxHops').value);
+ return {...globalThis.MeshtasticResilience.assessSingleRelayFailure({
+  nodes,links,source:'pradel',target:'labru',minMarginDb,maxLinks
+ }),unknown,known:links.length};
+}
+function rfCheckRedundancy(overrides={},preview=false){
+ const target=$('rfRedundancyResult');if(!target)return null;
+ target.replaceChildren();
+ if(!$('rfRedundancy').checked){target.textContent='Redondance désactivée.';return null;}
+ const report=rfFailureReport(overrides);
+ if(!report){target.textContent='Charge le terrain SRTM pour analyser les chemins alternatifs.';return null;}
+ const headline=document.createElement('p');
+ headline.textContent=!report.baseline
+  ?'Aucun trajet nominal démontré avec les marges exigées.'
+  :report.tolerantToOneRelayFailure
+   ?'Tous les scénarios de panne simple étudiés conservent un trajet estimé.'
+   :'Réseau non redondant selon le modèle : '+report.criticalRelays.length+' relais critique(s).';
+ target.append(headline);
+ const details=document.createElement('p');details.className='hint';
+ details.textContent=(preview?'Position proposée (pas encore appliquée). ':'')+
+   report.known+' liaisons évaluées, '+report.unknown+' inconnues. Modèle radio simplifié non validé.';
+ target.append(details);
+ for(const c of report.cases){
+  const row=document.createElement('p');row.className='hint';
+  row.textContent=c.nodeName+' hors ligne : '+(c.remainsConnected
+   ?'itinéraire '+c.alternatePath.nodes.join(' → ')+', marge minimale '+c.alternatePath.minMarginDb.toFixed(1)+' dB'
+   :'pas de chemin alternatif démontré');
+  target.append(row);
+ }
+ return report;
+}
 async function rfSuggestPosition(){
  if(!state.terrain){rfStatus('Impossible : charge le terrain SRTM.');return;}
  const id=state.selected,node=site(id);
@@ -246,6 +287,7 @@ async function rfSuggestPosition(){
   if(!best){rfStatus('Aucun emplacement candidat entièrement couvert par les données SRTM.');return;}
   RADIO.suggestion={id,original,best};
   $('rfApply').disabled=false;
+  if($('rfRedundancy').checked)rfCheckRedundancy({[id]:{lat:best.lat,lon:best.lon}},true);
   const delta=original?(best.score-original.score).toFixed(1):'inconnue';
   rfStatus('Candidat : '+best.lat.toFixed(5)+', '+best.lon.toFixed(5)+
     ' · marge minimale ≈ '+best.score.toFixed(1)+' dB (gain '+delta+' dB), sur '+checked+
@@ -262,6 +304,7 @@ function rfApplySuggestion(){
  state.selected=node.id;render();fitSites();
  rfStatus('Point déplacé vers la proposition géométrique. Vérifie l’accès réel et valide les liaisons dans Site Planner.');
  if(state.terrain)rfCalculateSite(node.id);
+ if($('rfRedundancy').checked)rfCheckRedundancy();
 }
 async function rfDb(){
  if(!('indexedDB' in window))throw Error('Cache navigateur indisponible');
@@ -307,7 +350,14 @@ function rfPanel(){
   '<h2>Couverture des relais <small>estimation radio</small></h2>'+
   '<p class="muted">Avec le terrain SRTM : chaque station peut produire sa propre couverture. Les résultats restent exploratoires.</p>'+
   '<div class="actions"><button id="rfSelected" class="primary">Calculer ce nœud</button><button id="rfAll">Calculer tous les nœuds</button></div>'+
-  '<details><summary>Optimisation de l’emplacement</summary><p class="hint">Recherche indicative du relais avec la meilleure marge minimale vers ses deux voisins. Les terrains privés, routes et obstacles locaux ne sont pas vérifiés.</p><div class="actions"><button id="rfOptimize">Chercher un emplacement</button><button id="rfApply" disabled>Appliquer</button></div></details>'+
+  '<details><summary>Optimisation de l’emplacement</summary><p class="hint">Recherche indicative du relais avec la meilleure marge minimale vers ses deux voisins. Les terrains privés, routes et obstacles locaux ne sont pas vérifiés.</p>'+
+  '<label><input type="checkbox" id="rfRedundancy"> Étudier aussi la redondance (optionnel)</label>'+
+  '<label>Marge minimale exigée (dB)<input id="rfMinMargin" type="number" value="10" min="-20" max="35"></label>'+
+  '<label>Nombre maximal de sauts<input id="rfMaxHops" type="number" value="7" min="1" max="7"></label>'+
+  '<div class="actions"><button id="rfOptimize">Chercher un emplacement</button><button id="rfApply" disabled>Appliquer</button></div>'+
+  '<button id="rfTestFailure" class="block" disabled>Tester les pannes des relais</button>'+
+  '<div id="rfRedundancyResult" class="hint">Redondance désactivée par défaut.</div>'+
+  '<p class="hint">L’option vérifie les chemins alternatifs pour le placement proposé ; elle ne recherche pas encore automatiquement des relais supplémentaires.</p></details>'+
   '<p id="rfStatus" class="hint">Pour calculer la couverture d’un nouveau point, charge d’abord son relief SRTM (si non mémorisé).</p>'+
   '<button id="rfChooseTerrain" class="block">Charger un terrain SRTM (HGT)</button>'+
   '<div class="actions"><label class="btn">Importer GeoJSON du point sélectionné<input id="rfImport" type="file" accept=".geojson,.json" hidden></label><button id="rfClearImport">Retirer import</button></div>'+
@@ -335,6 +385,12 @@ function rfPanel(){
  $('rfClearImport').onclick=()=>{RADIO.imports.delete(state.selected);rfDraw();rfStatus('Couverture importée retirée du nœud sélectionné.');};
  $('rfAll').onclick=()=>{rfReadSettings();rfComputeAll();};
  $('rfOptimize').onclick=()=>{rfReadSettings();rfSuggestPosition();};
+ $('rfRedundancy').onchange=e=>{
+  $('rfTestFailure').disabled=!e.target.checked;
+  if(e.target.checked)rfCheckRedundancy();
+  else $('rfRedundancyResult').textContent='Redondance désactivée.';
+ };
+ $('rfTestFailure').onclick=()=>rfCheckRedundancy();
  $('rfApply').onclick=rfApplySuggestion;
  $('rfShow').onchange=e=>{RADIO.enabled=e.target.checked;rfDraw();};
  $('rfThreshold').onchange=e=>{RADIO.settings.threshold=Number(e.target.value);rfDraw();};
