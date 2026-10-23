@@ -13,3 +13,13 @@
 aside section details{margin-top:8px;border:1px solid #dce7ed;border-radius:8px;padding:8px}
 aside section details summary{cursor:pointer;color:#365b6d;font-size:12px;font-weight:600}
 .estimate{fill:#899aa6!important;opacity:.36}
+
+/* Placement fin : croix de position + commandes directionnelles. */
+.precision-panel code{display:block;overflow-wrap:anywhere;background:#f0f7f8;border-radius:6px;padding:7px;color:#135c63}
+.precision-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:8px 0}
+.precision-grid .north{grid-column:2;grid-row:1}
+.precision-grid .west{grid-column:1;grid-row:2}
+.precision-grid .south{grid-column:2;grid-row:2}
+.precision-grid .east{grid-column:3;grid-row:2}
+.precision-grid button{min-height:36px}
+.precise-crosshair{stroke:#07465d;stroke-width:2.25;stroke-linecap:round;pointer-events:none}
