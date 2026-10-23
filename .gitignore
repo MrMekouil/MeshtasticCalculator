@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+*.log
+*.hgt
+*.hgt.gz
+*.tif
+*.tiff
+.env
+.env.*
+!*.example
+data/private/
+coverage/private/
