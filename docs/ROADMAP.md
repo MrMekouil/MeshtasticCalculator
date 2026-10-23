@@ -43,3 +43,9 @@ Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototy
 - Livré : affichage/masquage de la couche radio de chaque nœud, mémorisé dans l'export de projet JSON.
 - À faire : MapLibre mondial, fonds multi-zoom correctement licenciés, UX définitive, contrôles d'annulation/révision, mode « cellules » versus « zones polygonales » sans changer les valeurs RF.
 - Correctif précédent de capture du pointeur toujours à tester sur Firefox de l'utilisateur. Ne pas assimiler placement au mètre à précision physique SRTM au mètre.
+
+### 2026-10-24 — Progression CP-U1 + extension CP-U4
+- **Carte MapLibre mondiale isolée (bêta)** : `web/world-map-beta.html`. Zoom multi-niveaux, placement A/B et des relais, glisser-déposer et import/export du JSON projet. Aucun calcul de couverture dans cette page ; app SVG existante inchangée.
+- **Redondance (CP-U4, après moteurs radio fiables)** : tolérance à 1 panne de relais, itinéraire de secours, identification des nœuds critiques, puis chemins indépendants et N pannes. Contrat : `docs/REDUNDANCY.md`.
+- **Analyse de graphe initiale** : `web/mesh-resilience.js` testable séparément du calcul dBm ; ne pas l'utiliser pour prétendre à une vraie tolérance sans matrice de liens connue et vérifiée.
+- **Restant CP-U1** : migrer les couches et données dans MapLibre, confirmer les tuiles sur Firefox et résoudre le chemin de lancement (file:// vs localhost), contrôles précis et fonds durables.
