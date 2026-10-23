@@ -47,3 +47,10 @@
 - Tests manuels en JavaScript : réseaux parallèles/chaîne/liaison insuffisante et 70 graphes comparés à recherche exhaustive PASS ; syntaxe du module bêta PASS, démarrage et ajout d'un relais et changement A via DOM/MapLibre simulés PASS.
 - Tests réellement dans Firefox de l'utilisateur, WebGL/CDN/tuiles, radio réelle, intégration de couvertures dans MapLibre : NON EXÉCUTÉS.
 - Ne pas intégrer `main`, publier, créer release/tag sans validation.
+
+## 2026-10-24 — Fond mondial bêta adapté aux tests Tarn
+- Prévol distant : work HEAD `95c64f042b944eb6a00bbaf65afe42c8342c42b2`, main `bb853cc...`. Aucun checkout local disponible, git status/diff/index N/A.
+- Utilisateur a testé le fond pays de la bêta et le juge inutilisable, demande Le Pradel/Labruguière et routes détaillées.
+- `web/world-map-beta.html` corrigé : points initiaux Tarn, zoom centré, OpenFreeMap Positron/Liberty/Bright, sélecteur et fond blanc de repli, sauvegarde/import projet inchangés, réinitialisation explicitement confirmée.
+- Test de logique exécuté contre le fichier distant avec MapLibre/DOM simulés : démarrage, positions, 2 marqueurs, changement de style sans déplacement de nœud, ajout/reinitialisation PASS. Nouveau `tests/world-map-beta.test.cjs` commité.
+- Non exécuté : test Firefox réel des tuiles OpenFreeMap, chargement de fonts/icons distants, reproduction visuelle définitive, raccordement aux couvertures SRTM/Longley-Rice. Main préservée.
