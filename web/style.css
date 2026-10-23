@@ -25,3 +25,21 @@ aside section details summary{cursor:pointer;color:#365b6d;font-size:12px;font-w
 .precise-crosshair{stroke:#07465d;stroke-width:2.25;stroke-linecap:round;pointer-events:none}
 
 header a.btn{border:1px solid #cad6dd;background:#fff;border-radius:8px;color:#234558;padding:9px 11px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font:inherit}header a.btn:hover{background:#eef7fa}
+
+/* The worldwide map is now THE application map, not a second beta UI. */
+#mapStack{position:relative;flex:1;min-height:0;overflow:hidden;background:#fafcff}
+#worldMap{position:absolute;inset:0;z-index:1}
+#mapStack>svg#map{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+body.world-active #mapStack>svg#map{pointer-events:none;background:transparent;cursor:default;touch-action:auto}
+body.world-active #mapStack>svg#map .point{pointer-events:auto;cursor:grab;touch-action:none}
+body.world-active #mapStack>svg#map #gridLayer,
+body.world-active #mapStack>svg#map #baseLayer,
+body.world-active #mapStack>svg#map>rect{display:none}
+body.world-active #mapStack>svg#map #coveragePradel,
+body.world-active #mapStack>svg#map #coverageLabru,
+body.world-active #mapStack>svg#map #estimatedLayer,
+body.world-active #mapStack>svg#map #radioLayer,
+body.world-active #mapStack>svg#map #linksLayer{pointer-events:none}
+body.world-active #mapStack>svg#map .point text{pointer-events:none}
+#mapStack .maplibregl-control-container{z-index:3}
+@media(max-width:750px){#mapStack{min-height:350px}}
