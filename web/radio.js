@@ -222,7 +222,7 @@ function rfCheckRedundancy(overrides={},preview=false){
  headline.textContent=!report.baseline
   ?'Aucun trajet nominal démontré avec les marges exigées.'
   :report.tolerantToOneRelayFailure
-   ?'Tous les scénarios de panne simple étudiés conservent un trajet estimé.'
+   ?(report.cases.length?'Tous les scénarios de panne simple étudiés conservent un trajet estimé.':'Liaison directe estimée : aucun relais à tester.')
    :'Réseau non redondant selon le modèle : '+report.criticalRelays.length+' relais critique(s).';
  target.append(headline);
  const details=document.createElement('p');details.className='hint';
@@ -350,7 +350,7 @@ function rfPanel(){
   '<h2>Couverture des relais <small>estimation radio</small></h2>'+
   '<p class="muted">Avec le terrain SRTM : chaque station peut produire sa propre couverture. Les résultats restent exploratoires.</p>'+
   '<div class="actions"><button id="rfSelected" class="primary">Calculer ce nœud</button><button id="rfAll">Calculer tous les nœuds</button></div>'+
-  '<details><summary>Optimisation de l’emplacement</summary><p class="hint">Recherche indicative du relais avec la meilleure marge minimale vers ses deux voisins. Les terrains privés, routes et obstacles locaux ne sont pas vérifiés.</p>'+
+  '<details open><summary>Optimisation du trajet et des relais</summary><p class="hint">Recherche indicative du relais avec la meilleure marge minimale vers ses deux voisins. Les terrains privés, routes et obstacles locaux ne sont pas vérifiés.</p>'+
   '<label><input type="checkbox" id="rfRedundancy"> Étudier aussi la redondance (optionnel)</label>'+
   '<label>Marge minimale exigée (dB)<input id="rfMinMargin" type="number" value="10" min="-20" max="35"></label>'+
   '<label>Nombre maximal de sauts<input id="rfMaxHops" type="number" value="7" min="1" max="7"></label>'+
