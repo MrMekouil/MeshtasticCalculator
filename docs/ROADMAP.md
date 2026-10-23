@@ -37,3 +37,9 @@ Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototy
 - Fond vectoriel routier utilisable légalement et cache conforme aux licences, reliefs fins IGN en option.
 - Partage non public, import/export QGIS/GeoJSON, rapports d'étude et calculs reproductibles.
 - Packaging Windows/Linux et documentation de déploiement.
+
+### CP-U1 — progression placement fin / affichage (2026-10-24)
+- Livré sur la branche de travail : croix au centre réel des marqueurs, taille d'écran stabilisée au zoom, recentrage local, commandes d'ajustement 1/10/100 m.
+- Livré : affichage/masquage de la couche radio de chaque nœud, mémorisé dans l'export de projet JSON.
+- À faire : MapLibre mondial, fonds multi-zoom correctement licenciés, UX définitive, contrôles d'annulation/révision, mode « cellules » versus « zones polygonales » sans changer les valeurs RF.
+- Correctif précédent de capture du pointeur toujours à tester sur Firefox de l'utilisateur. Ne pas assimiler placement au mètre à précision physique SRTM au mètre.
