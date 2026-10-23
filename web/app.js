@@ -7,7 +7,14 @@ const HOME=[
  {id:'pradel',type:'home',name:'Le Pradel',lat:43.69992,lon:2.384259,height:10},
  {id:'labru',type:'home',name:'Labruguière',lat:43.538435,lon:2.262519,height:8}
 ];
-const state={sites:structuredClone(HOME),selected:'pradel',threshold:-118,layer:{pradel:null,labru:null},quality:'normal',opacity:.38,
+// Optional local-only JS sidecar: load through a normal <script>, not fetch(), so file:// works.
+function bundledLayer(key){
+ const val=globalThis.MESHTASTIC_LOCAL_COVERAGES?.[key];
+ return val?.type==='FeatureCollection' && Array.isArray(val.features)
+   && val.features.every(f=>['MultiPolygon','Polygon'].includes(f?.geometry?.type)&&Number.isFinite(Number(f?.properties?.dbm)))?val:null;
+}
+const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
+const state={sites:structuredClone(HOME),selected:'pradel',threshold:-118,layer:preloaded,quality:'normal',opacity:.38,
  terrain:null,estimate:null,base:'white',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
@@ -108,7 +115,14 @@ function drawEstimate(){
  const path=svg('path',{d:state.estimate.path,class:'estimate',opacity:Math.max(.2,state.opacity)},$('estimatedLayer'));
  path.setAttribute('data-model','geometric-LOS-Fresnel-NOT-RF');
 }
-function render(){renderSites();renderEditor();renderMarkers();drawImported();drawEstimate();mapBase();setView();}
+function showCoverageSource(){
+ const ready=['pradel','labru'].filter(id=>state.layer[id]);
+ const label={pradel:'Le Pradel',labru:'Labruguière'};
+ $('coverageSource').textContent=ready.length
+   ? 'Couverture'+(ready.length>1?'s':'')+' chargée'+(ready.length>1?'s':'')+' : '+ready.map(id=>label[id]).join(' et ')+'. Tu peux remplacer ces données par un nouvel import.'
+   : 'Aucune couverture chargée. Un fichier privé facultatif peut les charger automatiquement.';
+}
+function render(){renderSites();renderEditor();renderMarkers();drawImported();drawEstimate();mapBase();setView();showCoverageSource();}
 function addRelay(pos){
  const idx=relayList().length+1;
  const p={id:'r'+Date.now().toString(36)+'_'+idx,type:'relay',name:'Relais '+idx,lat:pos?.lat??43.64,lon:pos?.lon??2.36,height:8};
@@ -207,7 +221,7 @@ async function loadCoverage(file,key){
   const obj=JSON.parse(await file.text());
   if(obj.type!=='FeatureCollection'||!Array.isArray(obj.features))throw Error('FeatureCollection GeoJSON attendue');
   if(!obj.features.some(f=>f.geometry&&Number.isFinite(Number(f.properties?.dbm))))throw Error('Aucun polygone de puissance (dbm) reconnu');
-  state.layer[key]=obj;drawImported();updateStatus('Couverture importée : '+file.name+' ('+key+').');
+  state.layer[key]=obj;drawImported();showCoverageSource();updateStatus('Couverture importée : '+file.name+' ('+key+').');
  }catch(e){updateStatus('Import refusé : '+e.message);}
 }
 function save(){
@@ -222,7 +236,7 @@ async function restore(file){
   const ids=obj.sites.map(p=>p.id);
   if(!ids.includes('pradel')||!ids.includes('labru')||new Set(ids).size!==ids.length||obj.sites.length>100)throw Error('Stations de base manquantes ou doublons');
   if(obj.sites.some(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lon)||Math.abs(p.lat)>90||Math.abs(p.lon)>180))throw Error('Coordonnées invalides');
-  state.sites=obj.sites;state.layer={pradel:obj.layer?.pradel||null,labru:obj.layer?.labru||null};state.selected='pradel';state.threshold=Number(obj.threshold)||-118;
+  state.sites=obj.sites;state.layer={pradel:obj.layer?.pradel||preloaded.pradel||null,labru:obj.layer?.labru||preloaded.labru||null};state.selected='pradel';state.threshold=Number(obj.threshold)||-118;
   $('threshold').value=String(state.threshold);invalidate();render();updateStatus('Projet restauré.');
  }catch(e){updateStatus('Projet refusé : '+e.message);}
 }
@@ -274,4 +288,6 @@ function wire(){
  map.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.12:.89);},{passive:false});
 }
 function zoom(scale){const v=state.view;v.x+=(v.w-v.w*scale)/2;v.y+=(v.h-v.h*scale)/2;v.w*=scale;v.h*=scale;setView();}
-grid();wire();render();updateStatus('Prêt : importe les couvertures Site Planner et ajoute des relais.');
+grid();wire();render();updateStatus(preloaded.pradel&&preloaded.labru
+ ? 'Couvertures du Pradel et de Labruguière chargées automatiquement (fichier privé local).'
+ : 'Prêt : charge un fichier privé local ou importe les GeoJSON Site Planner.');
