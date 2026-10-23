@@ -1,16 +1,19 @@
-# Contrat technique — niveaux de preuve radio
-## Entrées
-Coordonnées longitude/latitude ; hauteur antenne AGL ; fréquence EU868 ; gain antenne ; perte de câble ; puissance EIRP réglementaire ; sensibilité RX ; profil LoRa ; DEM version/résolution ; environnement végétation/bâtiments.
-## Niveau 0 : géométrique
-Distance et azimut uniquement. Ne permet pas d'affirmer une liaison.
-## Niveau 1 : terrain / visibilité
-Ligne directe, dégagement de Fresnel, courbure terrestre, altitudes. Les obstacles non décrits dans DEM restent inconnus.
-## Niveau 2 : estimation radio
-Calcul de pertes avec modèle identifié ; qualité incertaine. Éviter de remplir des centaines d'hectares en couleur sans preuve si le modèle n'est pas calibré.
-## Niveau 3 : simulation de référence
-GeoJSON exporté Meshtastic Site Planner Longley-Rice avec paramètres documentés et métriques par saut comparables ; provenance obligatoire.
-## Niveau 4 : terrain
-Mesures réelles de paquets/reçus/SNR/RSSI/PDR, répétées dans le temps et les conditions.
-## Critères d'acceptation futurs
-Chaque saut : distance, profil altimétrique, marge dB, longueur/méthode, obstacles, erreurs; optimiser la marge minimale du parcours et comparer 1/2/N relais.
-Un résultat manquant = UNKNOWN, jamais PASS. Ne pas considérer l'amélioration graphique des polygones comme un gain de précision physique.
+# Contrat du moteur radio et niveau de preuve
+## Actuel (prototype v0.1)
+- Modèle local : perte en espace libre (FSPL), diffraction simplifiée ITU knife-edge sur l'obstacle dominant, effet de courbure terrestre 4/3 et réserve de pertes configurable.
+- Paramètres par défaut : 869,525 MHz, EIRP 20 dBm, hauteur RX 2 m, sensibilité −130 dBm, pertes supplémentaires 12 dB. Les paramètres sont des hypothèses, **pas des réglages homologués ou contrôlés automatiquement**.
+- DEM SRTM HGT 1°×1° échantillonné, interpolé ; plusieurs tuiles prises en charge. Hors couverture ou valeurs manquantes → inconnu.
+- Sorties : estimations dBm aux seuils −130, −117, −109, et bilan dB de chaque saut. Résolution graphique variable, pas marge physique certifiée.
+- Optimiseur local : recherche autour du relais sélectionné jusqu'à 12 km, objectif maximiser le minimum de deux marges locales ; aucune validation topographique fine, réglementation, accès, arbre, bâtiments, fiabilité du lien ni disponibilité de relais.
+## Provenance
+- GeoJSON Site Planner importés : sorties tierces, ne pas confondre leurs seuils avec la radio locale.
+- Résultats calculés localement : code `web/radio.js`, drapeau `srtm-knife-edge`.
+- Hors DEM, pas de prédiction valide.
+## Limites
+- Knife-edge dominant ne reproduit pas les multiples diffractions/réflections, végétation, bâti, climat, accord d'antennes, latence de mesh et contraintes de temps d'occupation de bande.
+- Pas de moteur ITM/Longley-Rice dans ce dépôt. Le moteur amont Meshtastic Site Planner est sous GPL-3.0 ; ne pas le copier sans décider de la licence de ce projet.
+- Dans les résultats, **estimation simulée != validation radio**.
+## Suite
+- Paramètres par nœud (fréquence, modem, batterie, antenne), graphe N relais.
+- Comparaison reproductible aux calculs amont puis aux mesures terrain (SNR, RSSI, PDR) ; tests sur vallées et crêtes.
+- Seuils conservateurs, incertitude et accès site intégrés aux recommandations.
