@@ -39,6 +39,7 @@ function renderSites(){
    b.append(name,info);b.onclick=()=>{state.selected=p.id;renderSites();renderMarkers();renderEditor();};list.append(b);
  });
  $('relayCount').textContent='· '+relayList().length+' relais';
+ if(typeof rfRefreshVisibility==='function')rfRefreshVisibility();
  if($('projectTitle'))$('projectTitle').textContent=(site('pradel')?.name||'Station 1')+' ↔ '+(site('labru')?.name||'Station 2');
 }
 function renderEditor(){
@@ -46,6 +47,7 @@ function renderEditor(){
  $('editor').hidden=!p;$('editorEmpty').hidden=!!p;if(!p)return;
  $('pointName').value=p.name;$('pointLat').value=p.lat;$('pointLon').value=p.lon;$('pointHeight').value=p.height;
  $('delete').hidden=p.type!=='relay';$('pointNote').textContent=p.type==='home'?'Station d’extrémité : modifiable mais non supprimable.':'Relais déplaçable et ajustable au mètre.';
+ $('precisionCoords').textContent=p.lat.toFixed(8)+', '+p.lon.toFixed(8);
  $('precisionCoords').textContent=p.lat.toFixed(8)+', '+p.lon.toFixed(8);
 }
 function renderMarkers(){
