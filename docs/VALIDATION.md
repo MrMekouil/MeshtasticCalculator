@@ -26,3 +26,10 @@
 - Test d'intégration d'initialisation de l'interface avec faux DOM : PASS (création du panneau radio et ajout d'un relais).
 - Essai sous Firefox de l'utilisateur, import des véritables GeoJSON dans la nouvelle version, stockage IndexedDB `file://`, HGT véritable du Tarn, temps CPU, simulation Longley-Rice et terrain réel : **NON EXÉCUTÉ**.
 - Recommandations d'emplacement : uniquement indicatives, accès au sol, réseau électrique et réglementation non vérifiés.
+
+## 2026-10-24 — CP-U1 partiel : capture pointeur
+- Code `web/app.js` lu sur la branche distante ; défaut identifié : pan commençait immédiatement à `pointerdown`, manque de contrôles boutons et `pointercancel`/`lostpointercapture`.
+- Correction poussée sur la branche `work/project-bootstrap-v0.1` avec test `tests/map-interaction.test.cjs`.
+- Banc de tests JavaScript sur source GitHub : survol inerte, clic droit inerte, seuil de 6px, pan > seuil, relâchement, clic nœud sans déplacement, glissement nœud, annulation rétablit coordonnées, capture perdue remet état à zéro : **9/9 PASS**.
+- Navigateur Firefox de l'utilisateur : **NON EXÉCUTÉ** ; interactions tactiles et intégration future MapLibre : **NON EXÉCUTÉ**.
+- La précision radio n'a pas progressé lors de ce checkpoint : seule la spécification de migration ITM/Longley-Rice est documentée.
