@@ -28,7 +28,7 @@ function wipe(id){$(id).replaceChildren();}
 function range(v,a,b){return Math.max(a,Math.min(b,v));}
 let previewTimer=null;
 function updateStatus(s){status(s);$('mapHint').textContent=s;}
-function setView(){const v=state.view;$('map').setAttribute('viewBox',[v.x,v.y,v.w,v.h].join(' '));}
+function setView(){const v=state.view;$('map').setAttribute('viewBox',[v.x,v.y,v.w,v.h].join(' '));renderMarkers();}
 function localXY(event){const p=$('map').createSVGPoint();p.x=event.clientX;p.y=event.clientY;return p.matrixTransform($('map').getScreenCTM().inverse());}
 function renderSites(){
  const list=$('sites');list.replaceChildren();
@@ -45,14 +45,23 @@ function renderEditor(){
  const p=site(state.selected);
  $('editor').hidden=!p;$('editorEmpty').hidden=!!p;if(!p)return;
  $('pointName').value=p.name;$('pointLat').value=p.lat;$('pointLon').value=p.lon;$('pointHeight').value=p.height;
- $('delete').hidden=p.type!=='relay';$('pointNote').textContent=p.type==='home'?'Station fixe : ne peut pas être supprimée. Coordonnées ajustables.':'Relais libre : position modifiable par glisser-déposer.';
+ $('delete').hidden=p.type!=='relay';$('pointNote').textContent=p.type==='home'?'Station d’extrémité : modifiable mais non supprimable.':'Relais déplaçable et ajustable au mètre.';
+ $('precisionCoords').textContent=p.lat.toFixed(8)+', '+p.lon.toFixed(8);
 }
 function renderMarkers(){
  wipe('markersLayer');
  state.sites.forEach(p=>{
  const v=project(p.lon,p.lat);
- const g=svg('g',{class:'point '+p.type+(p.id===state.selected?' selected':''),transform:'translate('+v.x+' '+v.y+')','data-id':p.id},$('markersLayer'));
+ const rect=$('map').getBoundingClientRect();
+ const pixelsPerUnit=(rect.width||1130)/state.view.w;
+ const visualScale=Math.min(6,Math.max(.001,11/(12*pixelsPerUnit)));
+ const g=svg('g',{class:'point '+p.type+(p.id===state.selected?' selected':''),transform:'translate('+v.x+' '+v.y+') scale('+visualScale+')','data-id':p.id},$('markersLayer'));
  svg('circle',{r:12,class:'point-ring'},g);svg('circle',{r:7,class:'point-core'},g);
+ if(p.id===state.selected){
+   for(const [x1,y1,x2,y2] of [[-21,0,-13,0],[13,0,21,0],[0,-21,0,-13],[0,13,0,21]])
+     svg('line',{x1,y1,x2,y2,class:'precise-crosshair'},g);
+   svg('circle',{r:2.1,fill:'#fff',stroke:'#002c32','stroke-width':'.75'},g);
+ }
  const t=svg('text',{x:16,y:5},g);t.textContent=p.name;
  });
  renderLinks();
@@ -133,6 +142,33 @@ function addRelay(pos){
  const idx=relayList().length+1;
  const p={id:'r'+Date.now().toString(36)+'_'+idx,type:'relay',name:'Relais '+idx,lat:pos?.lat??43.64,lon:pos?.lon??2.36,height:8};
  state.sites.splice(state.sites.length-1,0,p);state.selected=p.id;invalidate();render();
+}
+let preciseRecomputeTimer=null;
+function adjustPointByMeters(direction,metres){
+ const p=site(state.selected);if(!p)return;
+ const latFactor=111320,lonFactor=latFactor*Math.cos(p.lat*rad);
+ const m=Math.max(.1,Math.min(10000,Number(metres)||1));
+ if(direction==='n'||direction==='s')
+   p.lat=range(p.lat+(direction==='n'?1:-1)*m/latFactor,-89.999999,89.999999);
+ if((direction==='e'||direction==='w')&&lonFactor>1)
+   p.lon=range(p.lon+(direction==='e'?1:-1)*m/lonFactor,-180,180);
+ p.lat=+p.lat.toFixed(8);p.lon=+p.lon.toFixed(8);
+ invalidate();
+ if(typeof rfInvalidate==='function')rfInvalidate(p.id);
+ renderEditor();renderMarkers();renderSites();
+ if(state.terrain&&typeof rfCalculateSite==='function'){
+   clearTimeout(preciseRecomputeTimer);
+   preciseRecomputeTimer=setTimeout(()=>rfCalculateSite(p.id),350);
+ }
+}
+function centerOnSelectedPoint(){
+ const p=site(state.selected);if(!p)return;
+ const center=project(p.lon,p.lat),map=$('map'),rect=map.getBoundingClientRect();
+ const ratio=(rect.width||1130)/(rect.height||930);
+ const w=Math.min(state.view.w,42),h=w/ratio;
+ state.view={x:center.x-w/2,y:center.y-h/2,w,h};
+ setView();mapBase();
+ updateStatus('Placement fin : cible centrée. Utilise les flèches pour ajuster de 1, 10 ou 100 mètres.');
 }
 function invalidate(){state.estimate=null;wipe('estimatedLayer');}
 function updateField(field,value){
@@ -255,6 +291,10 @@ async function restore(file){
 }
 function wire(){
  $('add').onclick=()=>addRelay();
+ $('centerPrecise').onclick=centerOnSelectedPoint;
+ for(const button of document.querySelectorAll('[data-nudge]')){
+  button.onclick=()=>adjustPointByMeters(button.dataset.nudge,Number($('precisionStep').value));
+ }
  $('delete').onclick=()=>{const p=site(state.selected);if(!p||p.type!=='relay')return;state.sites=state.sites.filter(x=>x.id!==p.id);state.selected='pradel';invalidate();render();};
  for(const[field,id]of[['name','pointName'],['lat','pointLat'],['lon','pointLon'],['height','pointHeight']]){
   $(id).addEventListener('change',e=>{updateField(field,e.target.value);if(field!=='name')render();});
