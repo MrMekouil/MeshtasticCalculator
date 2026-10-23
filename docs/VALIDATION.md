@@ -40,3 +40,12 @@
 - L'interface a été vérifiée statiquement : 1 seul panneau de placement fin, 4 boutons N/O/S/E, aucun identifiant HTML dupliqué, app/radio syntaxe PASS.
 - Tests Firefox réel, clic, drag, zoom extrême et exécution script test Node : NON EXÉCUTÉS.
 - Modes cellules/contours, moteur ITM, DEM mondial : SPÉCIFIÉS, PAS IMPLÉMENTÉS.
+
+## 2026-10-24 — Redondance prospective et carte mondiale bêta
+- Réseau synthétique deux branches : panne de R1 ou R2 conserve un chemin ; PASS.
+- Réseau synthétique en série : R1 et R2 sont critiques ; PASS.
+- Exclusion des marges insuffisantes, liens bidirectionnels incomplets, dépassement de sauts : tests de logique PASS.
+- 70 graphes synthétiques (5-6 nœuds) confrontés à une recherche exhaustive du chemin maximin borné : 70/70 PASS.
+- Prototype `web/world-map-beta.html` : script module parsé PASS ; DOM et MapLibre simulés (3 marqueurs après ajout, station A repositionnée et actions import/export liées) PASS.
+- Aucun test de la disponibilité réelle des tuiles `demotiles.maplibre.org`, du CDN, de WebGL Firefox ou de la cartographie locale/radio : NON EXÉCUTÉ.
+- Ces résultats ne prouvent ni une redondance Meshtastic réelle ni un lien LoRa fonctionnel.
