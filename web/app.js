@@ -15,7 +15,7 @@ function bundledLayer(key){
 }
 const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
 const state={sites:structuredClone(HOME),selected:'pradel',threshold:-118,layer:preloaded,quality:'normal',opacity:.38,
- terrain:null,estimate:null,base:'white',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
+ terrain:null,terrains:[],estimate:null,base:'white',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
 const project=(lon,lat)=>({x:(lon-BASE.lon)*Math.cos(43.7*rad)*111*BASE.s,y:(BASE.lat-lat)*111*BASE.s});
@@ -39,6 +39,7 @@ function renderSites(){
    b.append(name,info);b.onclick=()=>{state.selected=p.id;renderSites();renderMarkers();renderEditor();};list.append(b);
  });
  $('relayCount').textContent='· '+relayList().length+' relais';
+ if($('projectTitle'))$('projectTitle').textContent=(site('pradel')?.name||'Station 1')+' ↔ '+(site('labru')?.name||'Station 2');
 }
 function renderEditor(){
  const p=site(state.selected);
@@ -142,15 +143,19 @@ function geometryData(buf,name){
  return {view:new DataView(buf),n,lat0:Number(hit[2])*(hit[1].toUpperCase()==='S'?-1:1),lon0:Number(hit[4])*(hit[3].toUpperCase()==='W'?-1:1),name};
 }
 function heightAt(lat,lon){
- const t=state.terrain;if(!t)return null;
- const row=(t.lat0+1-lat)*(t.n-1),col=(lon-t.lon0)*(t.n-1);
- if(row<0||col<0||row>=t.n-1||col>=t.n-1)return null;
- const r=Math.floor(row),c=Math.floor(col),dr=row-r,dc=col-c;
- function value(y,x){const a=t.view.getInt16((y*t.n+x)*2,false);return a<=-32768?null:a;}
- const v=[value(r,c),value(r,c+1),value(r+1,c),value(r+1,c+1)];
- if(v.some(x=>x===null))return null;
- return (v[0]*(1-dc)+v[1]*dc)*(1-dr)+(v[2]*(1-dc)+v[3]*dc)*dr;
+ const tiles=state.terrains?.length?state.terrains:state.terrain?[state.terrain]:[];
+ for(const t of tiles){
+  const row=(t.lat0+1-lat)*(t.n-1),col=(lon-t.lon0)*(t.n-1);
+  if(row<0||col<0||row>=t.n-1||col>=t.n-1)continue;
+  const r=Math.floor(row),c=Math.floor(col),dr=row-r,dc=col-c;
+  function value(y,x){const a=t.view.getInt16((y*t.n+x)*2,false);return a<=-32768?null:a;}
+  const v=[value(r,c),value(r,c+1),value(r+1,c),value(r+1,c+1)];
+  if(v.some(x=>x===null))return null;
+  return (v[0]*(1-dc)+v[1]*dc)*(1-dr)+(v[2]*(1-dc)+v[3]*dc)*dr;
+ }
+ return null;
 }
+
 /* A terrain-only feasibility filter, NEVER a radio link budget.
    Uses 4/3 earth curvature and 60% first Fresnel at 869.525 MHz.
    All points must have DEM coverage; unknown is not clear. */
@@ -210,8 +215,11 @@ async function loadDem(file){
    const stream=new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip'));
    data=await new Response(stream).arrayBuffer();
   }
-  state.terrain=geometryData(data,file.name);
-  $('demInfo').textContent='Relief chargé : '+file.name+' · '+state.terrain.n+'×'+state.terrain.n+'. Une seule tuile en mémoire.';
+  const tile=geometryData(data,file.name);
+  state.terrains||=[];
+  state.terrains=state.terrains.filter(t=>!(t.lat0===tile.lat0&&t.lon0===tile.lon0));
+  state.terrains.push(tile);state.terrain=tile;
+  $('demInfo').textContent='Relief chargé : '+state.terrains.length+' tuile(s) SRTM en mémoire · dernière : '+file.name+'.';
   invalidate();updateStatus('Terrain chargé : '+state.terrain.n+' points par côté.');
  }catch(e){updateStatus('Erreur de relief : '+e.message);}
 }
@@ -225,7 +233,7 @@ async function loadCoverage(file,key){
  }catch(e){updateStatus('Import refusé : '+e.message);}
 }
 function save(){
- const data={format:'MeshtasticCalculator',version:1,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold};
+ const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{}};
  const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
  a.href=url;a.download='meshtasticcalculator-projet.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),300);
 }
@@ -254,11 +262,18 @@ function wire(){
  $('baseOpacity').oninput=e=>{state.baseOpacity=Number(e.target.value)/100;mapBase();};
  $('quality').onchange=e=>{state.quality=e.target.value;if(state.terrain&&site(state.selected)){calculate();}else updateStatus('Mode '+e.target.value+' sélectionné. Charge un terrain pour calculer.');};
  $('calculate').onclick=calculate;
- $('fit').onclick=$('resetView').onclick=()=>{state.view={x:0,y:0,w:1130,h:930};setView();};
+ $('fit').onclick=$('resetView').onclick=fitSites;
+ $('newProject').onclick=()=>{
+  if(!confirm('Créer un nouveau projet ? Pense à exporter le projet actuel si tu veux conserver ses points et couvertures.'))return;
+  state.sites=structuredClone(HOME).map((p,i)=>({...p,name:'Station '+(i+1)}));
+  state.layer={pradel:null,labru:null};state.selected='pradel';invalidate();
+  if(typeof RADIO!=='undefined'){RADIO.coverage.clear();RADIO.imports.clear();rfDraw();rfSummary();}
+  render();fitSites();updateStatus('Nouveau projet : déplace les deux stations et ajoute tes relais.');
+ };
  $('zoomIn').onclick=()=>zoom(.8);$('zoomOut').onclick=()=>zoom(1.25);
  $('importPradel').onchange=e=>e.target.files[0]&&loadCoverage(e.target.files[0],'pradel');
  $('importLabru').onchange=e=>e.target.files[0]&&loadCoverage(e.target.files[0],'labru');
- $('importDem').onchange=e=>e.target.files[0]&&loadDem(e.target.files[0]);
+ $('importDem').onchange=async e=>{for(const f of [...e.target.files])await loadDem(f);};
  $('save').onclick=save;$('openProject').onchange=e=>e.target.files[0]&&restore(e.target.files[0]);
  const map=$('map');
  map.addEventListener('dblclick',e=>{e.preventDefault();const p=localXY(e);addRelay(unproject(p.x,p.y));});
@@ -284,10 +299,21 @@ function wire(){
   if(!state.drag)return;
   const moved=state.drag.kind==='site';state.drag=null;
   if(moved){clearTimeout(previewTimer);state.token++;invalidate();renderSites();renderEditor();renderMarkers();if(state.terrain)calculate();}
+  else mapBase();
  });
  map.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.12:.89);},{passive:false});
 }
-function zoom(scale){const v=state.view;v.x+=(v.w-v.w*scale)/2;v.y+=(v.h-v.h*scale)/2;v.w*=scale;v.h*=scale;setView();}
+function fitSites(){
+ if(!state.sites.length)return;
+ const pts=state.sites.map(n=>project(n.lon,n.lat));
+ const minX=Math.min(...pts.map(p=>p.x)),maxX=Math.max(...pts.map(p=>p.x));
+ const minY=Math.min(...pts.map(p=>p.y)),maxY=Math.max(...pts.map(p=>p.y));
+ const w=Math.max(190,(maxX-minX)*1.35),h=Math.max(155,(maxY-minY)*1.35);
+ const ratio=1130/930;state.view={x:(minX+maxX)/2-Math.max(w,h*ratio)/2,
+  y:(minY+maxY)/2-Math.max(h,w/ratio)/2,w:Math.max(w,h*ratio),h:Math.max(h,w/ratio)};
+ setView();mapBase();
+}
+function zoom(scale){const v=state.view;v.x+=(v.w-v.w*scale)/2;v.y+=(v.h-v.h*scale)/2;v.w*=scale;v.h*=scale;setView();mapBase();}
 grid();wire();render();updateStatus(preloaded.pradel&&preloaded.labru
  ? 'Couvertures du Pradel et de Labruguière chargées automatiquement (fichier privé local).'
  : 'Prêt : charge un fichier privé local ou importe les GeoJSON Site Planner.');
