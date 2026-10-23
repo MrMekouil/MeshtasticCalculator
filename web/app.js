@@ -18,8 +18,12 @@ const state={sites:structuredClone(HOME),selected:'pradel',threshold:-118,layer:
  terrain:null,terrains:[],estimate:null,base:'white',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
-const project=(lon,lat)=>({x:(lon-BASE.lon)*Math.cos(43.7*rad)*111*BASE.s,y:(BASE.lat-lat)*111*BASE.s});
-const unproject=(x,y)=>({lon:BASE.lon+x/(Math.cos(43.7*rad)*111*BASE.s),lat:BASE.lat-y/(111*BASE.s)});
+const project=(lon,lat)=>globalThis.MeshtasticWorldMap?.map
+ ?globalThis.MeshtasticWorldMap.map.project([lon,lat])
+ :({x:(lon-BASE.lon)*Math.cos(43.7*rad)*111*BASE.s,y:(BASE.lat-lat)*111*BASE.s});
+const unproject=(x,y)=>globalThis.MeshtasticWorldMap?.map
+ ?(()=>{const p=globalThis.MeshtasticWorldMap.map.unproject([x,y]);return {lon:p.lng,lat:p.lat};})()
+ :({lon:BASE.lon+x/(Math.cos(43.7*rad)*111*BASE.s),lat:BASE.lat-y/(111*BASE.s)});
 const site=id=>state.sites.find(s=>s.id===id);
 const relayList=()=>state.sites.filter(s=>s.type==='relay');
 const dist=(a,b)=>{const dlat=(a.lat-b.lat)*rad,dlon=(a.lon-b.lon)*rad,k=Math.sin(dlat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dlon/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(k)));};
@@ -28,7 +32,11 @@ function wipe(id){$(id).replaceChildren();}
 function range(v,a,b){return Math.max(a,Math.min(b,v));}
 let previewTimer=null;
 function updateStatus(s){status(s);$('mapHint').textContent=s;}
-function setView(){const v=state.view;$('map').setAttribute('viewBox',[v.x,v.y,v.w,v.h].join(' '));renderMarkers();}
+function setView(){
+ const world=globalThis.MeshtasticWorldMap?.map;
+ if(world){renderMarkers();return;}
+ const v=state.view;$('map').setAttribute('viewBox',[v.x,v.y,v.w,v.h].join(' '));renderMarkers();
+}
 function localXY(event){const p=$('map').createSVGPoint();p.x=event.clientX;p.y=event.clientY;return p.matrixTransform($('map').getScreenCTM().inverse());}
 function renderSites(){
  const list=$('sites');list.replaceChildren();
@@ -55,8 +63,8 @@ function renderMarkers(){
  state.sites.forEach(p=>{
  const v=project(p.lon,p.lat);
  const rect=$('map').getBoundingClientRect();
- const pixelsPerUnit=(rect.width||1130)/state.view.w;
- const visualScale=Math.min(6,Math.max(.001,11/(12*pixelsPerUnit)));
+ const pixelsPerUnit=globalThis.MeshtasticWorldMap?.map?1:(rect.width||1130)/state.view.w;
+ const visualScale=globalThis.MeshtasticWorldMap?.map?1:Math.min(6,Math.max(.001,11/(12*pixelsPerUnit)));
  const g=svg('g',{class:'point '+p.type+(p.id===state.selected?' selected':''),transform:'translate('+v.x+' '+v.y+') scale('+visualScale+')','data-id':p.id},$('markersLayer'));
  svg('circle',{r:12,class:'point-ring'},g);svg('circle',{r:7,class:'point-core'},g);
  if(p.id===state.selected){
@@ -80,10 +88,16 @@ function renderLinks(){
 }
 function grid(){
  wipe('gridLayer');
+ if(globalThis.MeshtasticWorldMap?.map)return;
  for(let x=0;x<1130;x+=120)svg('line',{x1:x,y1:0,x2:x,y2:930},$('gridLayer'));
  for(let y=0;y<930;y+=120)svg('line',{x1:0,y1:y,x2:1130,y2:y},$('gridLayer'));
 }
 function mapBase(){
+ if(globalThis.MeshtasticWorldMap?.map){
+  wipe('baseLayer');
+  $('baseInfo').textContent='Carte mondiale vectorielle : styles routiers et zoom adaptatif. Le fond blanc reste disponible.';
+  return;
+ }
  wipe('baseLayer');
  if(state.base!=='topo'){ $('baseInfo').textContent='Fond blanc local : disponible hors ligne.';return; }
  $('baseInfo').textContent='OpenTopoMap atténué. Si les tuiles sont bloquées, le fond blanc reste visible.';
@@ -142,7 +156,10 @@ function showCoverageSource(){
 function render(){renderSites();renderEditor();renderMarkers();drawImported();drawEstimate();mapBase();setView();showCoverageSource();}
 function addRelay(pos){
  const idx=relayList().length+1;
- const p={id:'r'+Date.now().toString(36)+'_'+idx,type:'relay',name:'Relais '+idx,lat:pos?.lat??43.64,lon:pos?.lon??2.36,height:8};
+ const a=site('pradel'),b=site('labru'),center=globalThis.MeshtasticWorldMap?.map?.getCenter();
+ const lat=pos?.lat??(center?.lat??(a.lat+b.lat)/2);
+ const lon=pos?.lon??(center?.lng??(a.lon+b.lon)/2);
+ const p={id:'r'+Date.now().toString(36)+'_'+idx,type:'relay',name:'Relais '+idx,lat,lon,height:8};
  state.sites.splice(state.sites.length-1,0,p);state.selected=p.id;invalidate();render();
 }
 let preciseRecomputeTimer=null;
@@ -165,6 +182,8 @@ function adjustPointByMeters(direction,metres){
 }
 function centerOnSelectedPoint(){
  const p=site(state.selected);if(!p)return;
+ const world=globalThis.MeshtasticWorldMap?.map;
+ if(world){world.easeTo({center:[p.lon,p.lat],zoom:Math.max(15,world.getZoom()),duration:400});return;}
  const center=project(p.lon,p.lat),map=$('map'),rect=map.getBoundingClientRect();
  const ratio=(rect.width||1130)/(rect.height||930);
  const w=Math.min(state.view.w,42),h=w/ratio;
@@ -313,7 +332,12 @@ function wire(){
  for(const id of ['showPradel','showLabru'])$(id).onchange=drawImported;
  $('showEstimate').onchange=drawEstimate;
  $('coverageOpacity').oninput=e=>{state.opacity=Number(e.target.value)/100;drawImported();drawEstimate();};
- $('base').onchange=e=>{state.base=e.target.value;mapBase();};
+ $('base').onchange=e=>{
+  state.base=e.target.value;
+  const world=globalThis.MeshtasticWorldMap;
+  if(world?.map)world.switchStyle(state.base);
+  else mapBase();
+ };
  $('baseOpacity').oninput=e=>{state.baseOpacity=Number(e.target.value)/100;mapBase();};
  $('quality').onchange=e=>{state.quality=e.target.value;if(state.terrain&&site(state.selected)){calculate();}else updateStatus('Mode '+e.target.value+' sélectionné. Charge un terrain pour calculer.');};
  $('calculate').onclick=calculate;
@@ -388,6 +412,13 @@ function wire(){
 }
 function fitSites(){
  if(!state.sites.length)return;
+ const world=globalThis.MeshtasticWorldMap?.map,GL=globalThis.MeshtasticWorldMap?.lib;
+ if(world&&GL){
+  const bounds=new GL.LngLatBounds();
+  for(const n of state.sites)bounds.extend([n.lon,n.lat]);
+  world.fitBounds(bounds,{padding:65,maxZoom:15,duration:400});
+  return;
+ }
  const pts=state.sites.map(n=>project(n.lon,n.lat));
  const minX=Math.min(...pts.map(p=>p.x)),maxX=Math.max(...pts.map(p=>p.x));
  const minY=Math.min(...pts.map(p=>p.y)),maxY=Math.max(...pts.map(p=>p.y));
@@ -396,7 +427,10 @@ function fitSites(){
   y:(minY+maxY)/2-Math.max(h,w/ratio)/2,w:Math.max(w,h*ratio),h:Math.max(h,w/ratio)};
  setView();mapBase();
 }
-function zoom(scale){const v=state.view;v.x+=(v.w-v.w*scale)/2;v.y+=(v.h-v.h*scale)/2;v.w*=scale;v.h*=scale;setView();mapBase();}
+function zoom(scale){
+ const world=globalThis.MeshtasticWorldMap?.map;
+ if(world){world.zoomTo(world.getZoom()-Math.log2(scale),{duration:200});return;}
+ const v=state.view;v.x+=(v.w-v.w*scale)/2;v.y+=(v.h-v.h*scale)/2;v.w*=scale;v.h*=scale;setView();mapBase();}
 grid();wire();render();updateStatus(preloaded.pradel&&preloaded.labru
  ? 'Couvertures du Pradel et de Labruguière chargées automatiquement (fichier privé local).'
  : 'Prêt : charge un fichier privé local ou importe les GeoJSON Site Planner.');
