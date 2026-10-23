@@ -238,7 +238,7 @@ function wire(){
  $('coverageOpacity').oninput=e=>{state.opacity=Number(e.target.value)/100;drawImported();drawEstimate();};
  $('base').onchange=e=>{state.base=e.target.value;mapBase();};
  $('baseOpacity').oninput=e=>{state.baseOpacity=Number(e.target.value)/100;mapBase();};
- $('quality').onchange=e=>{state.quality=e.target.value;updateStatus('Mode '+e.target.value+' sélectionné : relance le calcul pour appliquer la nouvelle précision.');};
+ $('quality').onchange=e=>{state.quality=e.target.value;if(state.terrain&&site(state.selected)){calculate();}else updateStatus('Mode '+e.target.value+' sélectionné. Charge un terrain pour calculer.');};
  $('calculate').onclick=calculate;
  $('fit').onclick=$('resetView').onclick=()=>{state.view={x:0,y:0,w:1130,h:930};setView();};
  $('zoomIn').onclick=()=>zoom(.8);$('zoomOut').onclick=()=>zoom(1.25);
