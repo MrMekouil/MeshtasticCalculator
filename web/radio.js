@@ -253,6 +253,43 @@ function rfApplySuggestion(){
  rfStatus('Point déplacé vers la proposition géométrique. Vérifie l’accès réel et valide les liaisons dans Site Planner.');
  if(state.terrain)rfCalculateSite(node.id);
 }
+async function rfDb(){
+ if(!('indexedDB' in window))throw Error('Cache navigateur indisponible');
+ return await new Promise((resolve,reject)=>{
+  const req=indexedDB.open('MeshtasticCalculatorTerrain',1);
+  req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('tiles'))req.result.createObjectStore('tiles',{keyPath:'name'});};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||Error('IndexedDB refusé'));
+ });
+}
+async function rfStoreTile(file){
+ try{
+  const db=await rfDb();
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction('tiles','readwrite');
+   tx.objectStore('tiles').put({name:file.name,blob:file,updated:Date.now()});
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+  });db.close();
+  RADIO.demPersistent=true;
+  $('demInfo').textContent+=' Terrain mémorisé localement dans ce navigateur.';
+ }catch(_){/* Storage is optional on file://, never block imported terrain. */}
+}
+async function rfRestoreTiles(){
+ try{
+  if(state.terrain)return;
+  const db=await rfDb();
+  const items=await new Promise((resolve,reject)=>{
+   const tx=db.transaction('tiles','readonly'),req=tx.objectStore('tiles').getAll();
+   req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });db.close();
+  if(state.terrain)return; // user selected a different file while storage opened
+  for(const item of items.slice(0,12)){
+   const blob=item.blob;
+   if(!blob)continue;
+   await loadDem(new File([blob],item.name,{type:'application/octet-stream'}));
+  }
+  if(items.length)rfStatus(items.length+' tuile(s) SRTM réutilisée(s) depuis le navigateur.');
+ }catch(_){/* Firefox file:// can block storage. Manual HGT remains available. */}
+}
 function rfPanel(){
  const prior=$('importDem').closest('section');
  const sect=document.createElement('section');sect.id='radioSection';
@@ -321,8 +358,13 @@ function rfPanel(){
  $('map').addEventListener('dblclick',()=>{if(state.terrain)setTimeout(()=>rfCalculateSite(state.selected),0);});
  const oldLoadDem=loadDem;
  loadDem=async(file)=>{
+  const before=state.terrains?.length||0;
   await oldLoadDem(file);
-  if(state.terrain){rfStatus('Terrain chargé. Calcul du relais sélectionné…');await rfCalculateSite(state.selected);rfSummary();}
+  if(state.terrain){
+    await rfStoreTile(file);
+    rfStatus('Terrain chargé. Calcul du relais sélectionné…');
+    await rfCalculateSite(state.selected);rfSummary();
+  }
  };
  const oldRestore=restore;
  restore=async(file)=>{
@@ -342,5 +384,6 @@ function rfPanel(){
   rfDraw();rfSummary();
 };
  rfSummary();
+ rfRestoreTiles();
 }
 rfPanel();
