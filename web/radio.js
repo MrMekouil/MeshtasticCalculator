@@ -5,7 +5,7 @@
 'use strict';
 const RADIO={
   settings:{freq:869.525,eirp:20,rxGain:0,extraLoss:12,sensitivity:-130,rxHeight:2,maxKm:25,quality:'normal',threshold:-117},
-  coverage:new Map(),imports:new Map(),versions:new Map(),enabled:true,active:true,dragPreview:null,demPersistent:false
+  coverage:new Map(),imports:new Map(),versions:new Map(),enabled:true,active:true,dragPreview:null,dragged:null,suggestion:null,optimToken:0,demPersistent:false
 };
 const RADIO_QUALITY={preview:{rays:72,step:.35,profileStep:180},normal:{rays:180,step:.15,profileStep:100},fine:{rays:360,step:.10,profileStep:70}};
 function rfPoint(lat,lon,theta,km){
@@ -187,6 +187,72 @@ function rfImportSite(file,id){
   rfStatus('GeoJSON Site Planner importé pour '+site(id)?.name+'. Il reste distinct du modèle local.');
  }).catch(e=>rfStatus('Import impossible : '+e.message));
 }
+async function rfSuggestPosition(){
+ if(!state.terrain){rfStatus('Impossible : charge le terrain SRTM.');return;}
+ const id=state.selected,node=site(id);
+ const route=[site('pradel'),...relayList(),site('labru')].filter(Boolean);
+ const idx=route.findIndex(x=>x.id===id);
+ if(!node||node.type!=='relay'||idx<1||idx>=route.length-1){rfStatus('Sélectionne un relais intermédiaire.');return;}
+ const p=route[idx-1],n=route[idx+1],version=++RADIO.optimToken;
+ const center={lat:node.lat,lon:node.lon};
+ const latitudeDegrees=1/111.195;
+ const longitudeDegrees=1/(111.195*Math.cos(center.lat*rad));
+ let best=null,checked=0;
+ const evaluate=(lat,lon)=>{
+  const elevation=heightAt(lat,lon);if(elevation===null)return null;
+  const cand={...node,lat,lon};
+  const inbound=rfTerrainLink(p,cand),outbound=rfTerrainLink(cand,n);
+  if(!inbound||!outbound)return null;
+  return {lat,lon,score:Math.min(inbound.margin,outbound.margin),links:[inbound,outbound]};
+ };
+ let original=evaluate(node.lat,node.lon);
+ best=original?{...original}:null;
+ const coarseKm=12,stepKm=1.5;
+ $('rfOptimize').disabled=true;
+ rfStatus('Recherche de positions SRTM dans un rayon de 12 km…');
+ try{
+  for(let x=-coarseKm;x<=coarseKm;x+=stepKm){
+   if(version!==RADIO.optimToken||!site(id))return;
+   for(let y=-coarseKm;y<=coarseKm;y+=stepKm){
+     if(x*x+y*y>coarseKm*coarseKm)continue;
+     const candidate=evaluate(center.lat+y*latitudeDegrees,center.lon+x*longitudeDegrees);
+     checked++;
+     if(candidate&&(!best||candidate.score>best.score))best=candidate;
+   }
+   await new Promise(r=>setTimeout(r,0));
+  }
+  if(best){
+   const seed={lat:best.lat,lon:best.lon};
+   for(let x=-1.5;x<=1.5001;x+=.3){
+    if(version!==RADIO.optimToken||!site(id))return;
+    for(let y=-1.5;y<=1.5001;y+=.3){
+     const candidate=evaluate(seed.lat+y*latitudeDegrees,seed.lon+x*longitudeDegrees);
+     checked++;
+     if(candidate&&candidate.score>best.score)best=candidate;
+    }
+    await new Promise(r=>setTimeout(r,0));
+   }
+  }
+  if(!best){rfStatus('Aucun emplacement candidat entièrement couvert par les données SRTM.');return;}
+  RADIO.suggestion={id,original,best};
+  $('rfApply').disabled=false;
+  const delta=original?(best.score-original.score).toFixed(1):'inconnue';
+  rfStatus('Candidat : '+best.lat.toFixed(5)+', '+best.lon.toFixed(5)+
+    ' · marge minimale ≈ '+best.score.toFixed(1)+' dB (gain '+delta+' dB), sur '+checked+
+    ' positions explorées. Accès au terrain NON vérifié. Clique « Appliquer » uniquement pour essayer.');
+ }finally{$('rfOptimize').disabled=false;}
+}
+function rfApplySuggestion(){
+ const rec=RADIO.suggestion,node=rec&&site(rec.id);
+ if(!node){rfStatus('Aucune proposition disponible.');return;}
+ const {lat,lon}=rec.best;
+ node.lat=+lat.toFixed(6);node.lon=+lon.toFixed(6);
+ RADIO.suggestion=null;$('rfApply').disabled=true;
+ rfInvalidate(node.id);
+ state.selected=node.id;render();fitSites();
+ rfStatus('Point déplacé vers la proposition géométrique. Vérifie l’accès réel et valide les liaisons dans Site Planner.');
+ if(state.terrain)rfCalculateSite(node.id);
+}
 function rfPanel(){
  const prior=$('importDem').closest('section');
  const sect=document.createElement('section');sect.id='radioSection';
@@ -194,6 +260,7 @@ function rfPanel(){
   '<h2>Couverture des relais <small>estimation radio</small></h2>'+
   '<p class="muted">Avec le terrain SRTM : chaque station peut produire sa propre couverture. Les résultats restent exploratoires.</p>'+
   '<div class="actions"><button id="rfSelected" class="primary">Calculer ce nœud</button><button id="rfAll">Calculer tous les nœuds</button></div>'+
+  '<details><summary>Optimisation de l’emplacement</summary><p class="hint">Recherche indicative du relais avec la meilleure marge minimale vers ses deux voisins. Les terrains privés, routes et obstacles locaux ne sont pas vérifiés.</p><div class="actions"><button id="rfOptimize">Chercher un emplacement</button><button id="rfApply" disabled>Appliquer</button></div></details>'+
   '<p id="rfStatus" class="hint">Charge un relief pour lancer le calcul.</p>'+
   '<div class="actions"><label class="btn">Importer GeoJSON du point sélectionné<input id="rfImport" type="file" accept=".geojson,.json" hidden></label><button id="rfClearImport">Retirer import</button></div>'+
   '<div class="toggles"><label><input id="rfShow" type="checkbox" checked> Afficher les estimations radio</label></div>'+
@@ -218,6 +285,8 @@ function rfPanel(){
  $('rfImport').onchange=e=>{if(e.target.files[0])rfImportSite(e.target.files[0],state.selected);e.target.value='';};
  $('rfClearImport').onclick=()=>{RADIO.imports.delete(state.selected);rfDraw();rfStatus('Couverture importée retirée du nœud sélectionné.');};
  $('rfAll').onclick=()=>{rfReadSettings();rfComputeAll();};
+ $('rfOptimize').onclick=()=>{rfReadSettings();rfSuggestPosition();};
+ $('rfApply').onclick=rfApplySuggestion;
  $('rfShow').onchange=e=>{RADIO.enabled=e.target.checked;rfDraw();};
  $('rfThreshold').onchange=e=>{RADIO.settings.threshold=Number(e.target.value);rfDraw();};
  $('rfOpacity').oninput=rfDraw;
@@ -229,12 +298,12 @@ function rfPanel(){
    const drag=state.drag;
    if(!drag||drag.kind!=='site'||!state.terrain)return;
    clearTimeout(RADIO.dragPreview);
-   const id=drag.id;RADIO.dragPreview=setTimeout(()=>{rfInvalidate(id);rfCalculateSite(id,'preview');},500);
+   const id=drag.id;RADIO.dragged=id;RADIO.dragPreview=setTimeout(()=>{rfInvalidate(id);rfCalculateSite(id,'preview');},500);
  });
  $('map').addEventListener('pointerup',()=>{
    clearTimeout(RADIO.dragPreview);
-   if(!state.terrain)return;
-   const id=state.selected;
+   if(!state.terrain||!RADIO.dragged)return;
+   const id=RADIO.dragged;RADIO.dragged=null;
    rfInvalidate(id);
    setTimeout(()=>{if(site(id))rfCalculateSite(id);},0);
  });
