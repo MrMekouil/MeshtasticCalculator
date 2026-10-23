@@ -1,38 +1,41 @@
 # MeshtasticCalculator
 
-Application expérimentale de planification de réseaux Meshtastic entre **Le Pradel et Labruguière** (Tarn). Deux sources sont distinguées : couvertures radio GeoJSON **importées** de Meshtastic Site Planner et **visibilité géométrique estimée localement** avec un relief SRTM.
+Calculateur de planification **Meshtastic universel (expérimental)**. Au démarrage, deux stations de démonstration sont placées vers Le Pradel et Labruguière. Elles peuvent être renommées, déplacées ou remplacées par un **nouveau projet** ; le nombre de relais intermédiaires est libre.
 
-## Ouvrir l'application
+## Démarrage
+1. Ouvrir `web/index.html` (directement en `file://`, pas de serveur requis).
+2. Importer au besoin les couvertures Meshtastic Site Planner par station. Un fichier privé `web/data/coverages.local.js` permet de précharger celles des deux stations sans import manuel (voir `docs/USAGE.md`).
+3. Charger une ou plusieurs tuiles `.hgt` / `.hgt.gz` SRTM via le panneau « Relief ». Une fois importé, le navigateur tente de mémoriser le terrain en local pour les sessions suivantes (fonctionnalité facultative dépendante des permissions `file://`).
+4. Ajouter un relais par bouton ou double-clic, le déplacer ; **les nouvelles couvertures radio estimées se calculent avec le relief chargé**, à l'issue du déplacement ou après une pause.
+5. Dans « Couverture des relais », choisir le seuil (−130/−117/−109 dBm), calculer le point ou tous les points, comparer les marges radio des sauts et essayer « Chercher un emplacement » pour une suggestion fondée sur la marge la plus faible.
 
-Lancer [web/index.html](web/index.html) dans Firefox ou Chromium depuis cette branche. Aucune installation et aucune API IGN requises.
+## Distinction essentielle des résultats
+- **Bleu et orange** : couvertures Site Planner réellement importées (modèle ITM/Longley-Rice de leur source).
+- **Vert** : **estimation radio locale expérimentale** : altitude SRTM, pertes en espace libre, diffraction simplifiée par obstacle dominant, réserve fixe de pertes, hauteur et sensibilité. **Ce n'est PAS Longley-Rice ni une mesure radio réelle.**
+- **Visibilité géométrique** (ancienne fonction) : seulement LOS/Fresnel du terrain, avec aucun calcul fiable de RSSI.
+- Hors SRTM : **inconnu**. Une couleur ne garantit pas de communication, surtout en forêt ou vallée.
 
-- Deux stations fixes prépositionnées, à coordonnées **approximatives**.
-- Ajout, déplacement, édition, suppression et renommage de relais ; double-clic sur la carte pour créer un point.
-- Chargement automatique des deux couvertures via le fichier local privé facultatif `web/data/coverages.local.js`, ou import manuel de `Endless_Centipede.geojson` et `Carbonic_Lorikeet.geojson` ; **les données privées ne sont pas publiées dans ce dépôt public**.
-- Chargement de `N43E002.hgt` ou `.hgt.gz` (fichier DEM non inclus).
-- Calcul terrain LOS / 60 % de Fresnel + courbure effective ; **ce n'est pas une prévision Longley-Rice**, ni une garantie de signal.
-- Trois résolutions d'exploration ; changer le mode relance automatiquement le calcul si le terrain est chargé. Après déplacement d'un site, aperçu puis recalcul complet.
-- Fond blanc hors ligne ou OpenTopoMap atténué facultatif (les serveurs externes peuvent refuser les tuiles).
-- Sauvegarde et restauration d'un projet JSON ; le gros fichier SRTM est rechargé séparément.
+Le chemin relie les nœuds dans leur ordre actuel. L'optimiseur explore autour d'un relais afin de maximiser la **plus faible marge estimée** de ses deux liaisons voisines. Il ne valide ni droits d'accès au terrain, ni alimentation, ni contraintes de montage.
 
-**Attention :** les zones vertes ne sont pas une couverture radio prédite. Elles décrivent seulement des positions géométriquement favorables selon un DEM qui ne contient pas tous les arbres et bâtiments.
+## Cartographie
+Fond blanc hors ligne ou OpenTopoMap atténué via Internet (peut être bloqué par le fournisseur). Les lieux sont configurables à partir des coordonnées ; le dessin SVG reste une projection locale simplifiée, à améliorer pour une utilisation mondiale.
 
-Documentation : [Mode d'emploi](docs/USAGE.md), [Modèle radio](docs/RADIO_MODEL.md), [Roadmap](docs/ROADMAP.md), [Validation](docs/VALIDATION.md).
+## Architecture
+- `web/index.html` — interface.
+- `web/app.js` — sites, imports, rendu vectoriel, terrain SRTM, modèle de visibilité.
+- `web/radio.js` — estimations radio par nœud, bilan du parcours, optimisation locale, mémorisation facultative SRTM.
+- `web/style.css` — styles.
+- `tests/` — tests synthétiques de géométrie et de radio.
+- `docs/`, `AGENTS.md`, `WORK_STATE.md` — méthode Assistant/Work V0.3 adaptée.
 
-## Méthode et développement
-
-Le kit Assistant pilote / Work V0.3 de l'utilisateur a été adapté et versionné dans `AGENTS.md`, `ASSISTANT_STATE.md`, `WORK_STATE.md`, `docs/` et `templates/`.
-
-La branche de travail est `work/project-bootstrap-v0.1`. La branche `main` reste volontairement stable. Aucun merge, tag ou release n'a été décidé.
-
-## Test
-
+## Vérification
 ```bash
 node tests/geometry.test.cjs
+node tests/radio.test.cjs
 ```
+Ces tests utilisent un terrain synthétique : ils ne prouvent pas les performances réelles. Le Site Planner reste la référence actuelle pour confronter les emplacements aux profils Longley-Rice.
 
-Test synthétique du terrain uniquement ; il ne remplace pas un test utilisateur ni un essai Meshtastic réel.
+## GitHub et confidentialité
+Développement sur `work/project-bootstrap-v0.1` ; `main` n'est pas fusionnée. Dépôt **public** : le fichier `web/data/coverages.local.js` contenant les simulations privées est exclu par `.gitignore`.
 
-## Confidentialité
-
-Dépôt public : ne pas y commiter une adresse exacte, une position privée, les exports utilisateur ni des tokens. Les points par défaut sont des références approximatives, non des domiciles relevés au GPS. Licence non choisie ; code externe soumis à examen avant réutilisation.
+Aucun code de Meshtastic Site Planner n'a été copié. Son moteur WebAssembly et sa licence GPL-3.0 seront étudiés séparément avant une éventuelle intégration.
