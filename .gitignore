@@ -10,3 +10,6 @@ node_modules/
 !*.example
 data/private/
 coverage/private/
+
+# Simulations geographiques privees : ne jamais publier le fichier local.
+web/data/coverages.local.js
