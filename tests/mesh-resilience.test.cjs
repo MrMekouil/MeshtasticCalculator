@@ -22,6 +22,8 @@ const oneWay=[{from:'A',to:'R1',marginForwardDb:20,marginReverseDb:-5},link('R1'
 assert.equal(bestPath(nodes,oneWay,{source:'A',target:'B',minMarginDb:10,maxLinks:3}),null);
 const missing=[{from:'A',to:'R1',marginForwardDb:20},link('R1','B')];
 assert.equal(bestPath(nodes,missing,{source:'A',target:'B',minMarginDb:10,maxLinks:3}),null);
+const nulled=[{from:'A',to:'R1',marginForwardDb:null,marginReverseDb:20},link('R1','B')];
+assert.equal(bestPath(nodes,nulled,{source:'A',target:'B',minMarginDb:-2,maxLinks:3}),null,'null margin must never become numeric zero');
 assert.equal(bestPath(nodes,serial,{source:'A',target:'B',minMarginDb:10,maxLinks:2}),null);
 const copy=JSON.stringify({nodes,links:mesh});
 assessSingleRelayFailure({nodes,links:mesh,source:'A',target:'B',minMarginDb:10,maxLinks:3});
