@@ -79,7 +79,12 @@ function mapBase(){
  const z=11,n=2**z,tileX=l=>Math.floor((l+180)/360*n),tileY=l=>Math.floor((1-Math.asinh(Math.tan(l*rad))/Math.PI)/2*n);
  const lonTile=x=>x/n*360-180,latTile=y=>Math.atan(Math.sinh(Math.PI*(1-2*y/n)))/rad;
  let failures=0;
- for(let x=tileX(2.0);x<=tileX(2.75);x++)for(let y=tileY(43.9);y<=tileY(43.45);y++){
+ const v=state.view,nw=unproject(v.x,v.y),se=unproject(v.x+v.w,v.y+v.h);
+ const x0=Math.max(0,tileX(Math.min(nw.lon,se.lon)))-1,x1=Math.min(n-1,tileX(Math.max(nw.lon,se.lon))+1);
+ const y0=Math.max(0,tileY(Math.max(nw.lat,se.lat)))-1,y1=Math.min(n-1,tileY(Math.min(nw.lat,se.lat))+1);
+ const count=(x1-x0+1)*(y1-y0+1);
+ if(count>80){$('baseInfo').textContent='Vue trop large pour le fond OpenTopoMap (limite 80 tuiles) : zoome sur le secteur.';return;}
+ for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){
   const a=project(lonTile(x),latTile(y)),b=project(lonTile(x+1),latTile(y+1));
   const im=svg('image',{x:a.x,y:a.y,width:b.x-a.x,height:b.y-a.y,opacity:state.baseOpacity,preserveAspectRatio:'none'},$('baseLayer'));
   im.setAttribute('href','https://tile.opentopomap.org/'+z+'/'+x+'/'+y+'.png');
