@@ -23,3 +23,5 @@ aside section details summary{cursor:pointer;color:#365b6d;font-size:12px;font-w
 .precision-grid .east{grid-column:3;grid-row:2}
 .precision-grid button{min-height:36px}
 .precise-crosshair{stroke:#07465d;stroke-width:2.25;stroke-linecap:round;pointer-events:none}
+
+header a.btn{border:1px solid #cad6dd;background:#fff;border-radius:8px;color:#234558;padding:9px 11px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font:inherit}header a.btn:hover{background:#eef7fa}
