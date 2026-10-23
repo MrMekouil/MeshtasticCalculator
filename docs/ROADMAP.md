@@ -1,4 +1,18 @@
 # Roadmap — MeshtasticCalculator
+
+## Nouveau jalon prioritaire — U1 Calculateur universel (24 octobre 2026)
+Document de référence : [SPEC_UNIVERSAL_MILESTONE.md](SPEC_UNIVERSAL_MILESTONE.md).
+
+| CP | Priorité | Résultat attendu | État |
+|---|---|---|---|
+| CP-U1 | P0 | Déplacement carte sans capture bloquée, A/B mobiles, UX simple, carte MapLibre mondiale et zoom adaptatif | **En cours** — correctif pointeur poussé, refonte MapLibre non réalisée |
+| CP-U2 | P0 | Relief SRTM/compléments téléchargé automatiquement, cache local, absence de couverture si DEM manquant | Non commencé |
+| CP-U3 | P0 | Couverture radio étalonnée, profils terrain, SNR/marge, comparaison de référence ITM/Longley-Rice | Non commencé |
+| CP-U4 | P1 | Optimiser 0/1/2/N relais, nombre minimal et meilleure marge du plus mauvais saut | Non commencé |
+| CP-U5 | P1 | Tests sur géographies variées, essais terrain, packaging et rapport vérifiable | Non commencé |
+
+Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototype**, pas le nouveau plan prioritaire.
+
 ## V0.1 — Base fonctionnelle expérimentale (travail sur `work/project-bootstrap-v0.1`)
 - Méthode Assistant/Work V0.3 adaptée, modules web versionnés, tests synthétiques.
 - Deux stations configurables, relais illimités ajoutables/déplaçables/supprimables, import/export local.
