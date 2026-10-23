@@ -1,3 +1,12 @@
+## Carte mondiale unifiée et redondance — 24 octobre 2026
+
+- Utiliser **uniquement `web/index.html`** : c'est désormais la page mondiale ET le calculateur. La page `world-map-beta.html` redirige vers elle.
+- Dans « Carte », sélectionner Positron, Liberty, Bright ou blanc. Le fond et les marqueurs se déplacent et zooment ensemble ; les anciennes couvertures Site Planner et le calcul SRTM restent dans cette même interface.
+- Conserver le fichier privé `web/data/coverages.local.js` en local lors des mises à jour ZIP. Il n'est pas dans GitHub.
+- Dans « Optimisation du trajet et des relais », laisser « Étudier aussi la redondance » **décoché** pour n'effectuer que l'optimisation classique de position.
+- Pour une étude additionnelle, cocher « Étudier aussi la redondance », choisir la marge minimale et le nombre de sauts, puis tester les pannes. Ce test vérifie le réseau existant et, lors de l'optimisation, la position suggérée. La recherche automatique de relais additionnels pour obtenir une vraie redondance reste à développer.
+- Le nouveau fond repose sur MapLibre via CDN et sur les styles OpenFreeMap. Sans connexion, la carte mondiale peut être indisponible ; le rendu SVG antérieur reste en secours. Les tests complets dans Firefox restent nécessaires.
+
 # Utiliser le calculateur
 
 ## Cas rapide
