@@ -49,11 +49,11 @@ function rfWedge(site,km0,km1,ang0,ang1){
  return 'M'+pts.map((pt,i)=>{const p=project(pt.lon,pt.lat);return (i?'L':'')+p.x.toFixed(1)+' '+p.y.toFixed(1)}).join('')+'Z';
 }
 function rfBuildWedges(site,rows,preset){
- const tiers=[-130,-117,-109],paths=Object.fromEntries(tiers.map(x=>[x,[]])),signals=[],valid=0;
+ const tiers=[-130,-117,-109],paths=Object.fromEntries(tiers.map(x=>[x,[]])),signals=[];let valid=0;
  const n=preset.rays,step=preset.step,count=Math.ceil(RADIO.settings.maxKm/step);
  for(let a=0;a<n;a++){
   const elevations=rows[a];
-  if(!elevations){signals.push(null);continue;}
+  if(!elevations||elevations[0]===null){signals.push(null);continue;}
   valid++;
   const signal=new Float32Array(count+1);
   const opens=Object.fromEntries(tiers.map(t=>[t,-1]));
@@ -86,7 +86,7 @@ async function rfCalculateSite(id,mode){
  for(let a=0;a<q.rays;a++){
   if(RADIO.versions.get(id)!==version||!site(id))return false;
   const theta=a*2*Math.PI/q.rays;
-  const elev=new Array(count+1),length=q.step*1000;
+  const elev=new Array(count+1);
   for(let j=0;j<=count;j++){
     const p=rfPoint(node.lat,node.lon,theta,j*q.step);
     elev[j]=heightAt(p.lat,p.lon);
