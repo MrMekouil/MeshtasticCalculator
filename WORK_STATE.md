@@ -54,3 +54,13 @@
 - `web/world-map-beta.html` corrigé : points initiaux Tarn, zoom centré, OpenFreeMap Positron/Liberty/Bright, sélecteur et fond blanc de repli, sauvegarde/import projet inchangés, réinitialisation explicitement confirmée.
 - Test de logique exécuté contre le fichier distant avec MapLibre/DOM simulés : démarrage, positions, 2 marqueurs, changement de style sans déplacement de nœud, ajout/reinitialisation PASS. Nouveau `tests/world-map-beta.test.cjs` commité.
 - Non exécuté : test Firefox réel des tuiles OpenFreeMap, chargement de fonts/icons distants, reproduction visuelle définitive, raccordement aux couvertures SRTM/Longley-Rice. Main préservée.
+
+
+## 2026-10-24 — Refonte d’interface unique (checkpoint partiel)
+- Prévol : branche distante `work/project-bootstrap-v0.1` HEAD `77be378e9c2fe15675b390df2cdb0027d5146a4e` avant modification ; `main` `bb853ccf45d86f194b70c1714275ac8edcb615f8`. Pas de checkout authentifié donc git status/diff/index N/A.
+- Nouvelle architecture de la page principale : MapLibre sous la surcouche SVG historique ; projection monde sur `map.project/unproject`, superposition des GeoJSON et du modèle radio local, recalcul des tracés au changement de viewport ; import des données privées par script local inchangé.
+- Fonds OpenFreeMap Positron/Liberty/Bright et blanc ; possibilité de retour au rendu SVG local si le CDN MapLibre échoue. Bêta secondaire désactivée via redirection.
+- Option explicite `rfRedundancy` NON cochée par défaut. Fonction d’analyse `rfFailureReport` sur liens radio locaux bidirectionnels ; comparaison d’une position de relais suggérée. Le solveur ne propose pas encore automatiquement des relais redondants additionnels.
+- Vérifications : syntaxe `app.js/radio.js/world-map-adapter.js/mesh-resilience.js` PASS ; ordre de chargement contrôlé ; géométrie projection monde + zoom/fits testés en simulation JS ; DOM sans identifiants doublons. Script `tests/unified-map.test.cjs` ajouté.
+- À valider : affichage Firefox réel, opacité/polygones aux zooms extrêmes, calcul long, vraie matrice RF SRTM, import GeoJSON réel et conformité d’interaction dans une carte MapLibre.
+- Aucun merge, release, tag, force-push, branche supprimée, ni données utilisateur privées ajoutées au dépôt.
