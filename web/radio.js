@@ -5,7 +5,7 @@
 'use strict';
 const RADIO={
   settings:{freq:869.525,eirp:20,rxGain:0,extraLoss:12,sensitivity:-130,rxHeight:2,maxKm:25,quality:'normal',threshold:-117},
-  coverage:new Map(),imports:new Map(),versions:new Map(),enabled:true,active:true,dragPreview:null,dragged:null,suggestion:null,optimToken:0,demPersistent:false
+  coverage:new Map(),imports:new Map(),versions:new Map(),hidden:new Set(),enabled:true,active:true,dragPreview:null,dragged:null,suggestion:null,optimToken:0,demPersistent:false
 };
 const RADIO_QUALITY={preview:{rays:72,step:.35,profileStep:180},normal:{rays:180,step:.15,profileStep:100},fine:{rays:360,step:.10,profileStep:70}};
 function rfPoint(lat,lon,theta,km){
@@ -118,7 +118,7 @@ function rfDraw(){
  if(!RADIO.enabled)return;
  const t=RADIO.settings.threshold;const opacity=+($('rfOpacity')?.value||35)/100;
  for(const node of state.sites){
-  if(!site(node.id))continue;
+  if(!site(node.id)||RADIO.hidden.has(node.id))continue;
   const imported=RADIO.imports.get(node.id);
   const cv=RADIO.coverage.get(node.id);
   let path='';
@@ -132,6 +132,16 @@ function rfDraw(){
   svg('path',{d:path,'fill-rule':'evenodd',fill:node.type==='home'?'#7c78dc':'#0ea875',
     'fill-opacity':selected?opacity:opacity*.52,stroke:selected?'#0d876b':'none',
     'stroke-width':'.4','vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind},group);
+ }
+}
+function rfRefreshVisibility(){
+ const parent=$('rfVisibility');if(!parent)return;parent.replaceChildren();
+ for(const node of state.sites){
+  const label=document.createElement('label');
+  const cb=document.createElement('input');cb.type='checkbox';cb.checked=!RADIO.hidden.has(node.id);
+  cb.onchange=()=>{if(cb.checked)RADIO.hidden.delete(node.id);else RADIO.hidden.add(node.id);rfDraw();};
+  const name=document.createElement('span');name.textContent=' '+node.name;
+  label.append(cb,name);parent.append(label);
  }
 }
 function rfSummary(){
@@ -301,7 +311,7 @@ function rfPanel(){
   '<p id="rfStatus" class="hint">Pour calculer la couverture d’un nouveau point, charge d’abord son relief SRTM (si non mémorisé).</p>'+
   '<button id="rfChooseTerrain" class="block">Charger un terrain SRTM (HGT)</button>'+
   '<div class="actions"><label class="btn">Importer GeoJSON du point sélectionné<input id="rfImport" type="file" accept=".geojson,.json" hidden></label><button id="rfClearImport">Retirer import</button></div>'+
-  '<div class="toggles"><label><input id="rfShow" type="checkbox" checked> Afficher les estimations radio</label></div>'+
+  '<div class="toggles"><label><input id="rfShow" type="checkbox" checked> Afficher les estimations radio</label></div>'+ '<div id="rfVisibility" class="toggles"></div>'+
   '<label>Seuil du signal<select id="rfThreshold"><option value="-130">≥ −130 dBm · limite</option><option value="-117" selected>≥ −117 dBm · meilleure marge</option><option value="-109">≥ −109 dBm · signal plus fort</option></select></label>'+
   '<label>Résolution<select id="rfPrecision"><option value="preview">Rapide (72 directions)</option><option value="normal" selected>Standard (180 directions)</option><option value="fine">Fine (360 directions)</option></select></label>'+
   '<label>Transparence du résultat<input id="rfOpacity" type="range" min="10" max="80" value="35"></label>'+
@@ -385,7 +395,7 @@ function rfPanel(){
   }
   rfDraw();rfSummary();
 };
- rfSummary();
+ rfSummary();rfRefreshVisibility();
  rfRestoreTiles();
 }
 rfPanel();
