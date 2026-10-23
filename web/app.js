@@ -15,7 +15,7 @@ function bundledLayer(key){
 }
 const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
 const state={sites:structuredClone(HOME),selected:'pradel',threshold:-118,layer:preloaded,quality:'normal',opacity:.38,
- terrain:null,terrains:[],estimate:null,base:'white',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
+ terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
 const project=(lon,lat)=>globalThis.MeshtasticWorldMap?.map
@@ -55,7 +55,6 @@ function renderEditor(){
  $('editor').hidden=!p;$('editorEmpty').hidden=!!p;if(!p)return;
  $('pointName').value=p.name;$('pointLat').value=p.lat;$('pointLon').value=p.lon;$('pointHeight').value=p.height;
  $('delete').hidden=p.type!=='relay';$('pointNote').textContent=p.type==='home'?'Station d’extrémité : modifiable mais non supprimable.':'Relais déplaçable et ajustable au mètre.';
- $('precisionCoords').textContent=p.lat.toFixed(8)+', '+p.lon.toFixed(8);
  $('precisionCoords').textContent=p.lat.toFixed(8)+', '+p.lon.toFixed(8);
 }
 function renderMarkers(){
