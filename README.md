@@ -8,7 +8,7 @@ Lancer [web/index.html](web/index.html) dans Firefox ou Chromium depuis cette br
 
 - Deux stations fixes prépositionnées, à coordonnées **approximatives**.
 - Ajout, déplacement, édition, suppression et renommage de relais ; double-clic sur la carte pour créer un point.
-- Import local de `Endless_Centipede.geojson` (Le Pradel) et `Carbonic_Lorikeet.geojson` (Labruguière), **non publiés dans ce dépôt public**.
+- Chargement automatique des deux couvertures via le fichier local privé facultatif `web/data/coverages.local.js`, ou import manuel de `Endless_Centipede.geojson` et `Carbonic_Lorikeet.geojson` ; **les données privées ne sont pas publiées dans ce dépôt public**.
 - Chargement de `N43E002.hgt` ou `.hgt.gz` (fichier DEM non inclus).
 - Calcul terrain LOS / 60 % de Fresnel + courbure effective ; **ce n'est pas une prévision Longley-Rice**, ni une garantie de signal.
 - Trois résolutions d'exploration ; changer le mode relance automatiquement le calcul si le terrain est chargé. Après déplacement d'un site, aperçu puis recalcul complet.
