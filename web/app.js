@@ -19,6 +19,7 @@ const dist=(a,b)=>{const dlat=(a.lat-b.lat)*rad,dlon=(a.lon-b.lon)*rad,k=Math.si
 function svg(tag,attrs={},parent){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,String(v)); if(parent)parent.append(e);return e;}
 function wipe(id){$(id).replaceChildren();}
 function range(v,a,b){return Math.max(a,Math.min(b,v));}
+let previewTimer=null;
 function updateStatus(s){status(s);$('mapHint').textContent=s;}
 function setView(){const v=state.view;$('map').setAttribute('viewBox',[v.x,v.y,v.w,v.h].join(' '));}
 function localXY(event){const p=$('map').createSVGPoint();p.x=event.clientX;p.y=event.clientY;return p.matrixTransform($('map').getScreenCTM().inverse());}
@@ -157,10 +158,10 @@ function clearLOS(a,b,rxHeight=8){
  return true;
 }
 const QUALITY={quick:{rays:90,step:0.7},normal:{rays:180,step:0.5},fine:{rays:360,step:0.35}};
-async function calculate(){
+async function calculate(qualityOverride){
  const p=site(state.selected);if(!p||!state.terrain){updateStatus('Charge un terrain SRTM et sélectionne un point.');return;}
  const myToken=++state.token;
- const q=QUALITY[state.quality],maxKm=25, dAngle=2*Math.PI/q.rays,step=q.step;
+ const q=QUALITY[qualityOverride||state.quality],maxKm=25, dAngle=2*Math.PI/q.rays,step=q.step;
  updateStatus('Visibilité du terrain : calcul en cours…');
  let path='',tested=0,pass=0;
  for(let i=0;i<q.rays;i++){
@@ -258,6 +259,7 @@ function wire(){
   const v=localXY(e);
   if(state.drag.kind==='site'){
    const p=site(state.drag.id);if(!p)return;const geo=unproject(v.x,v.y);p.lat=+geo.lat.toFixed(6);p.lon=+geo.lon.toFixed(6);renderMarkers();
+   if(state.terrain){clearTimeout(previewTimer);previewTimer=setTimeout(()=>calculate('quick'),450);}
   }else{
    const rect=map.getBoundingClientRect();
    state.view.x=state.drag.view.x-(e.clientX-state.drag.clientX)*state.drag.view.w/rect.width;
@@ -267,7 +269,7 @@ function wire(){
  map.addEventListener('pointerup',()=>{
   if(!state.drag)return;
   const moved=state.drag.kind==='site';state.drag=null;
-  if(moved){invalidate();renderSites();renderEditor();renderMarkers();if(state.terrain)calculate();}
+  if(moved){clearTimeout(previewTimer);state.token++;invalidate();renderSites();renderEditor();renderMarkers();if(state.terrain)calculate();}
  });
  map.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.12:.89);},{passive:false});
 }
