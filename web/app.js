@@ -202,6 +202,7 @@ async function loadDem(file){
 }
 async function loadCoverage(file,key){
  try{
+  if(file.size>20_000_000)throw Error('GeoJSON trop volumineux (> 20 Mo)');
   const obj=JSON.parse(await file.text());
   if(obj.type!=='FeatureCollection'||!Array.isArray(obj.features))throw Error('FeatureCollection GeoJSON attendue');
   if(!obj.features.some(f=>f.geometry&&Number.isFinite(Number(f.properties?.dbm))))throw Error('Aucun polygone de puissance (dbm) reconnu');
@@ -249,7 +250,7 @@ function wire(){
  map.addEventListener('pointerdown',e=>{
   const node=e.target.closest('.point');const p=localXY(e);
   if(node){state.selected=node.dataset.id;state.drag={kind:'site',id:state.selected};renderSites();renderEditor();renderMarkers();}
-  else state.drag={kind:'pan',x:p.x,y:p.y,view:{...state.view}};
+  else state.drag={kind:'pan',clientX:e.clientX,clientY:e.clientY,view:{...state.view}};
   map.setPointerCapture(e.pointerId);
  });
  map.addEventListener('pointermove',e=>{
@@ -258,8 +259,9 @@ function wire(){
   if(state.drag.kind==='site'){
    const p=site(state.drag.id);if(!p)return;const geo=unproject(v.x,v.y);p.lat=+geo.lat.toFixed(6);p.lon=+geo.lon.toFixed(6);renderMarkers();
   }else{
-   const dx=v.x-state.drag.x,dy=v.y-state.drag.y;
-   state.view.x-=dx;state.view.y-=dy;setView();
+   const rect=map.getBoundingClientRect();
+   state.view.x=state.drag.view.x-(e.clientX-state.drag.clientX)*state.drag.view.w/rect.width;
+   state.view.y=state.drag.view.y-(e.clientY-state.drag.clientY)*state.drag.view.h/rect.height;setView();
   }
  });
  map.addEventListener('pointerup',()=>{
