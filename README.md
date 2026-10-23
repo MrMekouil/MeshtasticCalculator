@@ -9,6 +9,9 @@ Calculateur de planification **Meshtastic universel (expérimental)**. Au démar
 4. Ajouter un relais par bouton ou double-clic, le déplacer ; **les nouvelles couvertures radio estimées se calculent avec le relief chargé**, à l'issue du déplacement ou après une pause.
 5. Dans « Couverture des relais », choisir le seuil (−130/−117/−109 dBm), calculer le point ou tous les points, comparer les marges radio des sauts et essayer « Chercher un emplacement » pour une suggestion fondée sur la marge la plus faible.
 
+## Redondance facultative
+Dans « Optimisation du trajet et des relais », cocher **« Étudier aussi la redondance »** uniquement si souhaité (désactivé par défaut). Le bouton « Tester les pannes des relais » analyse les liaisons radio bidirectionnelles estimées, retire virtuellement chaque relais et identifie les relais critiques. Après une proposition de déplacement, le même contrôle peut être appliqué à cette position. **Cela ne crée pas encore automatiquement les relais supplémentaires nécessaires** et ne garantit aucun basculement du firmware Meshtastic.
+
 ## Distinction essentielle des résultats
 - **Bleu et orange** : couvertures Site Planner réellement importées (modèle ITM/Longley-Rice de leur source).
 - **Vert** : **estimation radio locale expérimentale** : altitude SRTM, pertes en espace libre, diffraction simplifiée par obstacle dominant, réserve fixe de pertes, hauteur et sensibilité. **Ce n'est PAS Longley-Rice ni une mesure radio réelle.**
@@ -18,12 +21,14 @@ Calculateur de planification **Meshtastic universel (expérimental)**. Au démar
 Le chemin relie les nœuds dans leur ordre actuel. L'optimiseur explore autour d'un relais afin de maximiser la **plus faible marge estimée** de ses deux liaisons voisines. Il ne valide ni droits d'accès au terrain, ni alimentation, ni contraintes de montage.
 
 ## Cartographie
-Fond blanc hors ligne ou OpenTopoMap atténué via Internet (peut être bloqué par le fournisseur). Les lieux sont configurables à partir des coordonnées ; le dessin SVG reste une projection locale simplifiée, à améliorer pour une utilisation mondiale.
+**Une seule page** : `web/index.html` contient maintenant la carte mondiale MapLibre (styles routiers Positron/Liberty/Bright, blanc de secours) et tous les outils de calcul existants. Les couches de couverture restent temporairement dessinées en surcouche SVG synchronisée avec MapLibre ; cette migration est expérimentale et doit être validée dans Firefox. `world-map-beta.html` redirige vers l'application principale. Les fonds vectoriels et le moteur MapLibre nécessitent Internet au premier chargement. En cas d'échec du CDN, l'ancienne carte locale sert de secours.
 
 ## Architecture
 - `web/index.html` — interface.
 - `web/app.js` — sites, imports, rendu vectoriel, terrain SRTM, modèle de visibilité.
-- `web/radio.js` — estimations radio par nœud, bilan du parcours, optimisation locale, mémorisation facultative SRTM.
+- `web/radio.js` — estimations radio par nœud, bilan du parcours, optimisation locale et redondance facultative, mémorisation facultative SRTM.
+- `web/world-map-adapter.js` — raccordement du fond MapLibre à l'interface et aux couches radio existantes.
+- `web/mesh-resilience.js` — calcul de chemins alternatifs et analyse de pannes simples.
 - `web/style.css` — styles.
 - `tests/` — tests synthétiques de géométrie et de radio.
 - `docs/`, `AGENTS.md`, `WORK_STATE.md` — méthode Assistant/Work V0.3 adaptée.
