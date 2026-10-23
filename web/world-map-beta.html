@@ -23,31 +23,50 @@ h2{font-size:16px;margin:6px 0 9px}.muted{color:#5a7583;font-size:12px;line-heig
 .marker{width:23px;height:23px;border:3px solid #fff;outline:2px solid #173a50;border-radius:50%;background:#0ca08a;cursor:grab;box-shadow:0 2px 7px #0006}
 .marker.endpoint{background:#1b608e}.marker.current{outline:3px solid #eda42b}
 label{display:block;margin:12px 0 6px;font-size:12px;color:#416070}
-input[type=number]{width:100%;padding:7px;border:1px solid #cad9e2;border-radius:6px}
+input[type=number],select{width:100%;padding:8px;border:1px solid #cad9e2;border-radius:6px;background:#fff;color:#143345}
+#resetDemo{width:100%}
+#basemapInfo{min-height:26px}
 .row{display:flex;gap:7px;align-items:center}.row>*{flex:1}
 small{color:#617b86}
 @media(max-width:750px){main{display:flex;flex-direction:column-reverse;height:auto}#mapArea{height:62vh;min-height:350px}aside{height:auto}header{flex-wrap:wrap}}
 </style></head><body>
 <header><div><strong>◢ MeshtasticCalculator · carte mondiale (bêta)</strong><div><span>CP-U1 — expérimentation cartographique, sans calcul de couverture</span></div></div><a class="btn" href="index.html">← Application classique</a></header>
 <main><aside>
-<h2>Placement mondial</h2>
+<h2>Carte et positionnement</h2>
+<label for="basemap">Fond de carte</label>
+<select id="basemap" aria-label="Choisir un fond cartographique">
+<option value="positron" selected>Routes discrètes · Positron</option>
+<option value="liberty">Routes détaillées · Liberty</option>
+<option value="bright">Routes contrastées · Bright</option>
+<option value="white">Blanc · sans tuiles</option>
+</select>
+<p class="muted" id="basemapInfo">Fonds vectoriels OpenFreeMap : routes et détails changent avec le zoom, Internet requis.</p>
+<button id="resetDemo" class="btn">Revenir aux points de test du Tarn</button>
 <p class="muted">Zoom dynamique et marqueurs déplaçables. Tu peux importer un projet MeshtasticCalculator : ses autres données sont préservées lors de l'export.</p>
 <div class="actions"><button id="placeA">Placer A</button><button id="placeB">Placer B</button><button id="addRelay" class="primary">+ Relais</button><button id="fit">Voir tous</button></div>
 <div id="sites"></div>
 <h2>Coordonnées exactes</h2>
 <div id="editor"><p class="muted">Sélectionne une station ou un relais.</p></div>
 <div class="actions"><label class="upload btn">Importer projet<input type="file" id="importProject" accept=".json" hidden></label><button id="exportProject">Exporter JSON</button></div>
-<div class="warning"><b>Version cartographique seulement.</b> Les polygones GeoJSON, les estimations radio et la recherche automatique de relais restent dans l'application classique. Le fond de démonstration MapLibre nécessite Internet et n'est pas une source garantie pour la production.</div>
+<div class="warning"><b>Version cartographique seulement.</b> Les couvertures et calculs radio restent dans l’application classique. Fonds OpenFreeMap sans clé, nécessitant Internet ; fond blanc de secours si le fournisseur est indisponible.</div>
 <p class="muted">Aucune coordonnée n'est envoyée à GitHub. Le fournisseur du fond cartographique reçoit les requêtes nécessaires à l'affichage des tuiles. N'importe quelle position utilisée dans ce prototype doit être considérée comme un emplacement candidat, pas un site radio validé.</p>
 </aside><div id="mapArea"><div id="map"></div><div id="status">Chargement du moteur cartographique MapLibre…</div></div></main>
 <script type="module">
 const $=id=>document.getElementById(id);
 const defaultSites=[
- {id:'pradel',type:'home',name:'Station A',lat:48.8566,lon:2.3522,height:10},
- {id:'labru',type:'home',name:'Station B',lat:51.5072,lon:-0.1276,height:8}
+ {id:'pradel',type:'home',name:'Le Pradel',lat:43.69992,lon:2.384259,height:10},
+ {id:'labru',type:'home',name:'Labruguière',lat:43.538435,lon:2.262519,height:8}
 ];
+const STYLES={
+ positron:'https://tiles.openfreemap.org/styles/positron',
+ liberty:'https://tiles.openfreemap.org/styles/liberty',
+ bright:'https://tiles.openfreemap.org/styles/bright',
+ white:{version:8,sources:{},layers:[{id:'background',type:'background',paint:{'background-color':'#f5f8f9'}}]}
+};
+const TEST_VIEW={center:[2.323389,43.619178],zoom:10.5};
 let project={format:'MeshtasticCalculator',version:2,sites:structuredClone(defaultSites),layer:{pradel:null,labru:null}};
 let selected='pradel',armed=null,map=null,GL=null,markers=new Map();
+let styleId='positron',styleErrorCount=0,styleFallbackInProgress=false;
 const status=s=>$('status').textContent=s;
 const chosen=()=>project.sites.find(n=>n.id===selected);
 const get=id=>project.sites.find(n=>n.id===id);
@@ -109,6 +128,23 @@ function fit(){
 }
 function render(){showNodes();editor();updateMarkers();}
 function arm(mode){armed=mode;status(mode==='relay'?'Clique sur la carte pour ajouter le relais.':'Clique sur la carte pour définir la station '+mode+'.');}
+function switchBase(id,automatic=false){
+ if(!map||!Object.prototype.hasOwnProperty.call(STYLES,id))return;
+ styleId=id;styleErrorCount=0;
+ $('basemap').value=id;
+ $('basemapInfo').textContent=id==='white'
+  ?'Fond blanc local : aucune route. Tes stations restent disponibles.'
+  :'OpenFreeMap '+id+' : fond routier vectoriel à zoom adaptatif.';
+ map.setStyle(STYLES[id]);
+ status(automatic?'Fond précédent inaccessible : bascule sur '+id+'.':
+   'Fond '+id+' sélectionné. Les marqueurs et le zoom sont conservés.');
+}
+$('basemap').onchange=e=>switchBase(e.target.value);
+$('resetDemo').onclick=()=>{
+ if(!confirm('Remplacer les points et les relais actuels par les deux positions de test Le Pradel et Labruguière ? Exporte ton projet avant si nécessaire.'))return;
+ project={format:'MeshtasticCalculator',version:2,sites:structuredClone(defaultSites),layer:{pradel:null,labru:null}};
+ selected='pradel';armed=null;render();fit();status('Points de test du Tarn rétablis.');
+};
 $('placeA').onclick=()=>arm('A');$('placeB').onclick=()=>arm('B');$('addRelay').onclick=()=>arm('relay');
 $('fit').onclick=fit;
 $('importProject').onchange=async e=>{
@@ -132,10 +168,21 @@ $('exportProject').onclick=()=>{
 render();
 try{
  GL=await import('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs');
- map=new GL.Map({container:'map',style:'https://demotiles.maplibre.org/style.json',center:[0,40],zoom:2,maxZoom:19,attributionControl:true});
+ map=new GL.Map({container:'map',style:STYLES[styleId],center:TEST_VIEW.center,zoom:TEST_VIEW.zoom,maxZoom:20,attributionControl:true});
  map.addControl(new GL.NavigationControl(),'top-right');
- map.on('load',()=>{render();fit();status('Carte mondiale chargée. Sélectionne un point ou déplace son marqueur.');});
- map.on('error',()=>status('Erreur de tuiles ou WebGL. Vérifie Internet ou reviens à l’application classique.'));
+ map.on('load',()=>{render();fit();status('Carte du Tarn chargée : Le Pradel et Labruguière. Tu peux changer le fond de carte.');});
+ map.on('error',e=>{
+  const reason=String(e?.error?.message||'ressource cartographique indisponible');
+  if(styleId==='white'){status('Erreur MapLibre : '+reason);return;}
+  styleErrorCount++;
+  status('Le fond '+styleId+' rencontre des erreurs réseau. '+reason.slice(0,125));
+  if(styleErrorCount<3||styleFallbackInProgress)return;
+  styleFallbackInProgress=true;
+  const next=styleId==='positron'?'liberty':'white';
+  switchBase(next,true);
+  styleFallbackInProgress=false;
+ });
+ render();fit(); // Les deux repères apparaissent même si le fond distant tarde à charger.
  map.on('click',e=>{
   if(!armed)return;
   const lat=+e.lngLat.lat.toFixed(8),lon=+e.lngLat.lng.toFixed(8);
