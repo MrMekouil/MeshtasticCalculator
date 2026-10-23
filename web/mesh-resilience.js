@@ -20,7 +20,7 @@
   const adjacency=new Map([...idSet].filter(id=>!removed.has(id)).map(id=>[id,[]]));
   for(const l of links){
    if(!adjacency.has(l.from)||!adjacency.has(l.to)||l.from===l.to)continue;
-   const ab=Number(l.marginForwardDb),ba=Number(l.marginReverseDb);
+   const ab=l.marginForwardDb,ba=l.marginReverseDb; // null/strings are NOT measured margins
    if(!Number.isFinite(ab)||!Number.isFinite(ba)||l.verified===false)continue;
    const m=Math.min(ab,ba);
    if(m<minMargin)continue;
