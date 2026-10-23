@@ -34,7 +34,9 @@
   for(let k=1;k<=maxLinks;k++){
    for(const [id,state] of best[k-1]){
     for(const next of adjacency.get(id)||[]){
-     if(state.path.includes(next.id))continue; // avoid cycles
+     // Use walks in the bounded dynamic program: a maximum-bottleneck
+     // feasible walk always has a cycle-free counterpart with <= hops.
+     // Pruning by one stored path would otherwise hide viable continuations.
      const score=Math.min(state.score,next.margin);
      const existing=best[k].get(next.id);
      if(!existing||score>existing.score)best[k].set(next.id,{score,path:[...state.path,next.id]});
