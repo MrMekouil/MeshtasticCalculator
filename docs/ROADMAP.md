@@ -49,3 +49,11 @@ Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototy
 - **Redondance (CP-U4, après moteurs radio fiables)** : tolérance à 1 panne de relais, itinéraire de secours, identification des nœuds critiques, puis chemins indépendants et N pannes. Contrat : `docs/REDUNDANCY.md`.
 - **Analyse de graphe initiale** : `web/mesh-resilience.js` testable séparément du calcul dBm ; ne pas l'utiliser pour prétendre à une vraie tolérance sans matrice de liens connue et vérifiée.
 - **Restant CP-U1** : migrer les couches et données dans MapLibre, confirmer les tuiles sur Firefox et résoudre le chemin de lancement (file:// vs localhost), contrôles précis et fonds durables.
+
+### 2026-10-24 — Correction du fond cartographique MapLibre (CP-U1)
+- Carte mondiale bêta : test par l'utilisateur avec capture réelle : fond `demotiles.maplibre.org` n'affichait que pays/frontières, impraticable pour placer des relais.
+- Correction : points de démonstration **Le Pradel** (`43.69992, 2.384259`) et **Labruguière** (`43.538435, 2.262519`) conservés par défaut, zoom initial centré dans le Tarn puis cadrage automatique des deux points.
+- Fonds disponibles : OpenFreeMap **Positron** (défaut), Liberty, Bright, blanc. Tous les fonds routiers s'adaptent au zoom ; retrait du fond pays de démonstration.
+- Contrôle : choix explicite du fond, repli sur autre style/fond blanc en cas d'échecs réseau répétés ; positions des nœuds conservées lors du changement.
+- Non validé : chargement réseau réel OpenFreeMap dans Firefox `file://`, détails affichés sur le terrain du Tarn, essai mobile.
+- Ensuite : intégrer le moteur radio existant et les couches GeoJSON dans MapLibre (ne pas confondre avec fond de carte).
