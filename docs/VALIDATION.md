@@ -15,3 +15,14 @@
 - Le fichier `web/data/coverages.local.js` a été généré en **livrable privé téléchargeable**, non poussé dans ce dépôt public.
 - Tests effectués : parse de la donnée dans Node, structure et 12 niveaux, scripts HTML chargés dans l'ordre prévu, reconnaissance des deux couches par le code courant. PASS.
 - Test Firefox `file://` avec ces données sur la machine utilisateur : NON EXÉCUTÉ.
+
+## 2026-10-24 — Réintroduction du calcul radio et universalisation
+- V7 source originale inspectée en local : fonctions de couverture SRTM, rayons, seuils et optimisation identifiées. Le nouveau code n'est pas un copier-coller intégral de V7.
+- Nouvelle implémentation de couvertures SRTM : `web/radio.js`, modèle FSPL + diffraction dominante + pertes supplémentaires, points géographiques sans terrain = UNKNOWN.
+- Tests synthétiques (exécutés sur la source distante via environnement JS) : terrain plat 2,36 km ~−90,7 dBm, crête artificielle 300/500 m qui dégrade à ~−135,4 dBm, DEM manquant → `null`. PASS, **ce n'est pas une validation physique**.
+- Tests des groupes de polygones, seuils et couverture sur synthétique : PASS après correction d'un compteur `const`.
+- Contrôle syntaxe de `web/app.js`, `web/radio.js` et des deux scripts de test : PASS.
+- Contrôle des identifiants HTML / composants créés dynamiquement et ordre des scripts : PASS.
+- Test d'intégration d'initialisation de l'interface avec faux DOM : PASS (création du panneau radio et ajout d'un relais).
+- Essai sous Firefox de l'utilisateur, import des véritables GeoJSON dans la nouvelle version, stockage IndexedDB `file://`, HGT véritable du Tarn, temps CPU, simulation Longley-Rice et terrain réel : **NON EXÉCUTÉ**.
+- Recommandations d'emplacement : uniquement indicatives, accès au sol, réseau électrique et réglementation non vérifiés.
