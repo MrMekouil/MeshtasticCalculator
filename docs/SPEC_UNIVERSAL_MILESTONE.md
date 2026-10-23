@@ -127,3 +127,12 @@ Ne jamais pousser les exports `coverages.local.js`, la position réelle d'une ma
 - Meshtastic paramètres : https://meshtastic.org/docs/overview/radio-settings/
 - Terrain AWS : https://registry.opendata.aws/terrain-tiles/
 - SRTM couverture : https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1/
+
+## Addendum — Placement précis et visibilité des couches (24 octobre 2026)
+- Les marqueurs doivent conserver une taille d'interaction lisible à tout zoom, mais afficher une **croix de position GPS exacte** au centre. La taille du pictogramme n'est pas la précision géographique.
+- Mode placement fin : recadrage sur nœud, coordonnées latitude/longitude à huit décimales, déplacements incrémentaux N/S/E/O de 1, 10 ou 100 m, sans modifier les paramètres radio du nœud. Prévoir confirmation/annulation et recalcul différé.
+- Contrôle individuel des couches : afficher/masquer la couverture de chaque station ou relais, en conservant indépendamment le nœud visible. Modes « couverture du nœud sélectionné », « toutes », « aucune ».
+- Modes d'affichage radio à même jeu de données : (a) cellules angulaires brutes, fidèles à la résolution calculée ; (b) **zones/contours polygonaux** issus des mêmes seuils, sans interpolation abusive ni gain de précision physique affiché. Le mode choisi n'affecte jamais les données ou l'optimiseur.
+- En cas d'augmentation du zoom, la cible peut être placée précisément ; le moteur garde son incertitude altimétrique SRTM (30/90 m). Une précision de pointage au mètre ne signifie pas une prévision radio au mètre.
+- Cas tests : marqueur reste cliquable au zoom 10 m à 100 km ; nudge 1/10/100 m conserve une géodésique correcte ; couches désactivées n'influencent pas le calcul ; basculement cellule/zone ne modifie aucune marge dB.
+- **Validation du correctif pointeur précédent toujours attendue sur Firefox** ; pas d'obligation de bloquer ce jalon pendant l'essai.
