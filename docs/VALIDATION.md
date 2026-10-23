@@ -49,3 +49,10 @@
 - Prototype `web/world-map-beta.html` : script module parsé PASS ; DOM et MapLibre simulés (3 marqueurs après ajout, station A repositionnée et actions import/export liées) PASS.
 - Aucun test de la disponibilité réelle des tuiles `demotiles.maplibre.org`, du CDN, de WebGL Firefox ou de la cartographie locale/radio : NON EXÉCUTÉ.
 - Ces résultats ne prouvent ni une redondance Meshtastic réelle ni un lien LoRa fonctionnel.
+
+## 2026-10-24 — Correctif de lisibilité de la carte mondiale bêta
+- Capture réelle de l'utilisateur : le style pays/frontalier du service de démonstration MapLibre est insuffisant pour choisir un relais. Échec d'utilisabilité validé visuellement.
+- Nouvelle version : deux extrémités prédéfinies Tarn, changement de styles vectoriels OpenFreeMap et repli blanc ; test JavaScript DOM/MapLibre simulé PASS (2 marqueurs, bounds Tarn, styles commutables, points inchangés, ajout relais, rétablissement démo, erreurs simulées).
+- Script reproductible ajouté : `tests/world-map-beta.test.cjs` ; son exécution dans checkout Node local n'a pas été réalisée dans ce checkpoint.
+- Test sur navigateur réel avec OpenFreeMap **non exécuté**, la documentation technique OpenFreeMap confirme les URLs mais ne garantit pas leur disponibilité sur le réseau utilisateur.
+- Le moteur de couverture et ses limitations radio n'ont pas été modifiés.
