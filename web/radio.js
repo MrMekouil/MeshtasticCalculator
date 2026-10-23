@@ -363,7 +363,7 @@ function rfPanel(){
   const before=state.terrains?.length||0;
   await oldLoadDem(file);
   if(state.terrain){
-    await rfStoreTile(file);
+    void rfStoreTile(file); // cache best-effort; never delay RF simulation
     rfStatus('Terrain chargé. Calcul du relais sélectionné…');
     await rfCalculateSite(state.selected);rfSummary();
   }
