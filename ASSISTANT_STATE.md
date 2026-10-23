@@ -1,10 +1,9 @@
-# État pilote — MeshtasticCalculator
-- Date : 2026-10-23
-- Dépôt : `MrMekouil/MeshtasticCalculator`
-- Stable : `main` créée pour l'initialisation (commit `bb853ccf45d86f194b70c1714275ac8edcb615f8`).
-- Développement : `work/project-bootstrap-v0.1` ; vérifier le HEAD distant courant avant toute reprise.
-- Décision : bâtir un projet maintenable à partir des prototypes exploratoires V1–V7, préserver les exports Meshtastic et la méthode Assistant pilote / Work.
-- Acquis : exports GeoJSON du Pradel et de Labruguière fournis par l'utilisateur ; import manuel possible dans la prochaine application.
-- Non acquis : fiabilité de modèles locaux, disponibilité de fonds externes, altitude IGN complète et validation radio terrain.
-- Règles : `main` stable, pas de merge/tag/release sans accord ; point A/B/C historique retiré de l'interface par défaut ; les stations de maison ne sont pas des relais.
-- Prochain geste pilote : auditer le prototype versionné, faire valider import/export et contraintes radio, organiser le lot calcul/réseau.
+# État du pilote — MeshtasticCalculator
+- **Date :** 2026-10-23
+- **Dépôt :** `MrMekouil/MeshtasticCalculator` (public).
+- **Stable :** `main`, initialisation de dépôt uniquement.
+- **Actif :** `work/project-bootstrap-v0.1`; lire son HEAD distant à chaque reprise.
+- **Acquis :** application expérimentale versionnée et méthode Assistant/Work V0.3 adaptée ; test géométrique synthétique réussi sur la source GitHub.
+- **Non acquis :** validation dans le navigateur utilisateur, performances SRTM réelles, confirmation Longley-Rice, interface et compatibilité finale V7.
+- **Décisions :** conserver uniquement les stations de base comme points initiaux ; relais libres ; carte blanche fiable, OpenTopo atténué optionnel ; niveaux de preuve séparés et modèle local conservateur.
+- **Prochain acte du pilote :** demander essai ciblé des fonctions basiques sur Firefox (import GeoJSON, création/suppression/déplacement, DEM et finesse) ; auditer bugs ; construire CP suivant de calcul radio physique. Ne pas fusionner `main` sans validation utilisateur.
