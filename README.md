@@ -11,7 +11,7 @@ Lancer [web/index.html](web/index.html) dans Firefox ou Chromium depuis cette br
 - Import local de `Endless_Centipede.geojson` (Le Pradel) et `Carbonic_Lorikeet.geojson` (Labruguière), **non publiés dans ce dépôt public**.
 - Chargement de `N43E002.hgt` ou `.hgt.gz` (fichier DEM non inclus).
 - Calcul terrain LOS / 60 % de Fresnel + courbure effective ; **ce n'est pas une prévision Longley-Rice**, ni une garantie de signal.
-- Trois résolutions d'exploration ; après modification du mode, recliquer sur « Calculer ». Après glisser-déposer d'un site avec relief chargé, recalcul automatique.
+- Trois résolutions d'exploration ; changer le mode relance automatiquement le calcul si le terrain est chargé. Après déplacement d'un site, aperçu puis recalcul complet.
 - Fond blanc hors ligne ou OpenTopoMap atténué facultatif (les serveurs externes peuvent refuser les tuiles).
 - Sauvegarde et restauration d'un projet JSON ; le gros fichier SRTM est rechargé séparément.
 
