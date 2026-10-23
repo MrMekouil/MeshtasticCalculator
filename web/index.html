@@ -7,7 +7,19 @@
 <section><h2>Réseau <small id="relayCount"></small></h2><p class="muted">Deux stations de départ, modifiables pour n’importe quelle région. Ajoute des relais à volonté.</p><div id="sites" class="siteList"></div>
 <div class="actions"><button class="primary" id="add">+ Ajouter un relais</button><button id="fit">Vue d'ensemble</button></div>
 <p class="hint">Double-clique sur la carte pour ajouter un relais. Fais glisser un relais pour le déplacer.</p></section>
-<section><h2>Point sélectionné</h2><div id="editorEmpty" class="muted">Clique sur un point sur la carte.</div><div id="editor" hidden><label>Nom<input id="pointName"></label><div class="coords"><label>Latitude<input id="pointLat" type="number" step="0.000001"></label><label>Longitude<input id="pointLon" type="number" step="0.000001"></label></div><label>Hauteur d'antenne (m)<input id="pointHeight" type="number" min="1" max="100" step="1"></label><button id="delete" class="danger">Supprimer ce relais</button><p class="hint" id="pointNote"></p></div></section>
+<section><h2>Point sélectionné</h2><div id="editorEmpty" class="muted">Clique sur un point sur la carte.</div><div id="editor" hidden><label>Nom<input id="pointName"></label><div class="coords"><label>Latitude<input id="pointLat" type="number" step="0.000001"></label><label>Longitude<input id="pointLon" type="number" step="0.000001"></label></div><label>Hauteur d'antenne (m)<input id="pointHeight" type="number" min="1" max="100" step="1"></label>
+<details class="precision-panel"><summary>Placement fin du point</summary>
+<p class="hint">La croix au centre du marqueur indique la coordonnée réelle ; tu peux corriger sa position sans essayer de viser au pixel près.</p>
+<code id="precisionCoords"></code>
+<label>Pas de déplacement<select id="precisionStep"><option value="1">1 m</option><option value="10" selected>10 m</option><option value="100">100 m</option></select></label>
+<div class="precision-grid">
+<button data-nudge="n" class="north" title="Nord">↑ N</button>
+<button data-nudge="w" class="west" title="Ouest">← O</button>
+<button data-nudge="s" class="south" title="Sud">↓ S</button>
+<button data-nudge="e" class="east" title="Est">E →</button>
+</div><button id="centerPrecise" class="block">Centrer / zoomer sur ce point</button>
+<p class="hint">Ces pas en mètres sont approximés géodésiquement. La précision réelle de la couverture reste limitée par le MNT et le modèle radio.</p></details>
+<button id="delete" class="danger">Supprimer ce relais</button><p class="hint" id="pointNote"></p></div></section>
 <section><h2>Couvertures</h2><p class="muted">Importe les couvertures de référence exportées de Meshtastic Site Planner.</p><div class="actions"><label class="btn">Pradel (.geojson)<input type="file" id="importPradel" accept=".geojson,.json" hidden></label><label class="btn">Labruguière (.geojson)<input type="file" id="importLabru" accept=".geojson,.json" hidden></label></div>
 <p id="coverageSource" class="hint">Recherche les couvertures locales...</p><label>Seuil d'affichage<select id="threshold"><option value="-130">−130 dBm</option><option value="-118" selected>−118 dBm</option><option value="-110">−110 dBm</option></select></label><div class="toggles"><label><input type="checkbox" id="showPradel" checked> <i class="dot blue"></i> Pradel</label><label><input type="checkbox" id="showLabru" checked> <i class="dot orange"></i> Labruguière</label><label><input type="checkbox" id="showEstimate"> <i class="dot" style="background:#899aa6"></i> Visibilité géométrique</label></div></section>
 <section><h2>Relief et calcul</h2><p class="muted">Importe le terrain `N43E002.hgt` ou `.hgt.gz`. Aucun serveur IGN n'est requis.</p><label class="btn block">Charger le relief SRTM<input id="importDem" type="file" accept=".hgt,.gz" multiple hidden></label><p id="demInfo" class="hint">Aucun modèle de terrain chargé.</p>
