@@ -1,24 +1,27 @@
-## Chargement automatique des couvertures privées (sans import manuel)
+# Utiliser le calculateur
 
-Ce projet est public : les exports GeoJSON fournis par l'utilisateur ne sont **pas** committés dans GitHub.
+## Cas rapide
+- Ouvre `web/index.html`.
+- Si `web/data/coverages.local.js` est présent, les anciennes couvertures du Pradel et de Labruguière s'affichent sans action.
+- Pour **calculer une NOUVELLE couverture**, il faut en plus un modèle altimétrique : importe les tuiles `N43E002.hgt[.gz]` ou d'autres tuiles SRTM de ta zone.
+- Sélectionne un point, clique « Calculer ce nœud » ou « Calculer tous les nœuds ». Trois seuils : −130, −117, −109 dBm. Change la résolution pour recalculer le point sélectionné.
+- Chaque relais est libre : bouton Ajouter, double-clic, glisser-déposer, modification des coordonnées/nom/hauteur, suppression. Un aperçu léger s'exécute après une pause lors du glisser ; un calcul plus fin est réalisé au relâchement.
+- Dans le panneau radio, les **paramètres avancés** règlent la fréquence, l'EIRP, la réception, les pertes supplémentaires, la sensibilité, la hauteur RX et le rayon.
+- « Chercher un emplacement » explore un rayon de 12 km autour du relais sélectionné, puis raffine autour du meilleur candidat. Cela **ne garantit pas** que le site est accessible ni légalement installable.
+- « Nouveau projet » réinitialise les deux stations comme « Station 1 » et « Station 2 » et vide les couvertures affichées. Exporte d'abord le projet pour ne rien perdre.
+- Plusieurs fichiers SRTM peuvent être sélectionnés ; le navigateur essaie de mémoriser les tuiles pour les prochaines sessions, sans garantie sur `file://`.
+- Un export projet JSON sauvegarde les positions, couvertures importées et réglages de seuil, mais pas les tuiles volumineuses ni tous les calculs dérivés.
 
-- Placer le fichier `web/data/coverages.local.js` dans une copie locale (dossier `data` à créer si absent). Ce fichier est généré **sur l'ordinateur de l'utilisateur** ou fourni séparément.
-- Ouvrir `web/index.html` par double-clic (`file://`). Le script local est chargé **avant** `web/app.js`, sans requête `fetch` ni serveur HTTP.
-- Les couvertures originales Le Pradel et Labruguière sont préchargées. Le message « Couvertures chargées » confirme l'opération. Les boutons GeoJSON restent utilisables pour remplacer les données.
-- Si le fichier privé est absent, l'application reste opérationnelle, sans couverture initiale, et affiche une indication d'import. Une requête locale manquante peut apparaître dans la console mais ne bloque pas l'interface.
-- `.gitignore` exclut `web/data/coverages.local.js` ; ne pas forcer son ajout au dépôt public.
-- Pour créer son propre fichier, utiliser `globalThis.MESHTASTIC_LOCAL_COVERAGES = { pradel: <FeatureCollection>, labru: <FeatureCollection> };` avec les sorties Site Planner et éviter toute publication sans consentement.
+## Types de résultats
+1. GeoJSON Site Planner importé : données de provenance externe, paramètres d'émission d'origine à conserver.
+2. Couverture locale : estimation de signal (dBm) selon un modèle **simplifié** de diffraction + pertes. Elle peut être optimiste ou pessimiste localement ; la V7 précédente utilisait aussi ce type d'approximation.
+3. Visibilité LOS/Fresnel : géométrie seule, pas prédiction radio.
 
-# Utilisation locale
+La simulation détaillée Longley-Rice (Site Planner) et des mesures radio sur place sont nécessaires avant un déploiement. Le rayon coloré autour d'un point n'est pas un rayon garanti. Ne pas faire de conclusions sur des zones sans DEM.
 
-1. Ouvrir `web/index.html` dans un navigateur moderne.
-2. Conserver/ajuster les deux stations de référence (positions approximatives).
-3. Ajouter des relais (bouton ou double-clic), les glisser, éditer leur nom/hauteur/coordonnées ou supprimer.
-4. Importer les fichiers Meshtastic originaux : `Endless_Centipede.geojson` dans Le Pradel et `Carbonic_Lorikeet.geojson` dans Labruguière.
-5. Charger le DEM `N43E002.hgt` ou `.hgt.gz` ; si la décompression du navigateur échoue, décompresser manuellement en `.hgt`.
-6. Sélectionner un relais, choisir un niveau de finesse, lancer « Calculer la visibilité ». Changer la finesse relance automatiquement le calcul si la tuile est chargée ; un déplacement lance un aperçu puis un calcul complet.
-7. OpenTopoMap atténué est optionnel, peut être bloqué ; le fond blanc reste fiable. Exporter un projet JSON (SRTM non inclus).
-
-**Légende :** bleu/orange = couverture dBm **importée** ; vert = visibilité LOS/Fresnel **géométrique**, pas un signal radio ; traits pointillés = distances du trajet selon l'ordre des relais, pas preuve de fiabilité.
-
-**Limites :** une seule tuile HGT, modèle sans diffraction ni végétation ni bâti, aucun classement RF validé, essais navigateur et terrain à réaliser.
+## Dépannage
+- **Je vois les couvertures des maisons mais rien autour du nouveau relais** : les GeoJSON d'origine sont chargés, mais le relief SRTM n'est pas encore chargé pour calculer le nouveau site.
+- **Le calcul a moins de détails que prévu** : sélectionner « Fine » puis laisser le calcul se terminer ; les pixels supplémentaires n'améliorent pas la physique du modèle.
+- **Fond OpenTopoMap blanc** : un blocage du service tiers est possible. Fond blanc utilisable hors ligne.
+- **Le navigateur ne mémorise pas le terrain** : certaines configurations `file://` désactivent IndexedDB. Recharge le fichier HGT.
+- **Nouveau projet ailleurs en France / monde** : il faut les tuiles HGT couvrant les stations. La projection SVG n'est actuellement calibrée que pour des secteurs régionaux, pas une cartographie mondiale de précision.
