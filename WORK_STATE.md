@@ -1,10 +1,12 @@
 # État opérationnel Work — MeshtasticCalculator
-- Mis à jour : 2026-10-23.
-- Dépôt : `MrMekouil/MeshtasticCalculator` ; branche `work/project-bootstrap-v0.1`.
-- Base : `main` issue de `bb853ccf45d86f194b70c1714275ac8edcb615f8`.
-- HEAD de la branche : à interroger via GitHub avant chaque tâche (ce document ne prétend pas être un SHA figé).
-- Statut Git local : N/A, aucun checkout GitHub authentifié disponible lors de cette initialisation.
-- Objectif : socle du projet, méthode V0.3 adaptée, première interface simple pour sites/relais et imports GeoJSON.
-- Tests : séparer les vérifications statiques des essais navigateur, modèle SRTM et validation de terrain.
-- Risques : cartes tierces indisponibles, couverture optimiste, manque de terrain complet, positions approximatives.
-- Prochain geste : audit du code/version distante, tests de l'application avec les fichiers Meshtastic réels, puis implémentation du moteur radio vérifiable.
+- **Mis à jour :** 2026-10-23
+- **Dépôt :** `MrMekouil/MeshtasticCalculator`
+- **Branche active :** `work/project-bootstrap-v0.1`; **base stable :** `main`.
+- **Dernier HEAD distant contrôlé avant cette documentation :** `2d96c9318661567c9368d315951fd6c87042d889` ; interroger GitHub pour le HEAD courant.
+- **Prévol :** dépôt initialement vide ; permissions push vérifiées ; `main` initialisée (`bb853cc...`), travail placé sur branche séparée. Aucun checkout Git authentifié ; `git status/diff/index` N/A, pas « clean ».
+- **Livré :** méthode V0.3 adaptée (AGENTS, états, docs, templates), application `web/index.html` + `web/app.js` + `web/style.css`, points libres, sources GeoJSON importables, DEM HGT, LOS/Fresnel local, fond blanc/OpenTopo, export projet, tests.
+- **Tests observés :** syntaxe JS de la source GitHub PASS ; géométrie synthétique PASS (projection, relief uniforme, crête, hors DEM = inconnu). Script Node ajouté, exécution d'un checkout Node N/A. Aucune CI configurée.
+- **Non validé :** navigateur du propriétaire ; import réel de 2 GeoJSON dans la nouvelle interface ; SRTM N43E002 réel ; consommation CPU mémoire ; prédictions de propagation Longley-Rice ; terrain réel.
+- **Limites :** moteur vert = géométrie LOS/Fresnel, non couverture dBm. Tuile OpenTopo externe peut être bloquée ; aucune position privée précise stockée.
+- **Prochain geste exact :** tester localement l'application sur navigateur de l'utilisateur avec ses GeoJSON et DEM ; relever comportements et bugs ; découper moteur/DOM et valider comparaison radio avant l'optimiseur.
+- **Interdictions :** aucune fusion main/PR/release/tag sans autorisation ; pas de publication de données privées.
