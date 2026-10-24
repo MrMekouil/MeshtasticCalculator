@@ -84,3 +84,11 @@
 - Tests : parsing source app/radio/sidebar PASS ; tests `sidebar-navigation.test.cjs` et `network-visibility.test.cjs` adaptés et exécutés en V8 avec mocks CommonJS/file, PASS. Exécution Node dans un vrai checkout et test Firefox/visuel : NON EXÉCUTÉS.
 - Pas d'import d'informations personnelles dans GitHub ; GeoJSON, terrain et vrais paramètres ITM restent locaux. Aucune conclusion sur le biais radio réel ; capture montre la légende visibilité géométrique.
 - Prochaine intervention : confirmer Firefox, puis CP-UX2 (éditeur radio complet, choix de palettes) et CP-RF1 (comparaison de profils/source Longley-Rice), avant algorithme d'optimisation réseau entier.
+
+## 2026-10-24 — Checkpoint DOCUMENTAIRE uniquement : PAUSE
+- Ordre utilisateur explicite : plus de développement immédiatement ; centraliser les derniers retours et faire un bilan honnête.
+- Lecture GitHub : branche `work/project-bootstrap-v0.1` à `e0bc6a5c3f7e75c3d6701c9e9671c347d935f1a6` avant cette documentation ; `main` à `bb853ccf45d86f194b70c1714275ac8edcb615f8`, aucun PR ouvert lors de la consultation. Pas de checkout Git, donc index/status/diff = N/A.
+- Document de référence nouvellement créé : `docs/CHECKPOINT_PAUSE_2026-10-24.md` (état fonctionnel, confirmation utilisateur, blocages P0, backlog, ordre de reprise, critères d'acceptation).
+- Vérification statique ciblée : `web/app.js` crée les nouveaux relais sans appeler calcul RF ; `web/radio.js` initialise `RADIO.enabled=false` ; case LOS `showEstimate` n'appelle que `drawEstimate`, qui exige `state.estimate` ; l'optimiseur `rfSuggestPosition()` ne traite que le relais sélectionné et ses deux voisins. La redondance actuelle analyse les pannes mais n'optimise pas 0..N sites.
+- Rien de fonctionnel modifié pendant ce checkpoint ; **aucune validation Firefox ni simulation Longley-Rice ajoutée**, aucun test d'exécution revendiqué.
+- À la reprise : prévol du nouveau HEAD, lire le checkpoint, choisir uniquement CP-UX-FIX puis planifier tests/export et retour utilisateur. Ne pas toucher `main` ni aux GeoJSON privés.
