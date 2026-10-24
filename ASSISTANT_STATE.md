@@ -80,3 +80,11 @@
 - T33 : parse du JSON en wrapper `restore` dans `web/radio.js` avant gestion d'erreur locale : risque de rejet non géré, essentiel de tester en copie après export.
 - Cadenas de position : idée future, n'est pas implémenté ; corbeille flottante et couverture automatique à l'ajout toujours en backlog.
 - Pas de code modifié pendant cette consignation, branche `work/project-bootstrap-v0.1` seulement. Aucune autorisation de fusion main.
+
+
+## 2026-10-24 — Deuxième lot de recette V0.1
+- T25 non pleinement validé : la proposition existe en mémoire et en message `rfStatus` dans Couvertures, mais pas de repère cartographique ni panneau de proposition dans Optimisation ; T26 Appliquer OK utilisateur.
+- T27 à confirmer (« OK ? ») ; T28 screenshot : redondance activée, 10 paires évaluées/0 inconnue, 10 dB min/7 sauts, aucun trajet nominal satisfaisant. L'ordre géométrique en pointillés n'est pas un graphe de liaisons démontrées.
+- T31 et T32 PASS utilisateur ; T29/T30/T33 reportés ; T34 sans test, fournir procédure fenêtre privée sans DEM.
+- Journal-source : `docs/RECETTE_V01_T01_T24_2026-10-24.md` §6. Bloqueurs V0.1 à valider : export/restauration, erreurs JSON et données terrain inconnues ; correctifs UX de proposition.
+- Aucune fusion sur `main`, aucune modification du code de calcul pendant la recette.
