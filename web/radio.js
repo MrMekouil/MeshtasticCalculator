@@ -241,12 +241,20 @@ function rfCheckRedundancy(overrides={},preview=false){
  return report;
 }
 async function rfSuggestPosition(){
- if(!state.terrain){rfStatus('Impossible : charge le terrain SRTM.');return;}
+ if(!state.terrain){
+  rfStatus('Impossible : charge le terrain SRTM.');
+  $('rfCandidate').textContent='Aucune proposition : relief SRTM non chargé.';
+  return;
+ }
  const id=state.selected,node=site(id);
  const route=[site('pradel'),...relayList(),site('labru')].filter(Boolean);
  const idx=route.findIndex(x=>x.id===id);
  if(!node||node.type!=='relay'||idx<1||idx>=route.length-1){rfStatus('Sélectionne un relais intermédiaire.');return;}
  const p=route[idx-1],n=route[idx+1],version=++RADIO.optimToken;
+ RADIO.suggestion=null;
+ $('rfApply').disabled=true;
+ $('rfCandidate').textContent='Recherche en cours : le relais actuel reste à sa place.';
+ renderMarkers();
  const center={lat:node.lat,lon:node.lon};
  const latitudeDegrees=1/111.195;
  const longitudeDegrees=1/(111.195*Math.cos(center.lat*rad));
@@ -286,11 +294,21 @@ async function rfSuggestPosition(){
     await new Promise(r=>setTimeout(r,0));
    }
   }
-  if(!best){rfStatus('Aucun emplacement candidat entièrement couvert par les données SRTM.');return;}
+  if(!best){
+   rfStatus('Aucun emplacement candidat entièrement couvert par les données SRTM.');
+   $('rfCandidate').textContent='Aucune position proposée dans les zones SRTM évaluées.';
+   return;
+  }
   RADIO.suggestion={id,original,best};
   $('rfApply').disabled=false;
+  renderMarkers();
+  const delta=original?(best.score-original.score).toFixed(1):'inconnu';
+  $('rfCandidate').textContent='Position proposée, non appliquée : '+
+    best.lat.toFixed(6)+', '+best.lon.toFixed(6)+
+    ' · marge minimale estimée '+best.score.toFixed(1)+' dB' +
+    ' · gain '+delta+' dB · '+checked+' positions testées. '+
+    'Marqueur orange sur la carte ; accès au terrain non vérifié.';
   if($('rfRedundancy').checked)rfCheckRedundancy({[id]:{lat:best.lat,lon:best.lon}},true);
-  const delta=original?(best.score-original.score).toFixed(1):'inconnue';
   rfStatus('Candidat : '+best.lat.toFixed(5)+', '+best.lon.toFixed(5)+
     ' · marge minimale ≈ '+best.score.toFixed(1)+' dB (gain '+delta+' dB), sur '+checked+
     ' positions explorées. Accès au terrain NON vérifié. Clique « Appliquer » uniquement pour essayer.');
@@ -302,6 +320,7 @@ function rfApplySuggestion(){
  const {lat,lon}=rec.best;
  node.lat=+lat.toFixed(6);node.lon=+lon.toFixed(6);
  RADIO.suggestion=null;$('rfApply').disabled=true;
+ $('rfCandidate').textContent='Proposition appliquée à '+node.name+'. Nouveau calcul radio expérimental à vérifier.';
  rfInvalidate(node.id);
  state.selected=node.id;render();fitSites();
  rfStatus('Point déplacé vers la proposition géométrique. Vérifie l’accès réel et valide les liaisons dans Site Planner.');
@@ -357,6 +376,7 @@ function rfPanel(){
   '<label>Marge minimale exigée (dB)<input id="rfMinMargin" type="number" value="10" min="-20" max="35"></label>'+
   '<label>Nombre maximal de sauts<input id="rfMaxHops" type="number" value="7" min="1" max="7"></label>'+
   '<div class="actions"><button id="rfOptimize">Chercher un emplacement</button><button id="rfApply" disabled>Appliquer</button></div>'+
+  '<p id="rfCandidate" class="hint" role="status" aria-live="polite">Aucune position proposée. La recherche ne déplacera pas le relais avant « Appliquer ».</p>'+
   '<button id="rfTestFailure" class="block" disabled>Tester les pannes des relais</button>'+
   '<div id="rfRedundancyResult" class="hint">Redondance désactivée par défaut.</div>'+
   '<p class="hint">L’option vérifie les chemins alternatifs pour le placement proposé ; elle ne recherche pas encore automatiquement des relais supplémentaires.</p></details>'+
