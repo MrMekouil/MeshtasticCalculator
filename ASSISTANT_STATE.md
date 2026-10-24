@@ -88,3 +88,11 @@
 - T31 et T32 PASS utilisateur ; T29/T30/T33 reportés ; T34 sans test, fournir procédure fenêtre privée sans DEM.
 - Journal-source : `docs/RECETTE_V01_T01_T24_2026-10-24.md` §6. Bloqueurs V0.1 à valider : export/restauration, erreurs JSON et données terrain inconnues ; correctifs UX de proposition.
 - Aucune fusion sur `main`, aucune modification du code de calcul pendant la recette.
+
+
+## 2026-10-24 — CP-UX-FIX après reprise du développement
+- Demande : poursuivre le travail sur les anomalies connues ; T29/T30/T33 reportés, non validés. Aucun merge `main`.
+- Code créé/modifié uniquement sur `work/project-bootstrap-v0.1` : suppression dock avec confirmation, preview de candidat et indicateurs dans optimisation, intensité MapLibre réactive, cellules LOS reprojetables, calcul automatique du nouveau nœud avec DEM, estimations expérimentales ON par défaut, wrapper d'import JSON protégé, détails explicatifs par liaison de redondance.
+- Les positions actives restent non modifiées par la suggestion. La géométrie LOS reste un diagnostic, pas un RSSI. Le moteur reste knife-edge/SRTM simplifié : aucune validation physique nouvelle.
+- Tests de syntaxe app/radio/world/sidebar et tests synthétiques ciblés suppression annulée/protégée, nettoyage du relais, candidat non destructif, JSON mal formé sans mutation PASS en V8 ; aucun Firefox, checkout Node complet, SRTM Tarn réel ou mesure de liaison exécutés.
+- Ne pas déclarer la V0.1 stable ni exécuter une fusion main avant reprise de la recette, tests automatisés complets et validation explicite.
