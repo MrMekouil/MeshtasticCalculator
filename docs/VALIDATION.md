@@ -100,3 +100,11 @@
 - T16 (GeoJSON) et T19 (HGT) NON TESTÉS en import manuel car l'utilisateur exige un chargement automatique. Les mécanismes actuels sont uniquement préchargement privé local et cache terrain best-effort, pas téléchargement automatique mondial.
 - Inspecté statiquement : `app.js` `baseOpacity` sans effet MapLibre ; `world-map-adapter.js` `state.estimate=null` à reprojection ; `radio.js` parse du JSON hors gestion d'erreur lors de la restauration. Ce ne sont pas des PASS d'exécution, ce sont des causes/risques identifiés par lecture.
 - Critères bloquants maintenus : import/export sans perte, résultat « inconnu » hors DEM, pas d'exception non gérée pour fichier invalide. Demande d'accord explicite avant fusion.
+
+
+## 2026-10-24 — Retour T25–T34 / capture Optimisation
+- Voir `docs/RECETTE_V01_T01_T24_2026-10-24.md` §6 : T26/T31/T32 PASS utilisateur ; T25/T27/T28 PARTIEL ; T29/T30/T33/T34 reportés/non testés.
+- T25 : code `rfSuggestPosition` conserve `RADIO.suggestion` puis écrit dans `rfStatus` (onglet Couvertures), sans marqueur géographique. Problème UX, non erreur prouvée du calcul.
+- T28 : capture avec Le Pradel + Labruguière + trois relais, 10 paires calculées (0 inconnue), seuil de 10 dB et 7 sauts, mais aucune chaîne nominale admissible selon modèle ; **ne prouve aucune déconnexion réelle**.
+- T27 « OK ? » n'est pas PASS confirmé. T29/T30/T33 = tests de données toujours non exécutés ; aucun go fusion V0.1.
+- Analyse réalisée par lecture du code + screenshot utilisateur ; aucune exécution Firefox / tests RF nouveaux ici. Aucun changement `web/`.
