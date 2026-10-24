@@ -51,3 +51,17 @@ Notes : la documentation officielle présente 0.1 W (qui équivaut à 20 dBm, pa
 - Site Planner `ARCHITECTURE.md` : https://github.com/meshtastic/meshtastic-site-planner/blob/main/ARCHITECTURE.md
 - Description utilisateur : https://meshtastic.org/docs/software/site-planner/
 - Radio local : `web/radio.js`, `web/app.js`.
+
+
+## Constat sur capture utilisateur du 24 octobre 2026
+
+La capture montre une trame de secteurs/cellules angulaires autour d'un point près de Vabre/Bellegarde. Le texte visible en bas de la carte est **« Visibilité calculée : 362/9000 cellules géométriquement dégagées (pas une couverture radio) »**. **Ce résultat confirme la présence d'un calcul purement géométrique LOS/Fresnel**, qui ne fournit pas de puissance reçue ni un seuil Meshtastic. Il est incorrect de le traiter comme une preuve que Site Planner sous-estime sa portée.
+
+Trois couches de sources distinctes :
+- `#estimatedLayer`, générée par `calculate()` / `drawEstimate()` : géométrie, jamais dBm. Dans le CSS, elle est rendue en **gris** au lieu d'un vert assimilable à du RF.
+- `#radioLayer`, générée par `rfBuildWedges()` / `rfDraw()` : calcul *expérimental* FSPL + diffraction knife-edge. Les figures en secteurs angulaires sont des cellules d'échantillonnage (72/180/360 rayons, 350/150/100 m radialement), pas des frontières radio exactes. La quantification rend visibles des rectangles/rayons hachurés. Ce n'est pas un effet de la définition de la carte.
+- `#coveragePradel` / `#coverageLabru` : polygones issus des GeoJSON Site Planner privés. Le palier de l'export doit être comparé au niveau local réellement retenu.
+
+**Prochaine comparaison** : afficher chaque source séparément au même emplacement et paramètres de terrain, faire un tableau d'au moins 10–20 points de contrôle autour des crêtes et vallées où les deux *prédictions RF* divergent, documenter un profil terrain LOS/ITM + RSSI estimés. La simple superposition de silhouettes ne permet pas d'attribuer le biais ; ne pas lisser artificiellement les secteurs ni dessiner de polygones inexistants. Les mesures terrain SNR/RSSI/PDR restent la validation décisive.
+
+Données privées non publiées ni copiées dans le dépôt. Le résultat « 362/9000 » concerne les cellules géométriques du calcul visible, pas le nombre de paquets reçus ou la couverture réellement mesurée.
