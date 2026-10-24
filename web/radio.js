@@ -105,6 +105,7 @@ async function rfCalculateSite(id,mode){
  const result=rfBuildWedges(node,rows,q);
  RADIO.coverage.set(id,result);
  rfDraw();rfSummary();
+ if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
  rfStatus(node.name+' : '+result.valid+'/'+q.rays+' directions, modèle de diffraction simplifié (PAS Longley-Rice).');
  return true;
 }
@@ -129,7 +130,7 @@ function rfDraw(){
   }else if(cv)path=cv.paths[t];
   if(!path)continue;
   const selected=node.id===state.selected;
-  svg('path',{d:path,'fill-rule':'evenodd',fill:node.type==='home'?'#7c78dc':'#0ea875',
+  svg('path',{d:path,'fill-rule':'evenodd',fill:imported?'#426cab':'#0ea875',
     'fill-opacity':selected?opacity:opacity*.52,stroke:selected?'#0d876b':'none',
     'stroke-width':'.4','vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind},group);
  }
