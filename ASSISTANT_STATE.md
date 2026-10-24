@@ -49,3 +49,12 @@
 - Le local expérimental est **masqué par défaut** pour ne pas être confondu avec une zone de couverture certaine. Il reste activable et calculable à la demande.
 - `docs/COVERAGE_AUDIT.md` : analyse statique des différences de modèle/defaults/résolution. **Aucune conclusion sur l'optimisme relatif des zones individuelles** sans fichiers source privés + terrain correspondant + réglages harmonisés.
 - Tests statiques et banc JS simulé (tabs, opacité, paliers, yeux) PASS ; essai Firefox du menu et comparaison réelle RF encore requis ; main non modifiée.
+
+
+## 2026-10-24 — Nouveau jalon réseau global et UX dominante
+
+- L'utilisateur a validé conceptuellement le panneau Réseau flottant, le menu Point/Couverture/Optimisation, et quatre objectifs de calcul **réseau entier** : portée sous seuil et mono-couleur/gradient, qualité, redondance, minimum de relais. Souhaite hypothèses A/B/C comparables, variations relais par relais, aucune modification forcée du réseau actif.
+- Contrat complet : `docs/WHOLE_NETWORK_OPTIMIZATION_UX.md`. Roadmap actualisée ; **optimiseur conjoint et modes de gradient non implémentés**, ne pas promettre qu'ils fonctionnent.
+- Première implémentation UX : `web/sidebar.js` déplace la liste existante dans `#networkDock` au-dessus de la carte, le fond/intensité dans `#mapQuick`, onglet gauche « Point » réservé à l'édition ; `app.js` et `radio.js` ajoutent des opacités par nœud enregistrées dans les projets JSON.
+- Le mode géométrique de la capture (362/9000 cellules) est distinct du RF. Couche `.estimate` recolorée en gris ; voir `docs/COVERAGE_AUDIT.md`.
+- Contrôles JS simulés sidebar/network visibility PASS. Le comportement réel dans Firefox (dock, menu carte, slider par nœud, mobile, import/save) est **à valider**. Main inchangée, aucun merge.
