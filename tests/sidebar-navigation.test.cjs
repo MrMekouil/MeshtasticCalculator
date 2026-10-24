@@ -6,8 +6,8 @@ new Function(sidebar);new Function(app);new Function(radio);
 assert(html.includes('src="sidebar.js"'));
 assert(html.includes('value="-117" selected'));
 assert(!html.includes('value="-118" selected'));
-assert(radio.includes('hidden:new Set(),enabled:false'),'unvalidated local model off by default');
-assert(!radio.includes('<input id="rfShow" type="checkbox" checked>'));
+assert(radio.includes('hidden:new Set(),enabled:true'),'requested experimental coverage visible by default (source labelled)');
+assert(radio.includes('<input id="rfShow" type="checkbox" checked>'));
 class Node{
  constructor(id='',tag='div'){
   this.id=id;this.tag=tag;this.children=[];this.hidden=false;this.className='';
