@@ -1,5 +1,18 @@
 # Roadmap — MeshtasticCalculator
 
+## ARRÊT DE DÉVELOPPEMENT — BILAN DE REPRISE (24 octobre 2026)
+
+**Lire impérativement [CHECKPOINT_PAUSE_2026-10-24.md](CHECKPOINT_PAUSE_2026-10-24.md) avant tout nouveau développement.** Cette section prime sur les formulations historiques « livré/validé » des versions ci-dessous. L'utilisateur a demandé une **pause** : aucune nouvelle fonctionnalité ne doit être engagée sans sélectionner un nouveau checkpoint.
+
+**Retours P0 validés comme demandes :** corbeille à côté de chaque relais dans le dock flottant (sauf A/B) ; calcul automatique de couverture après ajout quand le terrain est disponible (avec provenance expérimentale claire) ; supprimer le faux interrupteur « Visibilité géométrique » silencieux de la vue Couvertures et le transformer en diagnostic explicite ; ne plus exiger d'activer une case obscure pour voir un résultat réellement calculé. Aucun de ces trois changements fonctionnels n'est implémenté à ce checkpoint.
+
+**Manques majeurs :** gradients/monochrome, quatre objectifs de calcul global, optimisation automatique 0…N relais, hypothèses alternatives comparables, matériel/radio par nœud, terrain mondial automatique, Longley-Rice validé. Tous sont **spécifiés mais non livrés**.
+
+**Reprise recommandée :** CP-UX-FIX → CP-UX-DISPLAY → CP-RF-VALIDATE → CP-NODE-MODEL → CP-GLOBAL-OPT. Redondance = option non imposée ; aucune nouvelle solution n'écrase le réseau sans validation.
+
+---
+
+
 ## Nouveau jalon prioritaire — U1 Calculateur universel (24 octobre 2026)
 Document de référence : [SPEC_UNIVERSAL_MILESTONE.md](SPEC_UNIVERSAL_MILESTONE.md).
 
