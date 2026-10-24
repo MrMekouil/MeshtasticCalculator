@@ -15,7 +15,7 @@ function bundledLayer(key){
 }
 const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
 const state={sites:structuredClone(HOME),selected:'pradel',threshold:-117,layer:preloaded,quality:'normal',opacity:.38,coverageOpacities:{},
- terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:1,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
+ coverageMode:'threshold',terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:1,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
 const project=(lon,lat)=>globalThis.MeshtasticWorldMap?.map
@@ -31,6 +31,16 @@ function svg(tag,attrs={},parent){const e=document.createElementNS(NS,tag);for(c
 function wipe(id){$(id).replaceChildren();}
 function range(v,a,b){return Math.max(a,Math.min(b,v));}
 function nodeOpacity(id){const v=Number(state.coverageOpacities?.[id]);return Number.isFinite(v)&&v>=.1&&v<=.9?v:state.opacity;}
+// Discrete RF levels only; the display never interpolates missing signal values.
+function coverageMode(){return state.coverageMode==='bands'?'bands':'threshold';}
+function displayTiers(levels,requested=state.threshold){
+ const values=[...new Set(levels.map(Number).filter(Number.isFinite))].sort((a,b)=>a-b);
+ if(!values.length)return [];
+ const goal=Number.isFinite(Number(requested))?Number(requested):-117;
+ const nearest=values.reduce((best,x)=>Math.abs(x-goal)<Math.abs(best-goal)?x:best,values[0]);
+ return coverageMode()==='bands'?values.filter(x=>x>=nearest):[nearest];
+}
+function bandOpacity(index,total){return coverageMode()==='bands'&&total>1?.45+.55*index/(total-1):1;}
 let previewTimer=null;
 function updateStatus(s){status(s);$('mapHint').textContent=s;}
 function setView(){
@@ -206,11 +216,14 @@ function drawImported(){
   const dest=id==='pradel'?'coveragePradel':'coverageLabru';wipe(dest);
   if(!state.layer[id]||!$(id==='pradel'?'showPradel':'showLabru').checked)continue;
   const features=state.layer[id].features.filter(f=>Number.isFinite(Number(f.properties?.dbm)));
-  const levels=[...new Set(features.map(f=>Number(f.properties.dbm)))];
-  if(!levels.length)continue;
-  const chosen=levels.reduce((best,x)=>Math.abs(x-state.threshold)<Math.abs(best-state.threshold)?x:best,levels[0]);
-  for(const f of features.filter(f=>Number(f.properties.dbm)===chosen)){
-    const d=rings(dest,f.geometry);if(d)svg('path',{d,class:'coverage '+(id==='pradel'?'pradel':'labru'),opacity:nodeOpacity(id),'fill-rule':'evenodd'},$(dest));
+  const tiers=displayTiers(features.map(f=>f.properties.dbm));
+  for(let i=0;i<tiers.length;i++){
+   for(const f of features.filter(f=>Number(f.properties.dbm)===tiers[i])){
+    const d=rings(dest,f.geometry);
+    if(d)svg('path',{d,class:'coverage '+(id==='pradel'?'pradel':'labru'),
+      opacity:nodeOpacity(id)*bandOpacity(i,tiers.length),'fill-rule':'evenodd',
+      'data-dbm':tiers[i],'data-display':coverageMode()},$(dest));
+   }
   }
  }
  if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
@@ -391,7 +404,7 @@ async function loadCoverage(file,key){
  }catch(e){updateStatus('Import refusé : '+e.message);}
 }
 function save(){
- const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{},hiddenCoverages:typeof RADIO!=='undefined'?[...RADIO.hidden]:[],coverageOpacity:state.opacity,coverageOpacities:{...state.coverageOpacities}};
+ const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{},hiddenCoverages:typeof RADIO!=='undefined'?[...RADIO.hidden]:[],coverageOpacity:state.opacity,coverageOpacities:{...state.coverageOpacities},coverageMode:coverageMode()};
  const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
  a.href=url;a.download='meshtasticcalculator-projet.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),300);
 }
@@ -406,6 +419,8 @@ async function restore(file){
   const stored=Number(obj.threshold);
   state.threshold=[-130,-117,-109].reduce((a,b)=>Math.abs(b-stored)<Math.abs(a-stored)?b:a,-117);
   $('threshold').value=String(state.threshold);
+  state.coverageMode=obj.coverageMode==='bands'?'bands':'threshold';
+  $('coverageMode').value=state.coverageMode;
   state.coverageOpacities={};
   if(obj.coverageOpacities&&typeof obj.coverageOpacities==='object'&&!Array.isArray(obj.coverageOpacities)){
    for(const [id,value] of Object.entries(obj.coverageOpacities)){
@@ -446,7 +461,11 @@ function wire(){
    drawImported();
    if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
  };
- for(const id of ['showPradel','showLabru'])$(id).onchange=drawImported;
+ $('coverageMode').onchange=e=>{
+   state.coverageMode=e.target.value==='bands'?'bands':'threshold';
+   drawImported();if(typeof rfDraw==='function')rfDraw();
+  };
+  for(const id of ['showPradel','showLabru'])$(id).onchange=drawImported;
  $('showEstimate').onchange=()=>{
   drawEstimate();
   if($('showEstimate').checked&&!state.estimate)
@@ -474,7 +493,7 @@ function wire(){
  $('newProject').onclick=()=>{
   if(!confirm('Créer un nouveau projet ? Pense à exporter le projet actuel si tu veux conserver ses points et couvertures.'))return;
   state.sites=structuredClone(HOME).map((p,i)=>({...p,name:'Station '+(i+1)}));
-  state.layer={pradel:null,labru:null};state.coverageOpacities={};state.selected='pradel';invalidate();
+  state.layer={pradel:null,labru:null};state.coverageOpacities={};state.coverageMode='threshold';$('coverageMode').value='threshold';state.selected='pradel';invalidate();
   if(typeof RADIO!=='undefined'){RADIO.coverage.clear();RADIO.imports.clear();RADIO.hidden.clear();rfDraw();rfSummary();}
   render();fitSites();updateStatus('Nouveau projet : déplace les deux stations et ajoute tes relais.');
  };

@@ -115,8 +115,10 @@
   for(const [id,name] of [['pradel',site('pradel')?.name||'Station A'],['labru',site('labru')?.name||'Station B']]){
    const lv=levelsFor(state.layer[id]);if(!lv.length)continue;
    const applied=lv.reduce((best,x)=>Math.abs(x-t)<Math.abs(best-t)?x:best,lv[0]);
-   lines.push('Site Planner · '+name+' : '+applied+' dBm'+(applied===t?'':' (palier disponible le plus proche)'));
+   const displayed=state.coverageMode==='bands'?' · paliers visibles : '+lv.filter(x=>x>=applied).sort((a,b)=>a-b).join(', ')+' dBm':'';
+   lines.push('Site Planner · '+name+' : '+applied+' dBm'+(applied===t?'':' (palier disponible le plus proche)')+displayed);
   }
+  lines.push('Rendu : '+(state.coverageMode==='bands'?'paliers RF discrets, sans gradient continu':'zone au seuil, une teinte par source'));
   const computed=typeof RADIO!=='undefined'&&RADIO.coverage.size;
   lines.push('Modèle local expérimental : seuil '+t+' dBm'+(computed?' · données calculées':' · non calculé'));
   note.replaceChildren();

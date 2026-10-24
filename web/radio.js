@@ -122,18 +122,19 @@ function rfDraw(){
   if(!site(node.id)||RADIO.hidden.has(node.id))continue;
   const imported=RADIO.imports.get(node.id);
   const cv=RADIO.coverage.get(node.id);
-  let path='';
-  if(imported){
-    const tiers=Object.keys(imported.groups).map(Number);
-    const selected=tiers.reduce((b,x)=>Math.abs(x-t)<Math.abs(b-t)?x:b,tiers[0]);
-    path=imported.groups[selected].map(f=>rings(null,f.geometry)).join('');
-  }else if(cv)path=cv.paths[t];
-  if(!path)continue;
-  const selected=node.id===state.selected;
-  const opacity=nodeOpacity(node.id);
-  svg('path',{d:path,'fill-rule':'evenodd',fill:imported?'#426cab':'#0ea875',
-    'fill-opacity':opacity,stroke:selected?'#0d876b':'none',
-    'stroke-width':'.4','vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind},group);
+  if(!imported&&!cv)continue;
+  const tiers=displayTiers(imported?Object.keys(imported.groups):Object.keys(cv.paths),t);
+  for(let i=0;i<tiers.length;i++){
+   const level=tiers[i];
+   const path=imported?(imported.groups[level]||[]).map(f=>rings(null,f.geometry)).join(''):cv.paths[level];
+   if(!path)continue;
+   const selected=node.id===state.selected;
+   svg('path',{d:path,'fill-rule':'evenodd',fill:imported?'#426cab':'#0ea875',
+     'fill-opacity':nodeOpacity(node.id)*bandOpacity(i,tiers.length),
+     stroke:selected?'#0d876b':'none','stroke-width':'.4',
+     'vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind,
+     'data-dbm':level,'data-display':coverageMode()},group);
+  }
  }
 }
 function rfRefreshVisibility(){

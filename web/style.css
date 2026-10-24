@@ -134,3 +134,6 @@ main{height:calc(100vh - 48px)}
 #networkDockBody .site-delete:hover{background:#fae5e5;border-color:#c04b4b}
 body.world-active #mapStack .candidate-preview{pointer-events:none}
 #mapQuick #baseInfo{display:none}
+
+/* CP-UX-DISPLAY-A: mode selection kept compact in Coverage tab. */
+.coverage-mode{margin-top:12px}.coverage-mode-note{margin-top:2px;color:#536e7d}
