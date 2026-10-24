@@ -69,7 +69,7 @@
  function projectCoveragePaths(){
   // Imported polygons retain their original world coordinates; redraw only on moveend.
   drawImported();
-  if(state.estimate)state.estimate=null; // old geometry paths are screen coordinates, not georeferenced
+  // Geographic cell corners are stored in WGS84; redraw for the new viewport.
   drawEstimate();
   for(const node of state.sites){
    const cv=RADIO.coverage.get(node.id);
