@@ -1,5 +1,17 @@
 # Roadmap — MeshtasticCalculator
 
+## Recette V0.1 — complément T25–T34 du 24 octobre 2026
+
+Lire l'addendum [Recette V0.1 T01–T34](RECETTE_V01_T01_T24_2026-10-24.md) §6. Résultats T25–T34 : **3 PASS** (T26/T31/T32), **3 partiels** (T25/T27/T28), **4 reportés/non testés** (T29/T30/T33/T34).
+
+- **P0 V0.1 :** l'optimiseur propose une position mais sans marqueur/carte ni coordonnées dans l'onglet Optimisation (message `rfStatus` isolé dans Couvertures). Ajouter une prévisualisation visible **sans déplacer le relais avant « Appliquer »**.
+- **P0 compréhension redondance :** rapport « 10 liaisons évaluées, 0 inconnue » mais aucun chemin admissible à +10 dB ; expliciter seuil, marges de chaque arête et pourquoi les traits géographiques ne prouvent pas une liaison RF.
+- **Tests bloquants à finir :** T29 export, T30 restauration, T33 JSON invalide et T34 absence de DEM ; confirmer T27 redondance optionnelle.
+- **Sans changement de code pendant la recette** ; ne pas commencer l'optimiseur global avant verrouillage du socle V0.1.
+
+---
+
+
 ## Recette V0.1 en cours — résultats T01–T24 reçus (24 octobre 2026)
 
 **Document prioritaire : [RECETTE_V01_T01_T24_2026-10-24.md](RECETTE_V01_T01_T24_2026-10-24.md)**
