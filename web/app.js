@@ -218,7 +218,14 @@ function drawImported(){
 function drawEstimate(){
  wipe('estimatedLayer');
  if(!state.estimate||!$('showEstimate').checked||!site(state.estimate.id))return;
- const path=svg('path',{d:state.estimate.path,class:'estimate',opacity:Math.max(.2,state.opacity)},$('estimatedLayer'));
+ let pathData=state.estimate.path;
+ if(Array.isArray(state.estimate.cells)){
+  pathData=state.estimate.cells.map(corners=>{
+   const pts=corners.map(c=>project(c.lon,c.lat));
+   return 'M'+pts.map(p=>p.x+','+p.y).join('L')+'Z';
+  }).join('');
+ }
+ const path=svg('path',{d:pathData,class:'estimate',opacity:Math.max(.2,state.opacity)},$('estimatedLayer'));
  path.setAttribute('data-model','geometric-LOS-Fresnel-NOT-RF');
 }
 function showCoverageSource(){
@@ -327,7 +334,7 @@ async function calculate(qualityOverride){
  const myToken=++state.token;
  const q=QUALITY[qualityOverride||state.quality],maxKm=25, dAngle=2*Math.PI/q.rays,step=q.step;
  updateStatus('Visibilité du terrain : calcul en cours…');
- let path='',tested=0,pass=0;
+ let path='',tested=0,pass=0,cells=[];
  for(let i=0;i<q.rays;i++){
   if(myToken!==state.token)return;
   const theta=i*dAngle;
@@ -341,14 +348,17 @@ async function calculate(qualityOverride){
    if(!ok)continue;
    pass++;
    const k0=km-step,k1=km+.035;
-   const pt=(r,t)=>project(p.lon+(r/(111*Math.cos(p.lat*rad)))*Math.sin(t),p.lat+(r/111)*Math.cos(t));
-   const a=pt(k0,theta-dAngle*.48),b=pt(k1,theta-dAngle*.48),c=pt(k1,theta+dAngle*.48),d=pt(k0,theta+dAngle*.48);
-   path+='M'+[a.x,a.y].join(' ')+'L'+[b.x,b.y].join(' ')+'L'+[c.x,c.y].join(' ')+'L'+[d.x,d.y].join(' ')+'Z';
+   const geopt=(r,t)=>({lon:p.lon+(r/(111*Math.cos(p.lat*rad)))*Math.sin(t),lat:p.lat+(r/111)*Math.cos(t)});
+   const corners=[geopt(k0,theta-dAngle*.48),geopt(k1,theta-dAngle*.48),
+                  geopt(k1,theta+dAngle*.48),geopt(k0,theta+dAngle*.48)];
+   cells.push(corners);
+   const pts=corners.map(v=>project(v.lon,v.lat));
+   path+='M'+pts.map(v=>v.x+','+v.y).join('L')+'Z';
   }
   if(i%6===0)await new Promise(resolve=>setTimeout(resolve,0));
  }
  if(myToken!==state.token)return;
- state.estimate={id:p.id,path,meta:{rays:q.rays,step:q.step,model:'terrain-LOS-Fresnel'}};
+ state.estimate={id:p.id,path,cells,meta:{rays:q.rays,step:q.step,model:'terrain-LOS-Fresnel'}};
  drawEstimate();
  updateStatus('Visibilité calculée : '+pass+'/'+tested+' cellules géométriquement dégagées (pas une couverture radio).');
 }
