@@ -122,3 +122,15 @@ main{height:calc(100vh - 48px)}
 #mapQuick>section h2{display:none}
 #mapQuick>section label{font-size:12px}
 #mapQuick #baseInfo{font-size:11px}
+
+/* Checkpoint CP-UX-FIX: candidate is a preview, never an active relay. */
+#mapStack .candidate-preview{pointer-events:none}
+#mapStack .candidate-line{stroke:#e27b12;stroke-width:2.5;stroke-dasharray:7 5;vector-effect:non-scaling-stroke}
+#mapStack .candidate-ring{fill:#fff4d5;stroke:#d86600;stroke-width:3;vector-effect:non-scaling-stroke}
+#mapStack .candidate-core{fill:#e17a00}
+#mapStack .candidate-label{fill:#874200;stroke:#fff;stroke-width:3;paint-order:stroke;font-weight:700;font-size:13px}
+#networkDockBody .site-delete{min-width:26px;height:31px;padding:1px 4px;font-size:13px;
+ border:1px solid #efcaca;border-radius:6px;color:#a12424;background:#fff9f9}
+#networkDockBody .site-delete:hover{background:#fae5e5;border-color:#c04b4b}
+body.world-active #mapStack .candidate-preview{pointer-events:none}
+#mapQuick #baseInfo{display:none}
