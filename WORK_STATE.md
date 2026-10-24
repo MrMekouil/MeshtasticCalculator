@@ -73,3 +73,14 @@
 - `docs/COVERAGE_AUDIT.md` compare algorithmes et paramètres officiels mais ne prétend pas savoir lequel est le plus réaliste dans chaque secteur. GeoJSON/HGT réels, captures comparatives, PDR et mesures terrain : NON EXÉCUTÉS.
 - Prochain contrôle utilisateur : vérifier tabs, opacité, œil, maintien des deux importations et de la redondance optionnelle, puis vérifier 2-3 positions où les couvertures divergent ; comparer avec profils Site Planner mêmes paramètres.
 - Aucun merge/release/PR/force-push; main intacte et aucun contenu utilisateur privé publié.
+
+
+## 2026-10-24 — Checkpoint CP-UX1 flottant + cadrage de l'optimisation globale
+
+- Prévol distant : work `06c511162ade88c10fdd2e833007cb172d6ec29d`, main `bb853ccf45d86f194b70c1714275ac8edcb615f8`. Aucun checkout local Git : état de l'index et git status/diff N/A.
+- Cadrage exhaustif ajouté dans `docs/WHOLE_NETWORK_OPTIMIZATION_UX.md` : quatre objectifs, mode manuel et automatique, optimisation 0..N relais recalculée globalement, scénarios non destructifs, palette mono-couleur/gradient, liste flottante, basemap top-right, barre compacte, preuves du moteur.
+- Modifications expérimentales : `web/sidebar.js` crée `#networkDock` et `#mapQuick` en déplaçant les contrôles existants sans casser leurs listeners, « Point » à gauche, `web/app.js` garde eyes et ajoute détails opacité par nœud; `web/radio.js` applique l'opacité par nœud; `web/style.css` dock et gris visibilité LOS, en-tête compact.
+- Projet JSON : nouvelle propriété optionnelle `coverageOpacities`, validée à la restauration (entre 0.1 et 0.9) ; compatibilité des projets plus anciens via repli vers `coverageOpacity`.
+- Tests : parsing source app/radio/sidebar PASS ; tests `sidebar-navigation.test.cjs` et `network-visibility.test.cjs` adaptés et exécutés en V8 avec mocks CommonJS/file, PASS. Exécution Node dans un vrai checkout et test Firefox/visuel : NON EXÉCUTÉS.
+- Pas d'import d'informations personnelles dans GitHub ; GeoJSON, terrain et vrais paramètres ITM restent locaux. Aucune conclusion sur le biais radio réel ; capture montre la légende visibilité géométrique.
+- Prochaine intervention : confirmer Firefox, puis CP-UX2 (éditeur radio complet, choix de palettes) et CP-RF1 (comparaison de profils/source Longley-Rice), avant algorithme d'optimisation réseau entier.
