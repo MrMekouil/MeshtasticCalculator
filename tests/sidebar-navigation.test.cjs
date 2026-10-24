@@ -26,6 +26,7 @@ class Node{
  focus(){}
 }
 const aside=new Node('aside');
+const mapStack=new Node('mapStack');
 const sections=Object.fromEntries(['network','editor','coverage','radio','terrain','map'].map(k=>[k,new Node(k,'section')]));
 const findSection={sites:'network',pointName:'editor',coverageSource:'coverage',radioSection:'radio',importDem:'terrain',base:'map'};
 const els={};
@@ -35,6 +36,7 @@ for(const id of ['rfOptimize','coverageOpacity','rfOpacity','threshold','showPra
 }
 els.rfOptimize.closest=tag=>tag==='details'?new Node('opt','details'):null;
 for(const id of ['coverageOpacity','rfOpacity','threshold','showPradel','showLabru'])els[id].label=new Node(id+'label','label');
+els.mapStack=mapStack;
 const get=id=>els[id]||null;
 const document={querySelector:query=>query==='main > aside'?aside:null,createElement:tag=>new Node('',tag)};
 const data=dbm=>({type:'FeatureCollection',features:[{properties:{dbm}}]});
@@ -47,12 +49,16 @@ const panes=aside.children.filter(c=>c.className==='sidebar-pane');
 assert.equal(panes.length,4);
 assert.equal(panes.filter(x=>!x.hidden).length,1);
 assert.equal(panes[0].id,'sidebar-pane-network');
+assert.equal(panes[0].children.length,1,'Point tab keeps only node editor');
 global.MeshtasticSidebar.activate('coverage');
 assert.equal(panes.filter(x=>!x.hidden)[0].id,'sidebar-pane-coverage');
 const legend=els.threshold.label.inserted.children.map(x=>x.textContent);
 assert(legend.some(s=>s?.includes('Le Pradel : -118 dBm')));
 assert(legend.some(s=>s?.includes('Labruguière : -110 dBm')));
-const slider=els.sites.inserted.children[0];
+assert.equal(mapStack.children.length,2,'network dock and map corner selectors');
+assert.equal(mapStack.children[0].id,'networkDock');
+assert.equal(mapStack.children[1].id,'mapQuick');
+const slider=els.sites.inserted.children[1].children[0];
 slider.value='64';slider.oninput();
 assert.equal(state.opacity,.64);
 assert.equal(els.coverageOpacity.value,'64');
