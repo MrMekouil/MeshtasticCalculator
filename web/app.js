@@ -34,7 +34,7 @@ function nodeOpacity(id){const v=Number(state.coverageOpacities?.[id]);return Nu
 // Discrete RF levels only; the display never interpolates missing signal values.
 function coverageMode(){return ['threshold','bands','gradient'].includes(state.coverageMode)?state.coverageMode:'threshold';}
 function thresholdPresets(){
- return [...new Set([...Array.from({length:25},(_,i)=>-160+i*5),-117,-109])].sort((a,b)=>a-b);
+ return [...new Set([...Array.from({length:33},(_,i)=>-160+i*5),-117,-109])].sort((a,b)=>a-b);
 }
 function chooseThreshold(value){
  const el=$('threshold');
@@ -60,7 +60,7 @@ function syncGradientLegend(){
 }
 function parseThreshold(value){
  const n=Number(value);
- return String(value).trim()!==''&&Number.isInteger(n)&&n>=-160&&n<=-40?n:null;
+ return (typeof value==='number'||typeof value==='string')&&String(value).trim()!==''&&Number.isInteger(n)&&n>=-160&&n<=0?n:null;
 }
 function displayTiers(levels,requested=state.threshold){
  const values=[...new Set(levels.map(Number).filter(Number.isFinite))].sort((a,b)=>a-b);

@@ -8,8 +8,8 @@ assert(world.includes('RADIO.projectionVersion=(RADIO.projectionVersion||0)+1;')
 const state={threshold:-117,coverageMode:'threshold'};
 const core=app.slice(app.indexOf('function coverageMode(){'),app.indexOf('let previewTimer='));
 const {parseThreshold,coverageMode,displayTiers}=new Function('state',core+'return {parseThreshold,coverageMode,displayTiers};')(state);
-for(const v of [-160,-148,-140,-130,-117,-109,-80,-40])assert.equal(parseThreshold(v),v);
-for(const v of [-170,-20,'',null,'-114.5','invalid'])assert.equal(parseThreshold(v),null);
+for(const v of [-160,-148,-140,-130,-117,-109,-80,-40,-20,0])assert.equal(parseThreshold(v),v);
+for(const v of [-170,5,'',null,'-114.5','invalid'])assert.equal(parseThreshold(v),null);
 assert.deepEqual(displayTiers([-130,-118,-109],-117),[-118]);
 assert.deepEqual(displayTiers([-130,-118,-109],-70),[],'No extrapolation of imported source');
 assert.deepEqual(displayTiers([-118],-117),[-118],'Nearest exported tier within 1 dB remains labeled');
@@ -26,14 +26,14 @@ assert.equal(result[-120],'','NoData may not reconnect a coverage run');
 // Preset selector, including old -117/-109 dBm choices and -125 dBm.
 const presetCode=app.slice(app.indexOf('function coverageMode(){'),app.indexOf('function displayTiers('));
 const presets=new Function('state','$','document',presetCode+'return thresholdPresets;')({coverageMode:'gradient'},()=>({}),{});
-assert.equal(presets().length,27);
+assert.equal(presets().length,35);
 assert(presets().includes(-125)&&presets().includes(-117)&&presets().includes(-109));
 // Full 13-bin RSSI scale is rendered only from existing samples.
 const gc=radio.slice(radio.indexOf('const RF_GRADIENT_COLORS='),radio.indexOf('// Display-only geometry from saved RSSI samples;'));
 const gradient=new Function('rfWedge',gc+'return {rfGradientLevels,rfGradientPaths,rfGradientColor};')((_node,a,b)=>'W'+a+':'+b+';');
-assert.equal(gradient.rfGradientLevels().length,13);
+assert.equal(gradient.rfGradientLevels().length,17);
 assert.equal(gradient.rfGradientLevels()[0],-160);
-assert.equal(gradient.rfGradientLevels().at(-1),-40);
+assert.equal(gradient.rfGradientLevels().at(-1),0);
 assert.notEqual(gradient.rfGradientColor(-140),gradient.rfGradientColor(-70));
 const samples={rays:2,step:1,signals:[new Float32Array([0,-145,-135,-115,-95,-49,NaN,-80]),null]};
 const colors=gradient.rfGradientPaths({},samples,-150);

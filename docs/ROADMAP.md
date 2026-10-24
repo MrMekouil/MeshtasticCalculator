@@ -165,3 +165,5 @@ Implémentation poussée sur `work/project-bootstrap-v0.1` :
 
 ### CP-UX-RSSI-GRADIENT — paliers fixes + carte colorée (2026-10-24)
 Retour Firefox D1–D3 OK, D4 restauration à −100. Introduire sélection fixe par 5 dB + ancienne compatibilité et mode d'échelle locale par bins de 10 dB couvrant −160..−40 ; légende et cache reprojeté. Tests G1–G4 avant lot suivant.
+
+- Correctif complémentaire CP-UX-RSSI-GRADIENT : bornes étendues jusqu'à 0 dBm (17 classes, 35 presets) au lieu de −40 ; tests G1–G4 restent à effectuer sur le nouveau commit.

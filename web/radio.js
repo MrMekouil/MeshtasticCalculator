@@ -43,10 +43,10 @@ function rfLevel(row,j,dMeters,txHeight,rxHeight){
  return {dbm:cfg.eirp+cfg.rxGain-fspl-knife-cfg.extraLoss,knife};
 }
 // RSSI received-power bands from actual local samples, not SNR or link quality.
-const RF_GRADIENT_COLORS=["#284c9a","#3271b4","#278fba","#25a9af","#26ad98","#3caf7c","#64b65a","#93bb43","#c4b43d","#dfa238","#e88a34","#ed6637","#cf3346"];
-function rfGradientLevels(){return Array.from({length:13},(_,i)=>-160+i*10);}
+const RF_GRADIENT_COLORS=["#284c9a","#3271b4","#278fba","#25a9af","#26ad98","#3caf7c","#64b65a","#93bb43","#c4b43d","#dfa238","#e88a34","#ed6637","#cf3346","#c52b46","#ae224a","#921b4b","#771543"];
+function rfGradientLevels(){return Array.from({length:17},(_,i)=>-160+i*10);}
 function rfGradientColor(level){
- const idx=Math.max(0,Math.min(12,Math.round((Number(level)+160)/10)));
+ const idx=Math.max(0,Math.min(16,Math.round((Number(level)+160)/10)));
  return RF_GRADIENT_COLORS[idx];
 }
 function rfGradientPaths(node,coverage,minThreshold){
@@ -67,7 +67,7 @@ function rfGradientPaths(node,coverage,minThreshold){
    const value=row[j];
    if(!Number.isFinite(value))blocked=true;
    const bin=!blocked&&value>=minThreshold&&value>=-160
-    ?Math.min(-40,Math.floor(value/10)*10):null;
+    ?Math.min(0,Math.floor(value/10)*10):null;
    if(bin!==active){close(j-1);if(bin!==null){start=j;active=bin;}}
   }
   close(row.length-1);
@@ -77,7 +77,7 @@ function rfGradientPaths(node,coverage,minThreshold){
 // Display-only geometry from saved RSSI samples; never infer signal through NoData.
 function rfLocalLevels(threshold,mode=coverageMode()){
  const t=parseThreshold(threshold);
- return t===null?[]:mode==='bands'?Array.from({length:5},(_,i)=>t+10*i).filter(x=>x<=-40):[t];
+ return t===null?[]:mode==='bands'?Array.from({length:5},(_,i)=>t+10*i).filter(x=>x<=0):[t];
 }
 function rfPathsFromSignals(node,coverage,levels){
  const paths=Object.fromEntries(levels.map(t=>[t,[]]));
