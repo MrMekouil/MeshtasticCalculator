@@ -133,6 +133,10 @@
   const el=$(id);
   if(el?.closest('label'))el.closest('label').hidden=true;
  }
+ // LOS/Fresnel is an advanced terrain diagnostic, never a radio-coverage layer.
+ const diag=$('calculate')?.closest('details');
+ const geometric=$('showEstimate')?.closest('label');
+ if(diag&&geometric)diag.append(geometric);
  // The redundant per-node radio list was superseded by the eye in the Network tab.
  const olderList=$('rfVisibility');if(olderList)olderList.hidden=true;
  activate('network');updateThreshold();
