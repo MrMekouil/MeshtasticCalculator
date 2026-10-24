@@ -21,7 +21,7 @@
  nav.id='sidebarTabs';nav.setAttribute('role','tablist');
  nav.setAttribute('aria-label','Sections de MeshtasticCalculator');
  const groups=[
-  ['network','Réseau',[network,editor]],
+  ['network','Point',[editor]],
   ['coverage','Couvertures',[coverage,radio]],
   ['optimization','Optimisation',[optimizeSection]],
   ['settings','Réglages',[terrain,mapOptions]]
@@ -38,6 +38,24 @@
   nav.append(button);aside.append(pane);panels.set(id,pane);
  }
  aside.prepend(nav);
+ // The network site list is now a small floating card over the map, not a
+ // second very long tab in the left sidebar. Keep its original DOM/events.
+ const mapStack=$('mapStack');
+ if(mapStack){
+  const dock=document.createElement('div');dock.id='networkDock';
+  dock.setAttribute('aria-label','Réseau et visibilité des nœuds');
+  const toggle=document.createElement('button');toggle.type='button';
+  toggle.id='networkDockToggle';toggle.textContent='Réseau · Points ▾';
+  toggle.setAttribute('aria-controls','networkDockBody');
+  toggle.setAttribute('aria-expanded','true');
+  const body=document.createElement('div');body.id='networkDockBody';
+  body.append(network);dock.append(toggle,body);mapStack.append(dock);
+  toggle.onclick=()=>{
+   const isOpen=!body.hidden;body.hidden=isOpen;
+   toggle.setAttribute('aria-expanded',String(!isOpen));
+   toggle.textContent=isOpen?'Réseau · Points ▸':'Réseau · Points ▾';
+  };
+ }
  function activate(id){
   for(const button of nav.querySelectorAll('[data-tab]')){
    const selected=button.dataset.tab===id;button.setAttribute('aria-selected',String(selected));
@@ -61,7 +79,11 @@
  opacity.type='range';opacity.min='10';opacity.max='90';opacity.value='38';
  opacity.setAttribute('aria-label','Opacité commune des couvertures');
  opacityLabel.append(opacity);
- $('sites').insertAdjacentElement('afterend',opacityLabel);
+ const globalOptions=document.createElement('details');
+ globalOptions.className='network-global-options';
+ const summary=document.createElement('summary');summary.textContent='Opacité générale';
+ globalOptions.append(summary,opacityLabel);
+ $('sites').insertAdjacentElement('afterend',globalOptions);
  const oldOpacity=$('coverageOpacity'),localOpacity=$('rfOpacity');
  if(oldOpacity?.closest('label'))oldOpacity.closest('label').hidden=true;
  if(localOpacity?.closest('label'))localOpacity.closest('label').hidden=true;
