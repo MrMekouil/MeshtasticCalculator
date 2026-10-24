@@ -41,3 +41,11 @@
 - Panneau Optimisation contient **une case à cocher redondance vide par défaut** ; elle ajoute une simulation de panne de relais. Sans coche : optimisation classique seulement.
 - Limites : analyse de panne basée sur le modèle radio expérimental, ne cherche pas encore automatiquement le nombre/emplacement de relais additionnels pour assurer la redondance. Ne jamais afficher succès terrain certifié.
 - `main` stable, aucune fusion/PR/release. Prochain contrôle : Firefox (fonds, zoom, drag, couches importées, SRTM, bascule redondance), puis stabilisation des géométries natives MapLibre.
+
+
+## 2026-10-24 — Menu compact, seuils et précision radio
+- Retour utilisateur : trop de scroll à gauche, visibilité des couvertures à proximité de chaque nœud, opacité à proximité, deux seuils mal expliqués, divergences entre Site Planner et estimations locales.
+- Implémentation : `web/sidebar.js` crée 4 onglets (Réseau / Couvertures / Optimisation / Réglages) sans recréer les formulaires, préserve les listeners ; œil par nœud dans `renderSites()`; opacité globale synchronisée avec sources ; seuil demandé commun avec palier réel affiché par source.
+- Le local expérimental est **masqué par défaut** pour ne pas être confondu avec une zone de couverture certaine. Il reste activable et calculable à la demande.
+- `docs/COVERAGE_AUDIT.md` : analyse statique des différences de modèle/defaults/résolution. **Aucune conclusion sur l'optimisme relatif des zones individuelles** sans fichiers source privés + terrain correspondant + réglages harmonisés.
+- Tests statiques et banc JS simulé (tabs, opacité, paliers, yeux) PASS ; essai Firefox du menu et comparaison réelle RF encore requis ; main non modifiée.
