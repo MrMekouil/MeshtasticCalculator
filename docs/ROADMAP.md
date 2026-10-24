@@ -1,5 +1,9 @@
 # Roadmap — MeshtasticCalculator
 
+### CP-UX-THRESHOLD — Seuils d'affichage étendus (2026-10-24)
+Suite à S1–S4 PASS Firefox, passage du choix des 3 seuils fixes à une saisie −160..−40 dBm (pas de 1 dB). Les GeoJSON restent bornés aux paliers exportés ; le rendu RF local exploite les échantillons pré-calculés. D1–D4 attendus avant la suite du développement.
+
+
 ### CP-UX-DISPLAY-A.1 — Visibilité des sources (24 octobre 2026)
 Deux interrupteurs Site Planner / RF local regroupés et indépendants ; correctif prêt sur branche work, tests Firefox S1–S4 attendus avant CP-UX-DISPLAY-B.
 

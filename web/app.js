@@ -33,10 +33,15 @@ function range(v,a,b){return Math.max(a,Math.min(b,v));}
 function nodeOpacity(id){const v=Number(state.coverageOpacities?.[id]);return Number.isFinite(v)&&v>=.1&&v<=.9?v:state.opacity;}
 // Discrete RF levels only; the display never interpolates missing signal values.
 function coverageMode(){return state.coverageMode==='bands'?'bands':'threshold';}
+function parseThreshold(value){
+ const n=Number(value);
+ return String(value).trim()!==''&&Number.isInteger(n)&&n>=-160&&n<=-40?n:null;
+}
 function displayTiers(levels,requested=state.threshold){
  const values=[...new Set(levels.map(Number).filter(Number.isFinite))].sort((a,b)=>a-b);
  if(!values.length)return [];
  const goal=Number.isFinite(Number(requested))?Number(requested):-117;
+ if(goal>values[values.length-1])return []; // Never invent a stronger imported contour.
  const nearest=values.reduce((best,x)=>Math.abs(x-goal)<Math.abs(best-goal)?x:best,values[0]);
  return coverageMode()==='bands'?values.filter(x=>x>=nearest):[nearest];
 }
@@ -417,7 +422,7 @@ async function restore(file){
   if(obj.sites.some(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lon)||Math.abs(p.lat)>90||Math.abs(p.lon)>180))throw Error('Coordonnées invalides');
   state.sites=obj.sites;state.layer={pradel:obj.layer?.pradel||preloaded.pradel||null,labru:obj.layer?.labru||preloaded.labru||null};state.selected='pradel';
   const stored=Number(obj.threshold);
-  state.threshold=[-130,-117,-109].reduce((a,b)=>Math.abs(b-stored)<Math.abs(a-stored)?b:a,-117);
+  state.threshold=parseThreshold(obj.threshold)??-117;
   $('threshold').value=String(state.threshold);
   state.coverageMode=obj.coverageMode==='bands'?'bands':'threshold';
   $('coverageMode').value=state.coverageMode;
@@ -460,12 +465,18 @@ function wire(){
   $(id).addEventListener('change',e=>{updateField(field,e.target.value);if(field!=='name')render();});
  }
  $('threshold').onchange=e=>{
-   const t=Number(e.target.value);state.threshold=t;
+   const t=parseThreshold(e.target.value);
+   if(t===null){
+    e.target.value=String(state.threshold);
+    updateStatus('Seuil invalide : utilise un entier entre −160 et −40 dBm.');
+    return;
+   }
+   state.threshold=t;
    if(typeof RADIO!=='undefined'){RADIO.settings.threshold=t;$('rfThreshold').value=String(t);rfDraw();}
    drawImported();
    if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
- };
- $('coverageMode').onchange=e=>{
+  };
+  $('coverageMode').onchange=e=>{
    state.coverageMode=e.target.value==='bands'?'bands':'threshold';
    drawImported();if(typeof rfDraw==='function')rfDraw();
   };

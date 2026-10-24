@@ -114,13 +114,15 @@
   const lines=[];
   for(const [id,name] of [['pradel',site('pradel')?.name||'Station A'],['labru',site('labru')?.name||'Station B']]){
    const lv=levelsFor(state.layer[id]);if(!lv.length)continue;
+   if(t>Math.max(...lv)){lines.push('Site Planner · '+name+' : aucun palier exporté à '+t+' dBm ou plus');continue;}
    const applied=lv.reduce((best,x)=>Math.abs(x-t)<Math.abs(best-t)?x:best,lv[0]);
    const displayed=state.coverageMode==='bands'?' · paliers visibles : '+lv.filter(x=>x>=applied).sort((a,b)=>a-b).join(', ')+' dBm':'';
    lines.push('Site Planner · '+name+' : '+applied+' dBm'+(applied===t?'':' (palier disponible le plus proche)')+displayed);
   }
   lines.push('Rendu : '+(state.coverageMode==='bands'?'paliers RF discrets, sans gradient continu':'zone au seuil, une teinte par source'));
   const computed=typeof RADIO!=='undefined'&&RADIO.coverage.size;
-  lines.push('Modèle local expérimental : seuil '+t+' dBm'+(computed?' · données calculées':' · non calculé'));
+  lines.push('Modèle local expérimental : seuil exact '+t+' dBm'+(computed?' · échantillons calculés':' · non calculé'));
+  lines.push('Le seuil d’affichage ne modifie pas la sensibilité radio du récepteur.');
   note.replaceChildren();
   const heading=document.createElement('strong');heading.textContent='Seuil réellement appliqué par source';note.append(heading);
   for(const line of lines){const p=document.createElement('p');p.textContent=line;note.append(p);}

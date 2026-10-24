@@ -71,10 +71,11 @@
   drawImported();
   // Geographic cell corners are stored in WGS84; redraw for the new viewport.
   drawEstimate();
-  for(const node of state.sites){
+  RADIO.projectionVersion=(RADIO.projectionVersion||0)+1;
+   for(const node of state.sites){
    const cv=RADIO.coverage.get(node.id);
    if(!cv||!Array.isArray(cv.signals))continue;
-   const levels=[-130,-117,-109],paths=Object.fromEntries(levels.map(x=>[x,[]]));
+   const levels=rfLocalLevels(RADIO.settings.threshold),paths=Object.fromEntries(levels.map(x=>[x,[]]));
    const step=cv.step,rays=cv.rays;
    for(let a=0;a<rays;a++){
     const signals=cv.signals[a];

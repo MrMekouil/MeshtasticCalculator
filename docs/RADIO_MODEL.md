@@ -17,3 +17,6 @@
 - Paramètres par nœud (fréquence, modem, batterie, antenne), graphe N relais.
 - Comparaison reproductible aux calculs amont puis aux mesures terrain (SNR, RSSI, PDR) ; tests sur vallées et crêtes.
 - Seuils conservateurs, incertitude et accès site intégrés aux recommandations.
+
+## Distinction seuil d'affichage / sensibilité radio — 2026-10-24
+Seuil d'affichage numérique libre entre −160 et −40 dBm (pas de 1 dB) ; ce n'est ni la sensibilité de réception de chaque préréglage LoRa ni la preuve qu'un paquet sera décodé. Les `RADIO.coverage.*.signals` calculés servent à reconstruire les secteurs au seuil choisi, sans recalcul de diffraction ni interpolation entre points inconnus. Les intervalles de NoData restent vides. Le mode paliers affiche le seuil choisi et jusqu'à quatre seuils supérieurs par pas de 10 dB, bornés. Les imports Site Planner demeurent dépendants des seuls contours présents dans leurs fichiers ; pas de contour disponible au-dessus du plus fort palier exporté.

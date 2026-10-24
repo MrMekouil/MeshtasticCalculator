@@ -4,8 +4,8 @@ const read=file=>fs.readFileSync(path.resolve(__dirname,'../web/',file),'utf8');
 const html=read('index.html'),sidebar=read('sidebar.js'),app=read('app.js'),radio=read('radio.js');
 new Function(sidebar);new Function(app);new Function(radio);
 assert(html.includes('src="sidebar.js"'));
-assert(html.includes('value="-117" selected'));
-assert(!html.includes('value="-118" selected'));
+assert(html.includes('id="threshold" type="number"'));
+assert(html.includes('value="-117" list="thresholdSuggestions"'));
 assert(radio.includes('hidden:new Set(),enabled:true'),'requested experimental coverage visible by default (source labelled)');
 assert(radio.includes('<input id="rfShow" type="checkbox" checked>'));
 class Node{

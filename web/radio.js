@@ -5,7 +5,7 @@
 'use strict';
 const RADIO={
   settings:{freq:869.525,eirp:20,rxGain:0,extraLoss:12,sensitivity:-130,rxHeight:2,maxKm:25,quality:'normal',threshold:-117},
-  coverage:new Map(),imports:new Map(),versions:new Map(),hidden:new Set(),enabled:true,active:true,dragPreview:null,dragged:null,suggestion:null,optimToken:0,demPersistent:false
+  coverage:new Map(),imports:new Map(),versions:new Map(),hidden:new Set(),enabled:true,active:true,projectionVersion:0,dragPreview:null,dragged:null,suggestion:null,optimToken:0,demPersistent:false
 };
 const RADIO_QUALITY={preview:{rays:72,step:.35,profileStep:180},normal:{rays:180,step:.15,profileStep:100},fine:{rays:360,step:.10,profileStep:70}};
 function rfPoint(lat,lon,theta,km){
@@ -41,6 +41,37 @@ function rfLevel(row,j,dMeters,txHeight,rxHeight){
  const knife=v<=-.78?0:Math.max(0,6.9+20*Math.log10(Math.sqrt((v-.1)**2+1)+v-.1));
  const fspl=32.44+20*Math.log10(d/1000)+20*Math.log10(cfg.freq);
  return {dbm:cfg.eirp+cfg.rxGain-fspl-knife-cfg.extraLoss,knife};
+}
+// Display-only geometry from saved RSSI samples; never infer signal through NoData.
+function rfLocalLevels(threshold,mode=coverageMode()){
+ const t=parseThreshold(threshold);
+ return t===null?[]:mode==='bands'?Array.from({length:5},(_,i)=>t+10*i).filter(x=>x<=-40):[t];
+}
+function rfPathsFromSignals(node,coverage,levels){
+ const paths=Object.fromEntries(levels.map(t=>[t,[]]));
+ if(!Array.isArray(coverage?.signals)||!coverage.rays||!coverage.step)return Object.fromEntries(levels.map(t=>[t,'']));
+ for(let a=0;a<coverage.rays;a++){
+  const row=coverage.signals[a];if(!row||row.length<2)continue;
+  const starts=Object.fromEntries(levels.map(t=>[t,-1]));
+  const theta=a*2*Math.PI/coverage.rays,half=Math.PI/coverage.rays;
+  function close(t,j){
+   if(starts[t]<0)return;
+   const inner=Math.max(0,(starts[t]-1)*coverage.step);
+   const outer=j*coverage.step;
+   if(outer>inner)paths[t].push(rfWedge(node,inner,outer,theta-half,theta+half));
+   starts[t]=-1;
+  }
+  let unknown=false;
+  for(let j=1;j<row.length;j++){
+   const value=row[j];if(!Number.isFinite(value))unknown=true;
+   for(const t of levels){
+    if(!unknown&&value>=t){if(starts[t]<0)starts[t]=j;}
+    else close(t,j-1);
+   }
+  }
+  for(const t of levels)close(t,row.length-1);
+ }
+ return Object.fromEntries(levels.map(t=>[t,paths[t].join('')]));
 }
 function rfWedge(site,km0,km1,ang0,ang1){
  const pts=[
@@ -120,12 +151,24 @@ function rfDraw(){
  for(const node of state.sites){
   if(!site(node.id)||RADIO.hidden.has(node.id))continue;
   const imported=RADIO.imports.get(node.id),calculated=RADIO.coverage.get(node.id);
-  const sources=[
-   state.plannerVisible!==false&&imported?{data:imported.groups,isImport:true,fill:'#426cab',model:'Meshtastic-import'}:null,
-   RADIO.enabled&&calculated?{data:calculated.paths,isImport:false,fill:'#0ea875',model:calculated.kind}:null
-  ].filter(Boolean);
+  const sources=[];
+  if(state.plannerVisible!==false&&imported)
+   sources.push({data:imported.groups,isImport:true,fill:'#426cab',model:'Meshtastic-import'});
+  if(RADIO.enabled&&calculated){
+   let paths=calculated.paths,levels=displayTiers(Object.keys(paths),t);
+   if(Array.isArray(calculated.signals)){
+    levels=rfLocalLevels(t);
+    const key=[RADIO.projectionVersion,t,coverageMode(),node.lat,node.lon,node.height].join('|');
+    if(calculated.displayKey!==key){
+     calculated.displayPaths=rfPathsFromSignals(node,calculated,levels);
+     calculated.displayKey=key;
+    }
+    paths=calculated.displayPaths;
+   }
+   sources.push({data:paths,isImport:false,fill:'#0ea875',model:calculated.kind,levels});
+  }
   for(const source of sources){
-   const tiers=displayTiers(Object.keys(source.data),t);
+   const tiers=source.levels||displayTiers(Object.keys(source.data),t);
    for(let i=0;i<tiers.length;i++){
     const dbm=tiers[i];
     const path=source.isImport?(source.data[dbm]||[]).map(f=>rings(null,f.geometry)).join(''):source.data[dbm];
@@ -177,7 +220,7 @@ function rfReadSettings(){
  s.freq=num('rfFreq',400,1000);s.eirp=num('rfEirp',-10,28);s.rxGain=num('rfRxGain',-6,16);
  s.extraLoss=num('rfLoss',0,45);s.sensitivity=num('rfSens',-155,-80);
  s.rxHeight=num('rfRxHeight',1,100);s.maxKm=num('rfRange',1,60);
- s.quality=$('rfPrecision').value;s.threshold=Number($('rfThreshold').value);
+ s.quality=$('rfPrecision').value;s.threshold=state.threshold;
 }
 async function rfComputeAll(){
  if(!state.terrain){rfStatus('Charge d’abord une tuile SRTM.');return;}
@@ -409,7 +452,7 @@ function rfPanel(){
   '<label><input id="plannerShow" type="checkbox" checked> Site Planner · couvertures importées (bleu/orange)</label>'+
   '<label><input id="rfShow" type="checkbox" checked> Estimations expérimentales locales (vert)</label>'+
   '<p class="hint">Les deux sources se masquent sans effacer les données. L’œil dans « Réseau » agit sur un seul nœud.</p></fieldset>'+
-  '<label hidden>Seuil interne synchronisé<select id="rfThreshold"><option value="-130">≥ −130 dBm</option><option value="-117" selected>≥ −117 dBm</option><option value="-109">≥ −109 dBm</option></select></label>'+
+  '<label hidden>Seuil interne synchronisé<input id="rfThreshold" type="number" min="-160" max="-40" step="1" value="-117"></label>'+
   '<label>Résolution<select id="rfPrecision"><option value="preview">Rapide (72 directions)</option><option value="normal" selected>Standard (180 directions)</option><option value="fine">Fine (360 directions)</option></select></label>'+
   '<label hidden>Opacité interne<input id="rfOpacity" type="range" min="10" max="90" value="38"></label>'+
   '<details><summary>Paramètres radio avancés</summary>'+
@@ -441,8 +484,13 @@ function rfPanel(){
  $('rfApply').onclick=rfApplySuggestion;
  $('plannerShow').onchange=e=>{state.plannerVisible=e.target.checked;drawImported();rfDraw();};
   $('rfShow').onchange=e=>{RADIO.enabled=e.target.checked;rfDraw();};
- $('rfThreshold').onchange=e=>{RADIO.settings.threshold=Number(e.target.value);state.threshold=RADIO.settings.threshold;$('threshold').value=e.target.value;rfDraw();drawImported();};
- $('rfOpacity').oninput=rfDraw;
+ $('rfThreshold').onchange=e=>{
+   const t=parseThreshold(e.target.value);
+   if(t===null){e.target.value=String(state.threshold);return;}
+   RADIO.settings.threshold=state.threshold=t;$('threshold').value=String(t);
+   rfDraw();drawImported();
+  };
+  $('rfOpacity').oninput=rfDraw;
  $('rfPrecision').onchange=e=>{RADIO.settings.quality=e.target.value;if(state.terrain&&site(state.selected))rfCalculateSite(state.selected);};
  for(const id of ['rfFreq','rfEirp','rfRxGain','rfLoss','rfSens','rfRxHeight','rfRange']){
   $(id).addEventListener('change',()=>{rfReadSettings();RADIO.coverage.clear();rfDraw();rfSummary();rfStatus('Paramètres modifiés : recalcule les couvertures.');});
