@@ -44,3 +44,12 @@ Ces tests utilisent un terrain synthétique : ils ne prouvent pas les performanc
 Développement sur `work/project-bootstrap-v0.1` ; `main` n'est pas fusionnée. Dépôt **public** : le fichier `web/data/coverages.local.js` contenant les simulations privées est exclu par `.gitignore`.
 
 Aucun code de Meshtastic Site Planner n'a été copié. Son moteur WebAssembly et sa licence GPL-3.0 seront étudiés séparément avant une éventuelle intégration.
+
+
+## Interface compacte et provenance des couvertures — 2026-10-24
+
+Le menu latéral possède désormais **quatre onglets : Réseau, Couvertures, Optimisation, Réglages**. Les champs existants sont conservés, mais seul le panneau sélectionné défile. Dans Réseau, l'œil de chaque ligne affiche/masque toutes les couvertures de ce point, et un curseur commun pilote l'opacité. Les préférences de masquage et l'opacité globale sont sauvegardées dans le projet JSON.
+
+La commande visible « Seuil d'affichage souhaité » (−130/−117/−109 dBm) synchronise l'affichage des deux sources. **Les GeoJSON importés restent soumis aux paliers réellement exportés** : le panneau affiche le niveau réel retenu, éventuellement voisin du seuil demandé. Les couvertures radio **locales non validées** sont désactivées à l'ouverture ; cocher explicitement « Afficher les estimations expérimentales » pour les voir.
+
+Lire [l'audit des divergences entre moteurs](docs/COVERAGE_AUDIT.md). Un même seuil et un fond commun ne prouvent pas que les deux simulations donnent les mêmes résultats.
