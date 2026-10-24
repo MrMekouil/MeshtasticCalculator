@@ -108,3 +108,9 @@
 - Lecture source `web/radio.js` : `rfSuggestPosition()` n'affiche pas de marqueur candidat, sauvegarde `RADIO.suggestion`, l'écrit dans `#rfStatus` (déplacé vers Couvertures), puis rend « Appliquer » actif ; T25 UX partiel, T26 OK selon utilisateur.
 - T27 « OK ? » partiel ; T28 un rapport reçu mais pas une vérification de RF réel ; T31/T32 OK, T29/T30/T33/T34 non exécutés. Le journal complet est `docs/RECETTE_V01_T01_T24_2026-10-24.md` §6.
 - Modifications UNIQUEMENT documentaires, pas de changements `web/`, pas de merge, PR, release ni tag. À la reprise, cibler avertissement candidat/visibilité redondance, puis les tests de sauvegarde et cas négatifs.
+
+
+## 2026-10-24 — Reprise des tests : T34 garde SRTM constatée
+- L'utilisateur a créé un nouveau projet, rendant les anciennes marges T28 indisponibles : ne pas les lui redemander.
+- T34 : message « Terrain SRTM absent : charge un fichier .hgt(.gz) pour calculer les nouvelles couvertures. » observé dans Firefox ; PASS du sous-critère signalement terrain manquant, mais absence de nouveau polygone radio pas encore confirmée, T34 global PARTIEL.
+- T29/T30/T33 restent reportés et bloquants pour qualifier l'import/export ; code inchangé. Voir `docs/RECETTE_V01_T01_T24_2026-10-24.md` §7.
