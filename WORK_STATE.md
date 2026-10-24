@@ -121,3 +121,10 @@
 - Statut lot T25–T34 : 4 PASS (T26/31/32/34), 3 PARTIELS (T25/27/28), 3 REPORTÉS (T29/30/33).
 - Priorité de test restante : export (T29), restauration (T30), JSON invalide sur copie en session isolée (T33). Corriger le parse JSON hors try/catch si problème constaté avant fusion.
 - Aucune modification de `web/`, aucune fusion `main`, aucune promesse de moteur RF validé.
+
+
+## 2026-10-24 — CP-UX-FIX / développement ciblé
+- Reprise demandée par l'utilisateur, qui reporte T29/T30/T33. HEAD distant avant travail `0ce52ed07759edec083e46ddc87910162470e7c2`, main `bb853ccf45d86f194b70c1714275ac8edcb615f8`; 0 PR ouvertes vérifiées. Pas de checkout authentifié disponible, donc git status/diff/index N/A ; ne pas revendiquer « propre ».
+- `web/app.js` : helper `removeRelay` unifié pour dock et éditeur ; confirmation, nettoyage, bornes A/B, annulation des suggestions et calculs obsolètes ; `renderCandidatePreview` en WGS84 reprojeté ; intensity MapLibre, LOS cells et auto-calc nouveau relais (si DEM). `web/radio.js` : sortie de candidat dans Optimisation, détail des marges du graphe, estimations visibles par défaut, wrapper JSON robuste. `web/world-map-adapter.js` : intensity canvas, reprojection de cellules LOS sans effacer `state.estimate`, pas de double calcul à l'ajout. `web/sidebar.js` : option LOS déplacée dans diagnostic de relief. `web/index.html` et `web/style.css` : slider 100 %, marqueur candidat, boutons suppressions.
+- Nouveau test `tests/v01-ux-fixes.test.cjs` ; mise à jour de `tests/sidebar-navigation.test.cjs` qui supposait la couverture locale masquée. Syntaxe app/radio/world + tests simulés de suppression, JSON invalide, candidate et opacité PASS en JS V8. Test Node dans checkout réel **NON EXÉCUTÉ**.
+- V0.1 reste **candidate non validée** : T29/T30/T33 reportés. Contours locaux radio non calibrés, DEM automatique mondial non implémenté, optimiseur multi-relais global non implémenté. Poursuivre par tests Firefox / lecture du diff, puis décider des corrections restantes avec l'utilisateur.
