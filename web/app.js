@@ -14,7 +14,7 @@ function bundledLayer(key){
    && val.features.every(f=>['MultiPolygon','Polygon'].includes(f?.geometry?.type)&&Number.isFinite(Number(f?.properties?.dbm)))?val:null;
 }
 const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
-const state={sites:structuredClone(HOME),selected:'pradel',threshold:-117,layer:preloaded,quality:'normal',opacity:.38,
+const state={sites:structuredClone(HOME),selected:'pradel',threshold:-117,layer:preloaded,quality:'normal',opacity:.38,coverageOpacities:{},
  terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
@@ -30,6 +30,7 @@ const dist=(a,b)=>{const dlat=(a.lat-b.lat)*rad,dlon=(a.lon-b.lon)*rad,k=Math.si
 function svg(tag,attrs={},parent){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,String(v)); if(parent)parent.append(e);return e;}
 function wipe(id){$(id).replaceChildren();}
 function range(v,a,b){return Math.max(a,Math.min(b,v));}
+function nodeOpacity(id){const v=Number(state.coverageOpacities?.[id]);return Number.isFinite(v)&&v>=.1&&v<=.9?v:state.opacity;}
 let previewTimer=null;
 function updateStatus(s){status(s);$('mapHint').textContent=s;}
 function setView(){
@@ -62,7 +63,17 @@ function renderSites(){
     if(legacy)legacy.checked=next;
     drawImported();renderSites();
    };
-   line.append(b,eye);list.append(line);
+   const prefs=document.createElement('details');prefs.className='node-coverage-options';
+   const prefTitle=document.createElement('summary');prefTitle.textContent='⋯';
+   prefTitle.title='Réglages de couverture de '+p.name;
+   prefTitle.setAttribute('aria-label',prefTitle.title);
+   const prefLabel=document.createElement('label');prefLabel.textContent='Opacité de '+p.name;
+   const prefInput=document.createElement('input');prefInput.type='range';prefInput.min='10';prefInput.max='90';
+   prefInput.value=String(Math.round(nodeOpacity(p.id)*100));
+   prefInput.setAttribute('aria-label','Opacité individuelle de '+p.name);
+   prefInput.oninput=()=>{state.coverageOpacities[p.id]=Number(prefInput.value)/100;drawImported();if(typeof rfDraw==='function')rfDraw();};
+   prefLabel.append(prefInput);prefs.append(prefTitle,prefLabel);
+   line.append(b,eye,prefs);list.append(line);
  });
  $('relayCount').textContent='· '+relayList().length+' relais';
  if(typeof rfRefreshVisibility==='function')rfRefreshVisibility();
@@ -153,7 +164,7 @@ function drawImported(){
   if(!levels.length)continue;
   const chosen=levels.reduce((best,x)=>Math.abs(x-state.threshold)<Math.abs(best-state.threshold)?x:best,levels[0]);
   for(const f of features.filter(f=>Number(f.properties.dbm)===chosen)){
-    const d=rings(dest,f.geometry);if(d)svg('path',{d,class:'coverage '+(id==='pradel'?'pradel':'labru'),opacity:state.opacity,'fill-rule':'evenodd'},$(dest));
+    const d=rings(dest,f.geometry);if(d)svg('path',{d,class:'coverage '+(id==='pradel'?'pradel':'labru'),opacity:nodeOpacity(id),'fill-rule':'evenodd'},$(dest));
   }
  }
  if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
@@ -321,7 +332,7 @@ async function loadCoverage(file,key){
  }catch(e){updateStatus('Import refusé : '+e.message);}
 }
 function save(){
- const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{},hiddenCoverages:typeof RADIO!=='undefined'?[...RADIO.hidden]:[],coverageOpacity:state.opacity};
+ const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{},hiddenCoverages:typeof RADIO!=='undefined'?[...RADIO.hidden]:[],coverageOpacity:state.opacity,coverageOpacities:{...state.coverageOpacities}};
  const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
  a.href=url;a.download='meshtasticcalculator-projet.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),300);
 }
@@ -336,6 +347,13 @@ async function restore(file){
   const stored=Number(obj.threshold);
   state.threshold=[-130,-117,-109].reduce((a,b)=>Math.abs(b-stored)<Math.abs(a-stored)?b:a,-117);
   $('threshold').value=String(state.threshold);
+  state.coverageOpacities={};
+  if(obj.coverageOpacities&&typeof obj.coverageOpacities==='object'&&!Array.isArray(obj.coverageOpacities)){
+   for(const [id,value] of Object.entries(obj.coverageOpacities)){
+    const v=Number(value);
+    if(ids.includes(id)&&Number.isFinite(v)&&v>=.1&&v<=.9)state.coverageOpacities[id]=v;
+   }
+  }
   const storedOpacity=Number(obj.coverageOpacity);
   if(Number.isFinite(storedOpacity)&&storedOpacity>=0.1&&storedOpacity<=0.9)state.opacity=storedOpacity;
   $('coverageOpacity').value=String(Math.round(state.opacity*100));
@@ -381,7 +399,7 @@ function wire(){
  $('newProject').onclick=()=>{
   if(!confirm('Créer un nouveau projet ? Pense à exporter le projet actuel si tu veux conserver ses points et couvertures.'))return;
   state.sites=structuredClone(HOME).map((p,i)=>({...p,name:'Station '+(i+1)}));
-  state.layer={pradel:null,labru:null};state.selected='pradel';invalidate();
+  state.layer={pradel:null,labru:null};state.coverageOpacities={};state.selected='pradel';invalidate();
   if(typeof RADIO!=='undefined'){RADIO.coverage.clear();RADIO.imports.clear();RADIO.hidden.clear();rfDraw();rfSummary();}
   render();fitSites();updateStatus('Nouveau projet : déplace les deux stations et ajoute tes relais.');
  };
