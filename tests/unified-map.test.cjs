@@ -4,7 +4,7 @@ const read=name=>fs.readFileSync(path.join(__dirname,'../web/',name),'utf8');
 const html=read('index.html'),app=read('app.js'),radio=read('radio.js'),adapter=read('world-map-adapter.js');
 const scriptOrder=[...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(m=>m[1]);
 assert.deepEqual(scriptOrder,[
- 'data/coverages.local.js','app.js','mesh-resilience.js','radio.js','world-map-adapter.js'
+ 'data/coverages.local.js','app.js','mesh-resilience.js','radio.js','world-map-adapter.js','sidebar.js'
 ]);
 assert(html.includes('id="worldMap"'),'Single unified world map exists in main entrypoint');
 assert(!html.includes('href="world-map-beta.html"'),'No separate beta navigation');
