@@ -34,3 +34,12 @@ La simulation détaillée Longley-Rice (Site Planner) et des mesures radio sur p
 - **Fond OpenTopoMap blanc** : un blocage du service tiers est possible. Fond blanc utilisable hors ligne.
 - **Le navigateur ne mémorise pas le terrain** : certaines configurations `file://` désactivent IndexedDB. Recharge le fichier HGT.
 - **Nouveau projet ailleurs en France / monde** : il faut les tuiles HGT couvrant les stations. La projection SVG n'est actuellement calibrée que pour des secteurs régionaux, pas une cartographie mondiale de précision.
+
+
+## Menu réduit et lecture des simulations
+- Onglet **Réseau** : sélectionner un point, cliquer sur l'icône œil pour afficher/masquer ses couvertures, régler l'opacité globale juste sous la liste. Masquer une couche **ne supprime jamais le nœud**.
+- Onglet **Couvertures** : calcul SRTM local, imports Site Planner, provenance et **un seul seuil demandé**. Le panneau « seuil réellement appliqué » indique le palier dBm importé le plus proche, parfois différent de celui demandé.
+- Onglet **Optimisation** : optimisation actuelle et option de redondance laissée non cochée par défaut.
+- Onglet **Réglages** : fond cartographique, chargement du terrain, diagnostic purement géométrique.
+- Le moteur local SRTM simplifié n'est plus affiché par défaut parce que son exactitude n'est pas validée : cocher « Afficher les estimations expérimentales » pour le comparer au Site Planner.
+- Pour une comparaison scientifique, voir `docs/COVERAGE_AUDIT.md` et relever les paramètres et sources d'altitude dans les deux calculateurs.
