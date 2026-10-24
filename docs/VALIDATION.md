@@ -84,3 +84,10 @@
 - Tests basés sur deux scripts versionnés (`tests/sidebar-navigation.test.cjs`, `tests/network-visibility.test.cjs`) lancés dans un contexte JavaScript V8 avec objets CommonJS et DOM simulés : PASS. **Cela ne remplace pas une exécution Node standard ni une validation Firefox.**
 - La carte MapLibre, le chargement de terrains et les modèles d'échantillonnage ne sont pas modifiés lors de ce checkpoint ; optimisation multi-objectifs / Longley-Rice non implémentés.
 - Risques à tester : position du dock et conflits d'overlay sur zoom carte, fermeture/repli et accessibilité clavier, restaurations JSON anciennes/nouvelles, impact sur couches RF et affichage des points nombreux, détails mobiles.
+
+## 2026-10-24 — Audit d'état lors de la pause (lecture uniquement)
+- **Constats utilisateur** : quatre fonds, dock réseau, visibilité individuelle, opacité et persistance jugés fonctionnels/positifs ; aucune nouvelle manipulation Firefox durant cet audit.
+- **Code vérifié en lecture** : `addRelay()` ne déclenche aucun `rfCalculateSite()` ; le calcul RF local est initialement masqué ; `showEstimate` est un interrupteur de résultat LOS préexistant ; `rfSuggestPosition()` se limite à un relais et à deux voisins ; le graphe de redondance est analytique, sans ajout automatique de relais.
+- **Absent confirmé** : UI gradients/monochrome, solveur global 0..N, scénarios multiples, éditeur radio par point, DEM mondial automatique, moteur Longley-Rice calibré.
+- Ce checkpoint comprend **uniquement des mises à jour Markdown**, aucun changement à `web/` ni aux modèles RF, et aucune exécution Node/Firefox/ITM ou test terrain nouveau. Pas de fausse assertion de PASS.
+- Checkpoint détaillé : `docs/CHECKPOINT_PAUSE_2026-10-24.md`.
