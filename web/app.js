@@ -411,7 +411,11 @@ async function restore(file){
   invalidate();render();
   if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
   updateStatus('Projet restauré.');
- }catch(e){updateStatus('Projet refusé : '+e.message);}
+  return true;
+ }catch(e){
+  updateStatus('Projet refusé : '+e.message);
+  return false;
+ }
 }
 function wire(){
  $('add').onclick=()=>addRelay();
