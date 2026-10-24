@@ -39,6 +39,28 @@ function setView(){
  const v=state.view;$('map').setAttribute('viewBox',[v.x,v.y,v.w,v.h].join(' '));renderMarkers();
 }
 function localXY(event){const p=$('map').createSVGPoint();p.x=event.clientX;p.y=event.clientY;return p.matrixTransform($('map').getScreenCTM().inverse());}
+function removeRelay(id){
+ const p=site(id);
+ if(!p||p.type!=='relay')return false;
+ if(!confirm('Supprimer « '+p.name+' » et ses couvertures de ce projet ?'))return false;
+ // Cancel stale calculations/optimization before removing the node.
+ clearTimeout(preciseRecomputeTimer);
+ if(typeof RADIO!=='undefined'){
+  RADIO.versions.set(id,(RADIO.versions.get(id)||0)+1);
+  RADIO.coverage.delete(id);RADIO.imports.delete(id);RADIO.hidden.delete(id);
+  RADIO.optimToken++;
+  RADIO.suggestion=null;
+  const apply=$('rfApply');if(apply)apply.disabled=true;
+  const candidate=$('rfCandidate');if(candidate)candidate.textContent='Aucune position proposée.';
+ }
+ delete state.coverageOpacities[id];
+ state.sites=state.sites.filter(n=>n.id!==id);
+ if(state.selected===id)state.selected='pradel';
+ invalidate();render();
+ if(typeof rfDraw==='function'){rfDraw();rfSummary();rfRefreshVisibility();}
+ updateStatus('Relais « '+p.name+' » supprimé du projet.');
+ return true;
+}
 function renderSites(){
  const list=$('sites');list.replaceChildren();
  state.sites.forEach(p=>{
@@ -73,7 +95,15 @@ function renderSites(){
    prefInput.setAttribute('aria-label','Opacité individuelle de '+p.name);
    prefInput.oninput=()=>{state.coverageOpacities[p.id]=Number(prefInput.value)/100;drawImported();if(typeof rfDraw==='function')rfDraw();};
    prefLabel.append(prefInput);prefs.append(prefTitle,prefLabel);
-   line.append(b,eye,prefs);list.append(line);
+   line.append(b,eye,prefs);
+   if(p.type==='relay'){
+    const del=document.createElement('button');del.type='button';del.className='site-delete';
+    del.textContent='✕';del.title='Supprimer '+p.name;
+    del.setAttribute('aria-label',del.title);
+    del.onclick=event=>{event.preventDefault();event.stopPropagation();removeRelay(p.id);};
+    line.append(del);
+   }
+   list.append(line);
  });
  $('relayCount').textContent='· '+relayList().length+' relais';
  if(typeof rfRefreshVisibility==='function')rfRefreshVisibility();
@@ -373,7 +403,7 @@ function wire(){
  for(const button of document.querySelectorAll('[data-nudge]')){
   button.onclick=()=>adjustPointByMeters(button.dataset.nudge,Number($('precisionStep').value));
  }
- $('delete').onclick=()=>{const p=site(state.selected);if(!p||p.type!=='relay')return;state.sites=state.sites.filter(x=>x.id!==p.id);state.selected='pradel';invalidate();render();};
+ $('delete').onclick=()=>removeRelay(state.selected);
  for(const[field,id]of[['name','pointName'],['lat','pointLat'],['lon','pointLon'],['height','pointHeight']]){
   $(id).addEventListener('change',e=>{updateField(field,e.target.value);if(field!=='name')render();});
  }
