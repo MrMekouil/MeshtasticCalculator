@@ -132,7 +132,7 @@ function rfDraw(){
   const selected=node.id===state.selected;
   const opacity=nodeOpacity(node.id);
   svg('path',{d:path,'fill-rule':'evenodd',fill:imported?'#426cab':'#0ea875',
-    'fill-opacity':selected?opacity:opacity*.52,stroke:selected?'#0d876b':'none',
+    'fill-opacity':opacity,stroke:selected?'#0d876b':'none',
     'stroke-width':'.4','vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind},group);
  }
 }
