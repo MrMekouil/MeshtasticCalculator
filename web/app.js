@@ -133,6 +133,22 @@ function renderMarkers(){
  const t=svg('text',{x:16,y:5},g);t.textContent=p.name;
  });
  renderLinks();
+ renderCandidatePreview();
+}
+function renderCandidatePreview(){
+ const rec=typeof RADIO!=='undefined'?RADIO.suggestion:null;
+ const node=rec&&site(rec.id);
+ if(!node||!rec.best||!rec.original)return;
+ // Only render a proposal for the unchanged source position.
+ if(Math.abs(node.lat-rec.original.lat)>0.0000001||Math.abs(node.lon-rec.original.lon)>0.0000001)return;
+ const start=project(node.lon,node.lat),end=project(rec.best.lon,rec.best.lat);
+ const layer=$('markersLayer');
+ const group=svg('g',{class:'candidate-preview','data-model':'unapplied-relay-proposal'},layer);
+ svg('line',{x1:start.x,y1:start.y,x2:end.x,y2:end.y,class:'candidate-line'},group);
+ svg('circle',{cx:end.x,cy:end.y,r:12,class:'candidate-ring'},group);
+ svg('circle',{cx:end.x,cy:end.y,r:4,class:'candidate-core'},group);
+ const text=svg('text',{x:end.x+16,y:end.y-9,class:'candidate-label'},group);
+ text.textContent='Position proposée (non appliquée)';
 }
 function renderLinks(){
  wipe('linksLayer');
