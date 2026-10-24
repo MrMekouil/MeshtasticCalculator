@@ -156,6 +156,7 @@ function drawImported(){
     const d=rings(dest,f.geometry);if(d)svg('path',{d,class:'coverage '+(id==='pradel'?'pradel':'labru'),opacity:state.opacity,'fill-rule':'evenodd'},$(dest));
   }
  }
+ if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
 }
 function drawEstimate(){
  wipe('estimatedLayer');
@@ -320,7 +321,7 @@ async function loadCoverage(file,key){
  }catch(e){updateStatus('Import refusé : '+e.message);}
 }
 function save(){
- const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{},hiddenCoverages:typeof RADIO!=='undefined'?[...RADIO.hidden]:[]};
+ const data={format:'MeshtasticCalculator',version:2,saved:new Date().toISOString(),sites:state.sites,layer:state.layer,threshold:state.threshold,radioImports:typeof RADIO!=='undefined'?Object.fromEntries([...RADIO.imports].map(([id,value])=>[id,value.obj])):{},hiddenCoverages:typeof RADIO!=='undefined'?[...RADIO.hidden]:[],coverageOpacity:state.opacity};
  const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
  a.href=url;a.download='meshtasticcalculator-projet.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),300);
 }
@@ -335,7 +336,14 @@ async function restore(file){
   const stored=Number(obj.threshold);
   state.threshold=[-130,-117,-109].reduce((a,b)=>Math.abs(b-stored)<Math.abs(a-stored)?b:a,-117);
   $('threshold').value=String(state.threshold);
-  if(typeof RADIO!=='undefined'){$('rfThreshold').value=String(state.threshold);RADIO.settings.threshold=state.threshold;}
+  const storedOpacity=Number(obj.coverageOpacity);
+  if(Number.isFinite(storedOpacity)&&storedOpacity>=0.1&&storedOpacity<=0.9)state.opacity=storedOpacity;
+  $('coverageOpacity').value=String(Math.round(state.opacity*100));
+  if($('networkOpacity'))$('networkOpacity').value=$('coverageOpacity').value;
+  if(typeof RADIO!=='undefined'){
+   $('rfThreshold').value=String(state.threshold);RADIO.settings.threshold=state.threshold;
+   $('rfOpacity').value=$('coverageOpacity').value;
+  }
   invalidate();render();
   if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
   updateStatus('Projet restauré.');
