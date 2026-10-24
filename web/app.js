@@ -243,6 +243,9 @@ function addRelay(pos){
  const lon=pos?.lon??(center?.lng??(a.lon+b.lon)/2);
  const p={id:'r'+Date.now().toString(36)+'_'+idx,type:'relay',name:'Relais '+idx,lat,lon,height:8};
  state.sites.splice(state.sites.length-1,0,p);state.selected=p.id;invalidate();render();
+ if(state.terrain&&typeof rfCalculateSite==='function'){
+  setTimeout(()=>{if(site(p.id))rfCalculateSite(p.id);},0);
+ }else updateStatus('Relais ajouté. Couverture non calculée : relief SRTM absent.');
 }
 let preciseRecomputeTimer=null;
 function adjustPointByMeters(direction,metres){
@@ -444,7 +447,11 @@ function wire(){
    if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
  };
  for(const id of ['showPradel','showLabru'])$(id).onchange=drawImported;
- $('showEstimate').onchange=drawEstimate;
+ $('showEstimate').onchange=()=>{
+  drawEstimate();
+  if($('showEstimate').checked&&!state.estimate)
+    updateStatus('Visibilité géométrique non calculée : lance le diagnostic du relief (pas une couverture radio).');
+};
  $('coverageOpacity').oninput=e=>{state.opacity=Number(e.target.value)/100;drawImported();drawEstimate();};
  $('base').onchange=e=>{
   state.base=e.target.value;
@@ -459,7 +466,10 @@ function wire(){
   else mapBase();
 };
  $('quality').onchange=e=>{state.quality=e.target.value;if(state.terrain&&site(state.selected)){calculate();}else updateStatus('Mode '+e.target.value+' sélectionné. Charge un terrain pour calculer.');};
- $('calculate').onclick=calculate;
+ $('calculate').onclick=()=>{
+  $('showEstimate').checked=true;
+  calculate();
+};
  $('fit').onclick=$('resetView').onclick=fitSites;
  $('newProject').onclick=()=>{
   if(!confirm('Créer un nouveau projet ? Pense à exporter le projet actuel si tu veux conserver ses points et couvertures.'))return;
