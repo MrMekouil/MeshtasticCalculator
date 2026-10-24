@@ -109,3 +109,16 @@ main{height:calc(100vh - 48px)}
  #networkDockBody{max-height:30vh}
  header{height:auto;min-height:48px}main{height:auto}
 }
+
+/* Small map style selector in upper-right, beside built-in MapLibre +/- buttons. */
+#mapQuick{position:absolute;top:10px;right:53px;z-index:11;
+ width:auto;min-width:120px;max-width:min(270px,calc(100% - 70px));background:#fff;
+ border:1px solid #cadae0;border-radius:8px;box-shadow:0 2px 12px #102b3d30}
+#mapQuick>summary{cursor:pointer;list-style:none;font-size:12px;font-weight:650;
+ color:#17475c;padding:9px 11px;white-space:nowrap}
+#mapQuick>summary::-webkit-details-marker{display:none}
+#mapQuick[open]{width:240px}
+#mapQuick>section{padding:10px;border:0;border-top:1px solid #dbe7eb;max-height:min(55vh,360px);overflow:auto}
+#mapQuick>section h2{display:none}
+#mapQuick>section label{font-size:12px}
+#mapQuick #baseInfo{font-size:11px}
