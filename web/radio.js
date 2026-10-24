@@ -116,24 +116,27 @@ function rfInvalidate(id){
 }
 function rfDraw(){
  const group=$('radioLayer');if(!group)return;group.replaceChildren();
- if(!RADIO.enabled)return;
  const t=RADIO.settings.threshold;
  for(const node of state.sites){
   if(!site(node.id)||RADIO.hidden.has(node.id))continue;
-  const imported=RADIO.imports.get(node.id);
-  const cv=RADIO.coverage.get(node.id);
-  if(!imported&&!cv)continue;
-  const tiers=displayTiers(imported?Object.keys(imported.groups):Object.keys(cv.paths),t);
-  for(let i=0;i<tiers.length;i++){
-   const level=tiers[i];
-   const path=imported?(imported.groups[level]||[]).map(f=>rings(null,f.geometry)).join(''):cv.paths[level];
-   if(!path)continue;
-   const selected=node.id===state.selected;
-   svg('path',{d:path,'fill-rule':'evenodd',fill:imported?'#426cab':'#0ea875',
+  const imported=RADIO.imports.get(node.id),calculated=RADIO.coverage.get(node.id);
+  const sources=[
+   state.plannerVisible!==false&&imported?{data:imported.groups,isImport:true,fill:'#426cab',model:'Meshtastic-import'}:null,
+   RADIO.enabled&&calculated?{data:calculated.paths,isImport:false,fill:'#0ea875',model:calculated.kind}:null
+  ].filter(Boolean);
+  for(const source of sources){
+   const tiers=displayTiers(Object.keys(source.data),t);
+   for(let i=0;i<tiers.length;i++){
+    const dbm=tiers[i];
+    const path=source.isImport?(source.data[dbm]||[]).map(f=>rings(null,f.geometry)).join(''):source.data[dbm];
+    if(!path)continue;
+    const selected=node.id===state.selected;
+    svg('path',{d:path,'fill-rule':'evenodd',fill:source.fill,
      'fill-opacity':nodeOpacity(node.id)*bandOpacity(i,tiers.length),
      stroke:selected?'#0d876b':'none','stroke-width':'.4',
-     'vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind,
-     'data-dbm':level,'data-display':coverageMode()},group);
+     'vector-effect':'non-scaling-stroke','data-model':source.model,
+     'data-dbm':dbm,'data-display':coverageMode()},group);
+   }
   }
  }
 }
@@ -402,7 +405,10 @@ function rfPanel(){
   '<p id="rfStatus" class="hint">Pour calculer la couverture d’un nouveau point, charge d’abord son relief SRTM (si non mémorisé).</p>'+
   '<button id="rfChooseTerrain" class="block">Charger un terrain SRTM (HGT)</button>'+
   '<div class="actions"><label class="btn">Importer GeoJSON du point sélectionné<input id="rfImport" type="file" accept=".geojson,.json" hidden></label><button id="rfClearImport">Retirer import</button></div>'+
-  '<div class="toggles"><label><input id="rfShow" type="checkbox" checked> Afficher les estimations expérimentales (non validées)</label></div>'+ '<p class="hint">Pour afficher ou masquer un nœud, utilise l’œil dans « Réseau ».</p>'+
+  '<fieldset class="coverage-source-switches"><legend>Sources de couverture</legend>'+
+  '<label><input id="plannerShow" type="checkbox" checked> Site Planner · couvertures importées (bleu/orange)</label>'+
+  '<label><input id="rfShow" type="checkbox" checked> Estimations expérimentales locales (vert)</label>'+
+  '<p class="hint">Les deux sources se masquent sans effacer les données. L’œil dans « Réseau » agit sur un seul nœud.</p></fieldset>'+
   '<label hidden>Seuil interne synchronisé<select id="rfThreshold"><option value="-130">≥ −130 dBm</option><option value="-117" selected>≥ −117 dBm</option><option value="-109">≥ −109 dBm</option></select></label>'+
   '<label>Résolution<select id="rfPrecision"><option value="preview">Rapide (72 directions)</option><option value="normal" selected>Standard (180 directions)</option><option value="fine">Fine (360 directions)</option></select></label>'+
   '<label hidden>Opacité interne<input id="rfOpacity" type="range" min="10" max="90" value="38"></label>'+
@@ -433,7 +439,8 @@ function rfPanel(){
  };
  $('rfTestFailure').onclick=()=>rfCheckRedundancy();
  $('rfApply').onclick=rfApplySuggestion;
- $('rfShow').onchange=e=>{RADIO.enabled=e.target.checked;rfDraw();};
+ $('plannerShow').onchange=e=>{state.plannerVisible=e.target.checked;drawImported();rfDraw();};
+  $('rfShow').onchange=e=>{RADIO.enabled=e.target.checked;rfDraw();};
  $('rfThreshold').onchange=e=>{RADIO.settings.threshold=Number(e.target.value);state.threshold=RADIO.settings.threshold;$('threshold').value=e.target.value;rfDraw();drawImported();};
  $('rfOpacity').oninput=rfDraw;
  $('rfPrecision').onchange=e=>{RADIO.settings.quality=e.target.value;if(state.terrain&&site(state.selected))rfCalculateSite(state.selected);};

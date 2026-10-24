@@ -137,3 +137,9 @@ body.world-active #mapStack .candidate-preview{pointer-events:none}
 
 /* CP-UX-DISPLAY-A: mode selection kept compact in Coverage tab. */
 .coverage-mode{margin-top:12px}.coverage-mode-note{margin-top:2px;color:#536e7d}
+
+.coverage-source-switches{border:1px solid #d5e4e9;border-radius:8px;min-width:0;padding:9px 11px;margin:11px 0;background:#f6fafb}
+.coverage-source-switches legend{font-weight:650;color:#294f61;font-size:12px;padding:0 5px}
+.coverage-source-switches label{display:flex;align-items:flex-start;gap:7px;margin:8px 0;line-height:1.45;font-weight:500}
+.coverage-source-switches input[type=checkbox]{flex:none;margin-top:3px}
+.coverage-source-switches .hint{margin:8px 0 0}
