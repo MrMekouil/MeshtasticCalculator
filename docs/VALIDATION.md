@@ -91,3 +91,12 @@
 - **Absent confirmé** : UI gradients/monochrome, solveur global 0..N, scénarios multiples, éditeur radio par point, DEM mondial automatique, moteur Longley-Rice calibré.
 - Ce checkpoint comprend **uniquement des mises à jour Markdown**, aucun changement à `web/` ni aux modèles RF, et aucune exécution Node/Firefox/ITM ou test terrain nouveau. Pas de fausse assertion de PASS.
 - Checkpoint détaillé : `docs/CHECKPOINT_PAUSE_2026-10-24.md`.
+
+
+## 2026-10-24 — Recette réelle Firefox (retour utilisateur T01–T24)
+- Détails et suites : [RECETTE_V01_T01_T24_2026-10-24.md](RECETTE_V01_T01_T24_2026-10-24.md). **16 PASS utilisateur**, **6 partiels/anomalies**, **2 non testés** ; ne pas les requalifier en succès.
+- PASS : T01–T05, T07–T15, T17, T21. Pas de nouveau test automatisé exécuté lors de cette consignation.
+- Partiels : T06 intensité fond ne change pas ; T18 options de visibilité éclatées ; T20 RF semble OK ; T22 réglages RF pas testés en profondeur ; T23 « calcul tous » semble OK ; T24 LOS lent et perdu au déplacement. Absents du bilan test : T25–T34.
+- T16 (GeoJSON) et T19 (HGT) NON TESTÉS en import manuel car l'utilisateur exige un chargement automatique. Les mécanismes actuels sont uniquement préchargement privé local et cache terrain best-effort, pas téléchargement automatique mondial.
+- Inspecté statiquement : `app.js` `baseOpacity` sans effet MapLibre ; `world-map-adapter.js` `state.estimate=null` à reprojection ; `radio.js` parse du JSON hors gestion d'erreur lors de la restauration. Ce ne sont pas des PASS d'exécution, ce sont des causes/risques identifiés par lecture.
+- Critères bloquants maintenus : import/export sans perte, résultat « inconnu » hors DEM, pas d'exception non gérée pour fichier invalide. Demande d'accord explicite avant fusion.
