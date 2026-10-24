@@ -55,6 +55,10 @@
    toggle.setAttribute('aria-expanded',String(!isOpen));
    toggle.textContent=isOpen?'Réseau · Points ▸':'Réseau · Points ▾';
   };
+  // Move existing, already wired basemap selectors next to MapLibre controls.
+  const mapQuick=document.createElement('details');mapQuick.id='mapQuick';
+  const mapSummary=document.createElement('summary');mapSummary.textContent='Fond de carte';
+  mapQuick.append(mapSummary,mapOptions);mapStack.append(mapQuick);
  }
  function activate(id){
   for(const button of nav.querySelectorAll('[data-tab]')){
