@@ -119,7 +119,7 @@
    const displayed=state.coverageMode==='bands'?' · paliers visibles : '+lv.filter(x=>x>=applied).sort((a,b)=>a-b).join(', ')+' dBm':'';
    lines.push('Site Planner · '+name+' : '+applied+' dBm'+(applied===t?'':' (palier disponible le plus proche)')+displayed);
   }
-  lines.push('Rendu : '+(state.coverageMode==='bands'?'paliers RF discrets, sans gradient continu':'zone au seuil, une teinte par source'));
+  lines.push('Rendu : '+(state.coverageMode==='gradient'?'échelle RSSI locale (−160 à −40 dBm), tranches de 10 dB':state.coverageMode==='bands'?'paliers RF discrets':'zone au seuil, une teinte par source'));
   const computed=typeof RADIO!=='undefined'&&RADIO.coverage.size;
   lines.push('Modèle local expérimental : seuil exact '+t+' dBm'+(computed?' · échantillons calculés':' · non calculé'));
   lines.push('Le seuil d’affichage ne modifie pas la sensibilité radio du récepteur.');

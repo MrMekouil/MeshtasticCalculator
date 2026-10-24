@@ -42,6 +42,38 @@ function rfLevel(row,j,dMeters,txHeight,rxHeight){
  const fspl=32.44+20*Math.log10(d/1000)+20*Math.log10(cfg.freq);
  return {dbm:cfg.eirp+cfg.rxGain-fspl-knife-cfg.extraLoss,knife};
 }
+// RSSI received-power bands from actual local samples, not SNR or link quality.
+const RF_GRADIENT_COLORS=["#284c9a","#3271b4","#278fba","#25a9af","#26ad98","#3caf7c","#64b65a","#93bb43","#c4b43d","#dfa238","#e88a34","#ed6637","#cf3346"];
+function rfGradientLevels(){return Array.from({length:13},(_,i)=>-160+i*10);}
+function rfGradientColor(level){
+ const idx=Math.max(0,Math.min(12,Math.round((Number(level)+160)/10)));
+ return RF_GRADIENT_COLORS[idx];
+}
+function rfGradientPaths(node,coverage,minThreshold){
+ const levels=rfGradientLevels(),paths=Object.fromEntries(levels.map(t=>[t,[]]));
+ if(!Array.isArray(coverage?.signals)||!coverage.rays||!coverage.step)
+  return Object.fromEntries(levels.map(t=>[t,'']));
+ for(let a=0;a<coverage.rays;a++){
+  const row=coverage.signals[a];if(!row||row.length<2)continue;
+  const theta=a*2*Math.PI/coverage.rays,half=Math.PI/coverage.rays;
+  let start=-1,active=null,blocked=false;
+  function close(j){
+   if(start<0||active===null)return;
+   const inner=Math.max(0,(start-1)*coverage.step),outer=j*coverage.step;
+   if(outer>inner)paths[active].push(rfWedge(node,inner,outer,theta-half,theta+half));
+   start=-1;active=null;
+  }
+  for(let j=1;j<row.length;j++){
+   const value=row[j];
+   if(!Number.isFinite(value))blocked=true;
+   const bin=!blocked&&value>=minThreshold&&value>=-160
+    ?Math.min(-40,Math.floor(value/10)*10):null;
+   if(bin!==active){close(j-1);if(bin!==null){start=j;active=bin;}}
+  }
+  close(row.length-1);
+ }
+ return Object.fromEntries(levels.map(t=>[t,paths[t].join('')]));
+}
 // Display-only geometry from saved RSSI samples; never infer signal through NoData.
 function rfLocalLevels(threshold,mode=coverageMode()){
  const t=parseThreshold(threshold);
@@ -157,15 +189,19 @@ function rfDraw(){
   if(RADIO.enabled&&calculated){
    let paths=calculated.paths,levels=displayTiers(Object.keys(paths),t);
    if(Array.isArray(calculated.signals)){
-    levels=rfLocalLevels(t);
+    const gradient=coverageMode()==='gradient';
+    levels=gradient?rfGradientLevels():rfLocalLevels(t);
     const key=[RADIO.projectionVersion,t,coverageMode(),node.lat,node.lon,node.height].join('|');
     if(calculated.displayKey!==key){
-     calculated.displayPaths=rfPathsFromSignals(node,calculated,levels);
+     calculated.displayPaths=gradient
+      ?rfGradientPaths(node,calculated,t)
+      :rfPathsFromSignals(node,calculated,levels);
      calculated.displayKey=key;
     }
     paths=calculated.displayPaths;
    }
-   sources.push({data:paths,isImport:false,fill:'#0ea875',model:calculated.kind,levels});
+   sources.push({data:paths,isImport:false,fill:'#0ea875',model:calculated.kind,levels,
+    gradient:coverageMode()==='gradient'&&Array.isArray(calculated.signals)});
   }
   for(const source of sources){
    const tiers=source.levels||displayTiers(Object.keys(source.data),t);
@@ -174,8 +210,8 @@ function rfDraw(){
     const path=source.isImport?(source.data[dbm]||[]).map(f=>rings(null,f.geometry)).join(''):source.data[dbm];
     if(!path)continue;
     const selected=node.id===state.selected;
-    svg('path',{d:path,'fill-rule':'evenodd',fill:source.fill,
-     'fill-opacity':nodeOpacity(node.id)*bandOpacity(i,tiers.length),
+    svg('path',{d:path,'fill-rule':'evenodd',fill:source.gradient?rfGradientColor(dbm):source.fill,
+     'fill-opacity':nodeOpacity(node.id)*(source.gradient?1:bandOpacity(i,tiers.length)),
      stroke:selected?'#0d876b':'none','stroke-width':'.4',
      'vector-effect':'non-scaling-stroke','data-model':source.model,
      'data-dbm':dbm,'data-display':coverageMode()},group);
@@ -487,7 +523,7 @@ function rfPanel(){
  $('rfThreshold').onchange=e=>{
    const t=parseThreshold(e.target.value);
    if(t===null){e.target.value=String(state.threshold);return;}
-   RADIO.settings.threshold=state.threshold=t;$('threshold').value=String(t);
+   RADIO.settings.threshold=state.threshold=t;chooseThreshold(t);
    rfDraw();drawImported();
   };
   $('rfOpacity').oninput=rfDraw;

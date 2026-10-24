@@ -51,8 +51,9 @@ const restoreCode=app.slice(app.indexOf('async function restore(file){'),app.ind
 const elements=Object.fromEntries(['threshold','coverageMode','coverageOpacity','networkOpacity','rfThreshold','rfOpacity'].map(id=>[id,{value:''}]));
 const projectRadio={settings:{}};
 let restores=0,status='';
-const restore=new Function('state','$','RADIO','preloaded','invalidate','render','globalThis','updateStatus',restoreCode+'return restore;')(
- state,id=>elements[id],projectRadio,{pradel:null,labru:null},()=>{},()=>{restores++;},{},message=>{status=message;});
+const restore=new Function('state','$','RADIO','preloaded','invalidate','render','globalThis','updateStatus','chooseThreshold','syncGradientLegend',restoreCode+'return restore;')(
+ state,id=>elements[id],projectRadio,{pradel:null,labru:null},()=>{},()=>{restores++;},{},message=>{status=message;},
+ v=>{elements.threshold.value=String(v);},()=>{});
 (async()=>{
  const sites=[{id:'pradel',lat:43,lon:2},{id:'labru',lat:43.1,lon:2.1}];
  assert.equal(await restore({text:async()=>JSON.stringify({format:'MeshtasticCalculator',sites,coverageMode:'bands',threshold:-117})}),true);

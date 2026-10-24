@@ -71,35 +71,8 @@
   drawImported();
   // Geographic cell corners are stored in WGS84; redraw for the new viewport.
   drawEstimate();
+  // World projection invalidates rendered shapes, preserving original RSSI samples.
   RADIO.projectionVersion=(RADIO.projectionVersion||0)+1;
-   for(const node of state.sites){
-   const cv=RADIO.coverage.get(node.id);
-   if(!cv||!Array.isArray(cv.signals))continue;
-   const levels=rfLocalLevels(RADIO.settings.threshold),paths=Object.fromEntries(levels.map(x=>[x,[]]));
-   const step=cv.step,rays=cv.rays;
-   for(let a=0;a<rays;a++){
-    const signals=cv.signals[a];
-    if(!signals)continue;
-    const runs=Object.fromEntries(levels.map(x=>[x,-1]));
-    const theta=a*2*Math.PI/rays,half=Math.PI/rays;
-    function close(level,j){
-     if(runs[level]<0)return;
-     const inner=Math.max(0,(runs[level]-1)*step);
-     const outer=Math.min(RADIO.settings.maxKm,j*step);
-     paths[level].push(rfWedge(node,inner,outer,theta-half,theta+half));
-     runs[level]=-1;
-    }
-    for(let j=1;j<signals.length;j++){
-     const val=signals[j];
-     for(const level of levels){
-      if(Number.isFinite(val)&&val>=level){if(runs[level]<0)runs[level]=j;}
-      else close(level,j-1);
-     }
-    }
-    for(const level of levels)close(level,signals.length-1);
-   }
-   cv.paths=Object.fromEntries(levels.map(t=>[t,paths[t].join('')]));
-  }
   rfDraw();
  }
  function toggleCoverage(show){

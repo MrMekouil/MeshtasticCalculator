@@ -143,3 +143,11 @@ body.world-active #mapStack .candidate-preview{pointer-events:none}
 .coverage-source-switches label{display:flex;align-items:flex-start;gap:7px;margin:8px 0;line-height:1.45;font-weight:500}
 .coverage-source-switches input[type=checkbox]{flex:none;margin-top:3px}
 .coverage-source-switches .hint{margin:8px 0 0}
+
+/* Sample-backed RSSI palette, distinct from imported coverage provenance. */
+.rf-gradient-legend{padding:9px 11px;margin:8px 0 12px;border:1px solid #dce8ec;border-radius:8px;background:#f8fbfc}
+.rf-gradient-legend[hidden]{display:none!important}
+.rf-gradient-legend-title{font-weight:650;font-size:12px;margin-bottom:6px}
+.rf-gradient-ramp{height:16px;border-radius:5px;border:1px solid #d1dce0;background:linear-gradient(to right,#284c9a 0%,#3271b4 8%,#278fba 17%,#25a9af 25%,#26ad98 33%,#3caf7c 42%,#64b65a 50%,#93bb43 58%,#c4b43d 67%,#dfa238 75%,#e88a34 83%,#ed6637 92%,#cf3346 100%)}
+.rf-gradient-ticks{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:11px;line-height:1.35;color:#35546a}
+.rf-gradient-ticks span:nth-child(2){text-align:center}.rf-gradient-ticks span:last-child{text-align:right}

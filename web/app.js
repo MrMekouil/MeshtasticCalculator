@@ -15,7 +15,7 @@ function bundledLayer(key){
 }
 const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
 const state={sites:structuredClone(HOME),selected:'pradel',threshold:-117,layer:preloaded,quality:'normal',opacity:.38,coverageOpacities:{},
- coverageMode:'threshold',plannerVisible:true,terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:1,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
+ coverageMode:'gradient',plannerVisible:true,terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:1,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
 const project=(lon,lat)=>globalThis.MeshtasticWorldMap?.map
@@ -32,7 +32,32 @@ function wipe(id){$(id).replaceChildren();}
 function range(v,a,b){return Math.max(a,Math.min(b,v));}
 function nodeOpacity(id){const v=Number(state.coverageOpacities?.[id]);return Number.isFinite(v)&&v>=.1&&v<=.9?v:state.opacity;}
 // Discrete RF levels only; the display never interpolates missing signal values.
-function coverageMode(){return state.coverageMode==='bands'?'bands':'threshold';}
+function coverageMode(){return ['threshold','bands','gradient'].includes(state.coverageMode)?state.coverageMode:'threshold';}
+function thresholdPresets(){
+ return [...new Set([...Array.from({length:25},(_,i)=>-160+i*5),-117,-109])].sort((a,b)=>a-b);
+}
+function chooseThreshold(value){
+ const el=$('threshold');
+ if(el.options&&!Array.from(el.options).some(x=>Number(x.value)===value)){
+  const option=document.createElement('option');
+  option.value=String(value);option.textContent=value+' dBm (projet importé)';
+  el.append(option);
+ }
+ el.value=String(value);
+}
+function buildThresholdSelector(){
+ const el=$('threshold'),options=thresholdPresets().map(value=>{
+  const option=document.createElement('option');
+  option.value=String(value);option.textContent=value+' dBm';
+  return option;
+ });
+ el.replaceChildren(...options);
+ chooseThreshold(state.threshold);
+}
+function syncGradientLegend(){
+ const legend=$('rfGradientLegend');
+ if(legend)legend.hidden=coverageMode()!=='gradient';
+}
 function parseThreshold(value){
  const n=Number(value);
  return String(value).trim()!==''&&Number.isInteger(n)&&n>=-160&&n<=-40?n:null;
@@ -423,9 +448,10 @@ async function restore(file){
   state.sites=obj.sites;state.layer={pradel:obj.layer?.pradel||preloaded.pradel||null,labru:obj.layer?.labru||preloaded.labru||null};state.selected='pradel';
   const stored=Number(obj.threshold);
   state.threshold=parseThreshold(obj.threshold)??-117;
-  $('threshold').value=String(state.threshold);
-  state.coverageMode=obj.coverageMode==='bands'?'bands':'threshold';
+  chooseThreshold(state.threshold);
+  state.coverageMode=['gradient','bands','threshold'].includes(obj.coverageMode)?obj.coverageMode:'threshold';
   $('coverageMode').value=state.coverageMode;
+  syncGradientLegend();
   state.plannerVisible=obj.plannerVisible!==false;
   if($('plannerShow'))$('plannerShow').checked=state.plannerVisible;
   state.coverageOpacities={};
@@ -455,6 +481,8 @@ async function restore(file){
  }
 }
 function wire(){
+ buildThresholdSelector();
+ syncGradientLegend();
  $('add').onclick=()=>addRelay();
  $('centerPrecise').onclick=centerOnSelectedPoint;
  for(const button of document.querySelectorAll('[data-nudge]')){
@@ -467,18 +495,18 @@ function wire(){
  $('threshold').onchange=e=>{
    const t=parseThreshold(e.target.value);
    if(t===null){
-    e.target.value=String(state.threshold);
-    updateStatus('Seuil invalide : utilise un entier entre −160 et −40 dBm.');
+    chooseThreshold(state.threshold);
+    updateStatus('Seuil non proposé : choisis une valeur de la liste.');
     return;
    }
-   state.threshold=t;
+   state.threshold=t;chooseThreshold(t);
    if(typeof RADIO!=='undefined'){RADIO.settings.threshold=t;$('rfThreshold').value=String(t);rfDraw();}
    drawImported();
    if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
   };
   $('coverageMode').onchange=e=>{
-   state.coverageMode=e.target.value==='bands'?'bands':'threshold';
-   drawImported();if(typeof rfDraw==='function')rfDraw();
+   state.coverageMode=['threshold','bands','gradient'].includes(e.target.value)?e.target.value:'threshold';
+   syncGradientLegend();drawImported();if(typeof rfDraw==='function')rfDraw();
   };
   for(const id of ['showPradel','showLabru'])$(id).onchange=drawImported;
  $('showEstimate').onchange=()=>{
@@ -508,7 +536,7 @@ function wire(){
  $('newProject').onclick=()=>{
   if(!confirm('Créer un nouveau projet ? Pense à exporter le projet actuel si tu veux conserver ses points et couvertures.'))return;
   state.sites=structuredClone(HOME).map((p,i)=>({...p,name:'Station '+(i+1)}));
-  state.layer={pradel:null,labru:null};state.coverageOpacities={};state.coverageMode='threshold';$('coverageMode').value='threshold';state.plannerVisible=true;if($('plannerShow'))$('plannerShow').checked=true;state.selected='pradel';invalidate();
+  state.layer={pradel:null,labru:null};state.coverageOpacities={};state.coverageMode='gradient';$('coverageMode').value='gradient';syncGradientLegend();state.plannerVisible=true;if($('plannerShow'))$('plannerShow').checked=true;state.selected='pradel';invalidate();
   if(typeof RADIO!=='undefined'){RADIO.coverage.clear();RADIO.imports.clear();RADIO.hidden.clear();RADIO.enabled=true;if($('rfShow'))$('rfShow').checked=true;rfDraw();rfSummary();}
   render();fitSites();updateStatus('Nouveau projet : déplace les deux stations et ajoute tes relais.');
  };

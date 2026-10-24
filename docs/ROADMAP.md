@@ -162,3 +162,6 @@ Implémentation poussée sur `work/project-bootstrap-v0.1` :
 - **T28 intelligibilité** : détails de marges et verdict de chaque paire dans un sous-menu ; la géométrie pointillée n'est pas une preuve de liaison RF.
 
 **À valider ensuite dans Firefox** : un relais supprimé après confirmation et sans suppression des stations A/B, réglages d'intensité, position candidate, résultat RF de nouveau relais avec DEM, LOS maintenu au déplacement, projet sauvegardé/rechargé et JSON invalide. **Aucun solveur global 0…N n'a été développé.**
+
+### CP-UX-RSSI-GRADIENT — paliers fixes + carte colorée (2026-10-24)
+Retour Firefox D1–D3 OK, D4 restauration à −100. Introduire sélection fixe par 5 dB + ancienne compatibilité et mode d'échelle locale par bins de 10 dB couvrant −160..−40 ; légende et cache reprojeté. Tests G1–G4 avant lot suivant.

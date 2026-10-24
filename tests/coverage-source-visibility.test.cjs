@@ -42,8 +42,9 @@ assert(save.includes('plannerVisible:state.plannerVisible!==false'));
 assert(save.includes("experimentalVisible:typeof RADIO!=='undefined'?RADIO.enabled:true"));
 const restoreSource=app.slice(app.indexOf('async function restore(file){'),app.indexOf('function wire(){'));
 const inputs=Object.fromEntries(['plannerShow','rfShow','rfThreshold','rfOpacity','threshold','coverageOpacity','coverageMode','networkOpacity'].map(id=>[id,{checked:true,value:''}]));
-const restorer=new Function('state','$','RADIO','preloaded','invalidate','render','globalThis','updateStatus',
- restoreSource+'return restore;')(state,id=>inputs[id],RADIO,{pradel:null,labru:null},()=>{},()=>{},{},()=>{});
+const restorer=new Function('state','$','RADIO','preloaded','invalidate','render','globalThis','updateStatus','chooseThreshold','syncGradientLegend',
+ restoreSource+'return restore;')(state,id=>inputs[id],RADIO,{pradel:null,labru:null},()=>{},()=>{},{},()=>{},
+ v=>{inputs.threshold.value=String(v);},()=>{});
 (async()=>{
  const sites=[{id:'pradel',lat:43,lon:2},{id:'labru',lat:44,lon:3}];
  for(const [flags,a,b] of [[{plannerVisible:false,experimentalVisible:true},false,true],

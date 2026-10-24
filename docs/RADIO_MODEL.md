@@ -23,3 +23,6 @@ Seuil d'affichage numérique libre entre −160 et −40 dBm (pas de 1 dB) ; ce 
 
 ### Tolérance visuelle des paliers GeoJSON
 Lorsque le seuil demandé est très proche d'un palier exporté (2 dB au plus sous le seuil demandé), afficher le vrai palier avec sa valeur effective explicitée, sans fabriquer le palier souhaité. Au-delà de 2 dB, aucune surface exportée n'est représentée pour ce seuil s'il dépasse la plage du fichier. Ce n'est pas un calcul RF supplémentaire.
+
+## Carte RSSI couleur (octobre 2026)
+Mode `gradient` représente le RSSI calculé localement par **13 classes de 10 dB de −160 à −40 dBm**, bleu pour faible, rouge pour fort. Des valeurs au-dessus de −40 sont groupées dans la dernière classe, les valeurs inférieures à −160 sont omises. Seuls les échantillons FSPL + obstacle dominant / SRTM existants sont utilisés : aucun point inconnu, aucune interpolation spatiale inventée. Le seuil sélectionné continue de masquer les échantillons en dessous : choisir −160 pour l'échelle complète. Il ne s'agit pas d'un calcul de taux de paquets, de SNR, ni d'un gradient de réception physique continue. Les imports GeoJSON restent au seul niveau de détail que leur source permet. 27 valeurs prédéfinies de filtre à pas de 5 dB avec −117/−109 préservés, seuils personnalisés historiques conservés dans les projets.
