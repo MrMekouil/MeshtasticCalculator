@@ -156,3 +156,5 @@
 - `RADIO.settings.sensitivity` reste séparée de `RADIO.settings.threshold`. Préserver les valeurs radio calculées/les GeoJSON privés, sans modification des données ; `main` non touchée.
 - Tests V8 pré-push : syntaxe JS des modules, valeurs valides/invalides, palier existant/absent importé, calcul de la géométrie à partir des échantillons, NoData et mode paliers PASS. Script reproductible `tests/coverage-threshold-range.test.cjs` ajouté. **Exécution Node en checkout / Firefox après changements : NON EXÉCUTÉS.**
 - Recette demandée avant checkpoint suivant : D1 seuil −140 puis −125 ; D2 seuil supérieur aux paliers exportés, aucune couverture fictive ; D3 navigation carte et bascule sources/paliers ; D4 saisir −170 et −20 et vérifier retour à la précédente valeur valide. T29/T30/T33 restent reportés.
+
+- CP-UX-THRESHOLD post-contrôle : palier unique Site Planner −118 dBm encore visible et identifié pour seuil demandé −117 (écart 1 dB) ; pas d'extrapolation pour −114 dBm. Test V8 PASS ; Firefox après correctif NON EXÉCUTÉ.

@@ -41,7 +41,7 @@ function displayTiers(levels,requested=state.threshold){
  const values=[...new Set(levels.map(Number).filter(Number.isFinite))].sort((a,b)=>a-b);
  if(!values.length)return [];
  const goal=Number.isFinite(Number(requested))?Number(requested):-117;
- if(goal>values[values.length-1])return []; // Never invent a stronger imported contour.
+ if(goal>values[values.length-1]+2)return []; // Only near exported tiers (≤ 2 dB) may stand for this display request.
  const nearest=values.reduce((best,x)=>Math.abs(x-goal)<Math.abs(best-goal)?x:best,values[0]);
  return coverageMode()==='bands'?values.filter(x=>x>=nearest):[nearest];
 }

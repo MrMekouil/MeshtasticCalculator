@@ -12,6 +12,8 @@ for(const v of [-160,-148,-140,-130,-117,-109,-80,-40])assert.equal(parseThresho
 for(const v of [-170,-20,'',null,'-114.5','invalid'])assert.equal(parseThreshold(v),null);
 assert.deepEqual(displayTiers([-130,-118,-109],-117),[-118]);
 assert.deepEqual(displayTiers([-130,-118,-109],-70),[],'No extrapolation of imported source');
+assert.deepEqual(displayTiers([-118],-117),[-118],'Nearest exported tier within 1 dB remains labeled');
+assert.deepEqual(displayTiers([-118],-114),[],'Do not extrapolate beyond 2 dB');
 const radioCore=radio.slice(radio.indexOf('function rfLocalLevels('),radio.indexOf('function rfWedge('));
 const {rfLocalLevels,rfPathsFromSignals}=new Function('parseThreshold','coverageMode','rfWedge',radioCore+'return {rfLocalLevels,rfPathsFromSignals};')(
  parseThreshold,coverageMode,(_site,start,end)=>'W'+start+':'+end+';');

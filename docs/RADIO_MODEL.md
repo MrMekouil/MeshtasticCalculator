@@ -20,3 +20,6 @@
 
 ## Distinction seuil d'affichage / sensibilité radio — 2026-10-24
 Seuil d'affichage numérique libre entre −160 et −40 dBm (pas de 1 dB) ; ce n'est ni la sensibilité de réception de chaque préréglage LoRa ni la preuve qu'un paquet sera décodé. Les `RADIO.coverage.*.signals` calculés servent à reconstruire les secteurs au seuil choisi, sans recalcul de diffraction ni interpolation entre points inconnus. Les intervalles de NoData restent vides. Le mode paliers affiche le seuil choisi et jusqu'à quatre seuils supérieurs par pas de 10 dB, bornés. Les imports Site Planner demeurent dépendants des seuls contours présents dans leurs fichiers ; pas de contour disponible au-dessus du plus fort palier exporté.
+
+### Tolérance visuelle des paliers GeoJSON
+Lorsque le seuil demandé est très proche d'un palier exporté (2 dB au plus sous le seuil demandé), afficher le vrai palier avec sa valeur effective explicitée, sans fabriquer le palier souhaité. Au-delà de 2 dB, aucune surface exportée n'est représentée pour ce seuil s'il dépasse la plage du fichier. Ce n'est pas un calcul RF supplémentaire.

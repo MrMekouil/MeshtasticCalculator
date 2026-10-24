@@ -114,7 +114,7 @@
   const lines=[];
   for(const [id,name] of [['pradel',site('pradel')?.name||'Station A'],['labru',site('labru')?.name||'Station B']]){
    const lv=levelsFor(state.layer[id]);if(!lv.length)continue;
-   if(t>Math.max(...lv)){lines.push('Site Planner · '+name+' : aucun palier exporté à '+t+' dBm ou plus');continue;}
+   if(t>Math.max(...lv)+2){lines.push('Site Planner · '+name+' : aucun palier exporté proche de '+t+' dBm');continue;}
    const applied=lv.reduce((best,x)=>Math.abs(x-t)<Math.abs(best-t)?x:best,lv[0]);
    const displayed=state.coverageMode==='bands'?' · paliers visibles : '+lv.filter(x=>x>=applied).sort((a,b)=>a-b).join(', ')+' dBm':'';
    lines.push('Site Planner · '+name+' : '+applied+' dBm'+(applied===t?'':' (palier disponible le plus proche)')+displayed);
