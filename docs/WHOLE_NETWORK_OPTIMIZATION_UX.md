@@ -58,3 +58,8 @@ Pas de fausses couvertures ou marges sans terrain; pas de garanties de fiabilit�
 
 ## Références internes
 `docs/SPEC_UNIVERSAL_MILESTONE.md`, `docs/REDUNDANCY.md`, `docs/COVERAGE_AUDIT.md`, `docs/RADIO_MODEL.md`.
+
+## Complément de priorités à l'arrêt du 24 octobre 2026
+- Ce document **décrit la cible** : ne pas confondre objectifs de réseau entier, gradients et hypothèses multi-relais avec un produit déjà disponible.
+- Correctifs UX P0 à traiter d'abord : corbeille dans dock Réseau, calcul automatique de la couverture après ajout si DEM valide, affichage RF expérimental sans interrupteur muet, diagnostic géométrique distinct et actionnable. Voir `CHECKPOINT_PAUSE_2026-10-24.md` pour les critères d'acceptation.
+- Maintenir carte dominante, opacités par point, redondance optionnelle, scénario choisi seulement après confirmation. La précision radio est préalable à l'optimisation de couverture maximale.
