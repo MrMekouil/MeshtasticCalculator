@@ -58,3 +58,12 @@
 - Première implémentation UX : `web/sidebar.js` déplace la liste existante dans `#networkDock` au-dessus de la carte, le fond/intensité dans `#mapQuick`, onglet gauche « Point » réservé à l'édition ; `app.js` et `radio.js` ajoutent des opacités par nœud enregistrées dans les projets JSON.
 - Le mode géométrique de la capture (362/9000 cellules) est distinct du RF. Couche `.estimate` recolorée en gris ; voir `docs/COVERAGE_AUDIT.md`.
 - Contrôles JS simulés sidebar/network visibility PASS. Le comportement réel dans Firefox (dock, menu carte, slider par nœud, mobile, import/save) est **à valider**. Main inchangée, aucun merge.
+
+## PAUSE demandée — état à reprendre le 24 octobre 2026
+- L'utilisateur demande explicitement **d'arrêter les ajouts de fonctionnalités**, de conserver toutes les idées dans le dépôt et de faire un point d'avancement fiable. Document-source : `docs/CHECKPOINT_PAUSE_2026-10-24.md`.
+- Derniers retours : dock flottant, sélection, boutons œil, opacité individuelle et sauvegarde appréciés. Il faut **ajouter une corbeille directement par relais**, ne jamais permettre de supprimer A/B.
+- Ajout relais : `addRelay()` crée le point mais ne lance pas sa couverture ; `RADIO.enabled=false` par défaut explique pourquoi les estimations restent masquées. La demande est une couverture automatique et visible si DEM valide, avec la mention **expérimental** et une politique de calcul non intrusive.
+- « Visibilité géométrique » : case `showEstimate` n'affiche que `state.estimate`, sans déclencher `calculate()` ; sans calcul préalable, elle ne fait rien. Déplacer sous Diagnostic relief avancé et afficher non calculé/DEM absent/en cours/calculé.
+- Important : gradients, optimiseur multi-relais global, quatre objectifs et hypothèses sont **des spécifications**, PAS de fonctions utilisables. Redondance actuelle = **analyse simple de panne**, pas optimisation de sites supplémentaires.
+- Priorité de reprise : CP-UX-FIX (suppressions sûres, auto couverture claire, visibilité géométrique), puis modes d'affichage, validation moteur radio et optimisation globale. Aucune nouvelle implémentation pendant la pause.
+- Sources GitHub contrôlées : travail pré-pause `e0bc6a5c3f7e75c3d6701c9e9671c347d935f1a6`; main `bb853ccf45d86f194b70c1714275ac8edcb615f8`. Lire HEAD actuel à la reprise. Pas de checkout local/CI navigateur ou mesures radio pendant ce checkpoint ; aucune fusion.
