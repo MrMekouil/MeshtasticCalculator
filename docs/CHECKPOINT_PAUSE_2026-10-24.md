@@ -97,3 +97,8 @@ Après plusieurs versions successives, le socle cartographique a progressé, mai
 Relevé des configurations exactes Site Planner et locale, vrai DEM utilisé dans chaque moteur, GeoJSON privés exportés, échantillons de liaison en terrain dégagé et obstrué (RSSI, SNR, livraison), conditions temporelles et équipement. Aucune affirmation « Meshtastic sous-estime » ou « notre site surestime » avant cela.
 
 **Sources internes :** `AGENTS.md`, `docs/WHOLE_NETWORK_OPTIMIZATION_UX.md`, `docs/COVERAGE_AUDIT.md`, `docs/REDUNDANCY.md`, `docs/SPEC_UNIVERSAL_MILESTONE.md`.
+
+
+## Addendum après premiers tests Firefox (24 octobre 2026)
+La pause et la recette se poursuivent : l'utilisateur a fourni ses verdicts T01–T24. Détails, classification et tests restants enregistrés dans `docs/RECETTE_V01_T01_T24_2026-10-24.md`.
+**16 PASS, 6 PARTIELS/anomalies, 2 NON TESTÉS**. Fond d'écran : intensité sans effet ; visibilité : mécanismes dispersés ; diagnostic LOS : résultats effacés au déplacement. T16/T19 ne répondent pas au souhait d'acquisition des données automatique. Pas de modification de l'application pendant ce complément documentaire, main intouchable.
