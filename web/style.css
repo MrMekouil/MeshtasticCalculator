@@ -148,6 +148,14 @@ body.world-active #mapStack .candidate-preview{pointer-events:none}
 .rf-gradient-legend{padding:9px 11px;margin:8px 0 12px;border:1px solid #dce8ec;border-radius:8px;background:#f8fbfc}
 .rf-gradient-legend[hidden]{display:none!important}
 .rf-gradient-legend-title{font-weight:650;font-size:12px;margin-bottom:6px}
-.rf-gradient-ramp{height:16px;border-radius:5px;border:1px solid #d1dce0;background:linear-gradient(to right,#284c9a 0%,#3271b4 6%,#278fba 13%,#25a9af 19%,#26ad98 25%,#3caf7c 31%,#64b65a 38%,#93bb43 44%,#c4b43d 50%,#dfa238 56%,#e88a34 63%,#ed6637 69%,#cf3346 75%,#c52b46 81%,#ae224a 88%,#921b4b 94%,#771543 100%)}
+.rf-gradient-ramp{height:19px;border-radius:5px;border:1px solid #d1dce0;background:linear-gradient(to right,#315bbb 0%,#29b5cf 25%,#52b972 50%,#f5c14a 75%,#d74843 100%)}
 .rf-gradient-ticks{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:11px;line-height:1.35;color:#35546a}
 .rf-gradient-ticks span:nth-child(2){text-align:center}.rf-gradient-ticks span:last-child{text-align:right}
+
+/* Only five numeric RSSI ticks; keep legend compact and labels readable. */
+.rf-gradient-ticks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin-top:6px;font-size:10px;line-height:1.4;color:#35546a;font-variant-numeric:tabular-nums}
+.rf-gradient-ticks span{white-space:nowrap;text-align:center}
+.rf-gradient-ticks span:first-child{text-align:left}
+.rf-gradient-ticks span:last-child{text-align:right}
+
+#rfGradientHint[hidden]{display:none!important}

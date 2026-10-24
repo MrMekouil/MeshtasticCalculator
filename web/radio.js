@@ -42,37 +42,78 @@ function rfLevel(row,j,dMeters,txHeight,rxHeight){
  const fspl=32.44+20*Math.log10(d/1000)+20*Math.log10(cfg.freq);
  return {dbm:cfg.eirp+cfg.rxGain-fspl-knife-cfg.extraLoss,knife};
 }
-// RSSI received-power bands from actual local samples, not SNR or link quality.
-const RF_GRADIENT_COLORS=["#284c9a","#3271b4","#278fba","#25a9af","#26ad98","#3caf7c","#64b65a","#93bb43","#c4b43d","#dfa238","#e88a34","#ed6637","#cf3346","#c52b46","#ae224a","#921b4b","#771543"];
-function rfGradientLevels(){return Array.from({length:17},(_,i)=>-160+i*10);}
-function rfGradientColor(level){
- const idx=Math.max(0,Math.min(16,Math.round((Number(level)+160)/10)));
- return RF_GRADIENT_COLORS[idx];
+// Five coherent modeled-RSSI classes, not measured SNR or packet quality.
+const RF_GRADIENT_COLORS=['#315bbb','#29b5cf','#52b972','#f5c14a','#d74843'];
+function rfGradientLevels(){return [0,1,2,3,4];}
+function rfGradientColor(index){return RF_GRADIENT_COLORS[Math.max(0,Math.min(4,Number(index)))];}
+function rfGradientScale(threshold,coverages){
+ let strongest=-Infinity;
+ for(const cv of coverages){
+  if(!Array.isArray(cv?.signals))continue;
+  for(const row of cv.signals){
+   if(!row)continue;
+   for(let i=1;i<row.length;i++){
+    const v=row[i];
+    if(!Number.isFinite(v))break; // NoData ends a trustworthy ray
+    if(v>=threshold&&v>strongest)strongest=v;
+   }
+  }
+ }
+ return {min:threshold,max:Number.isFinite(strongest)?Math.min(0,strongest):null};
 }
-function rfGradientPaths(node,coverage,minThreshold){
- const levels=rfGradientLevels(),paths=Object.fromEntries(levels.map(t=>[t,[]]));
- if(!Array.isArray(coverage?.signals)||!coverage.rays||!coverage.step)
-  return Object.fromEntries(levels.map(t=>[t,'']));
- for(let a=0;a<coverage.rays;a++){
-  const row=coverage.signals[a];if(!row||row.length<2)continue;
-  const theta=a*2*Math.PI/coverage.rays,half=Math.PI/coverage.rays;
+function rfGradientClass(value,scale){
+ if(!Number.isFinite(value)||!scale||scale.max===null||value<scale.min)return null;
+ const span=scale.max-scale.min;
+ return span<=0?4:Math.max(0,Math.min(4,Math.floor((value-scale.min)*5/span)));
+}
+function rfGradientTicks(scale){
+ if(!scale||scale.max===null)return [];
+ const interval=scale.max-scale.min;
+ return Array.from({length:5},(_,i)=>{
+  const v=scale.min+interval*i/4;
+  return interval>=4?Math.round(v):+v.toFixed(1);
+ });
+}
+function rfUpdateGradientLegend(scale){
+ const root=$('rfGradientLegend');if(!root)return;
+ const ticks=$('rfGradientTicks'),hint=$('rfGradientHint'),values=rfGradientTicks(scale);
+ if(ticks){
+  ticks.replaceChildren();
+  if(!values.length)ticks.textContent='Aucun calcul radio local disponible';
+  else for(const value of values){
+   const node=document.createElement('span');
+   node.textContent=String(value);
+   ticks.append(node);
+  }
+ }
+ if(hint){
+  hint.hidden=values.length>0;
+  hint.textContent='Aucune couverture locale calculée : charge un relief SRTM puis calcule les nœuds.';
+ }
+}
+function rfGradientPaths(node,cv,threshold,scale){
+ const paths=Object.fromEntries(rfGradientLevels().map(t=>[t,[]]));
+ if(!Array.isArray(cv?.signals)||!cv.rays||!cv.step||scale?.max===null)
+  return Object.fromEntries(rfGradientLevels().map(t=>[t,'']));
+ for(let a=0;a<cv.rays;a++){
+  const row=cv.signals[a];if(!row||row.length<2)continue;
+  const theta=a*2*Math.PI/cv.rays,half=Math.PI/cv.rays;
   let start=-1,active=null,blocked=false;
   function close(j){
    if(start<0||active===null)return;
-   const inner=Math.max(0,(start-1)*coverage.step),outer=j*coverage.step;
+   const inner=Math.max(0,(start-1)*cv.step),outer=j*cv.step;
    if(outer>inner)paths[active].push(rfWedge(node,inner,outer,theta-half,theta+half));
    start=-1;active=null;
   }
   for(let j=1;j<row.length;j++){
    const value=row[j];
    if(!Number.isFinite(value))blocked=true;
-   const bin=!blocked&&value>=minThreshold&&value>=-160
-    ?Math.min(0,Math.floor(value/10)*10):null;
+   const bin=blocked?null:rfGradientClass(value,scale);
    if(bin!==active){close(j-1);if(bin!==null){start=j;active=bin;}}
   }
   close(row.length-1);
  }
- return Object.fromEntries(levels.map(t=>[t,paths[t].join('')]));
+ return Object.fromEntries(rfGradientLevels().map(t=>[t,paths[t].join('')]));
 }
 // Display-only geometry from saved RSSI samples; never infer signal through NoData.
 function rfLocalLevels(threshold,mode=coverageMode()){
@@ -109,7 +150,7 @@ function rfWedge(site,km0,km1,ang0,ang1){
  const pts=[
   rfPoint(site.lat,site.lon,ang0,km0),rfPoint(site.lat,site.lon,ang0,km1),
   rfPoint(site.lat,site.lon,ang1,km1),rfPoint(site.lat,site.lon,ang1,km0)];
- return 'M'+pts.map((pt,i)=>{const p=project(pt.lon,pt.lat);return (i?'L':'')+p.x.toFixed(1)+' '+p.y.toFixed(1)}).join('')+'Z';
+ return 'M'+pts.map((pt,i)=>{const p=project(pt.lon,pt.lat);return (i?'L':'')+p.x.toFixed(2)+' '+p.y.toFixed(2)}).join('')+'Z';
 }
 function rfBuildWedges(site,rows,preset){
  const tiers=[-130,-117,-109],paths=Object.fromEntries(tiers.map(x=>[x,[]])),signals=[];let valid=0;
@@ -180,6 +221,8 @@ function rfInvalidate(id){
 function rfDraw(){
  const group=$('radioLayer');if(!group)return;group.replaceChildren();
  const t=RADIO.settings.threshold;
+ const gradientScale=coverageMode()==='gradient'?rfGradientScale(t,RADIO.coverage.values()):null;
+ if(gradientScale)rfUpdateGradientLegend(gradientScale);
  for(const node of state.sites){
   if(!site(node.id)||RADIO.hidden.has(node.id))continue;
   const imported=RADIO.imports.get(node.id),calculated=RADIO.coverage.get(node.id);
@@ -191,10 +234,10 @@ function rfDraw(){
    if(Array.isArray(calculated.signals)){
     const gradient=coverageMode()==='gradient';
     levels=gradient?rfGradientLevels():rfLocalLevels(t);
-    const key=[RADIO.projectionVersion,t,coverageMode(),node.lat,node.lon,node.height].join('|');
+    const key=[RADIO.projectionVersion,t,coverageMode(),gradientScale?.max,node.lat,node.lon,node.height].join('|');
     if(calculated.displayKey!==key){
      calculated.displayPaths=gradient
-      ?rfGradientPaths(node,calculated,t)
+      ?rfGradientPaths(node,calculated,t,gradientScale)
       :rfPathsFromSignals(node,calculated,levels);
      calculated.displayKey=key;
     }
@@ -212,9 +255,10 @@ function rfDraw(){
     const selected=node.id===state.selected;
     svg('path',{d:path,'fill-rule':'evenodd',fill:source.gradient?rfGradientColor(dbm):source.fill,
      'fill-opacity':nodeOpacity(node.id)*(source.gradient?1:bandOpacity(i,tiers.length)),
-     stroke:selected?'#0d876b':'none','stroke-width':'.4',
+     stroke:source.gradient?'none':selected?'#0d876b':'none','stroke-width':source.gradient?'0':'.4',
      'vector-effect':'non-scaling-stroke','data-model':source.model,
-     'data-dbm':dbm,'data-display':coverageMode()},group);
+     'data-dbm':source.gradient&&gradientScale?+(gradientScale.min+(gradientScale.max-gradientScale.min)*dbm/5).toFixed(1):dbm,
+     'data-band':source.gradient?dbm:'','data-display':coverageMode()},group);
    }
   }
  }

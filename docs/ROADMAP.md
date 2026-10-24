@@ -167,3 +167,6 @@ Implémentation poussée sur `work/project-bootstrap-v0.1` :
 Retour Firefox D1–D3 OK, D4 restauration à −100. Introduire sélection fixe par 5 dB + ancienne compatibilité et mode d'échelle locale par bins de 10 dB couvrant −160..−40 ; légende et cache reprojeté. Tests G1–G4 avant lot suivant.
 
 - Correctif complémentaire CP-UX-RSSI-GRADIENT : bornes étendues jusqu'à 0 dBm (17 classes, 35 presets) au lieu de −40 ; tests G1–G4 restent à effectuer sur le nouveau commit.
+
+### CP-UX-RSSI-5BANDS (2026-10-24)
+À la suite de la capture Firefox G2 non validée : suppression du quadrillage en mode gradient, cinq couleurs bleu→rouge avec une plage min=seuil choisi et max=meilleur RSSI réellement calculé ; cinq repères numériques en légende. Tests H1–H4 en attente de retour utilisateur ; aucune validation Firefox anticipée.

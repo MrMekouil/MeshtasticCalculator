@@ -43,7 +43,7 @@ rfDraw();
 assert.deepEqual(displayed.map(x=>x['data-dbm']),[-118,-109,-117,-109]);
 RADIO.hidden.add('r1');rfDraw();
 assert.deepEqual(displayed.map(x=>x['data-dbm']),[-118,-109]);
-RADIO.enabled=false;rfDraw();assert.equal(displayed.length,0);
+RADIO.enabled=false;rfDraw();assert.equal(displayed.length,2,'Planner import remains visible when local RF is off');
 RADIO.enabled=true;RADIO.hidden.clear();state.coverageMode='threshold';rfDraw();
 assert.deepEqual(displayed.map(x=>x['data-dbm']),[-118,-117]);
 // Project schema migration: optional coverageMode, fallback for invalid and legacy values.
