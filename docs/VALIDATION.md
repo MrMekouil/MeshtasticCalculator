@@ -65,3 +65,13 @@
 - `rfRedundancy` présent sans `checked` dans le panneau d'optimisation ; base `MeshtasticResilience` réutilisée, et rapports actuels/proposés affichés seulement sur demande.
 - Calcul d’implantations supplémentaires redondantes, moteur ITM/Longley-Rice validé, performance et rendu des couches MapLibre dans Firefox **NON EXÉCUTÉS**.
 - Ce checkpoint est une intégration fonctionnelle expérimentale, pas une version stable validée terrain.
+
+
+## 2026-10-24 — Navigation compacte et séparation des prédictions
+- Vérification de syntaxe de `web/app.js`, `web/radio.js`, `web/sidebar.js` récupérés sur branche distante : PASS.
+- Faux DOM construit pour vérifier : 4 onglets créés, Réseau actif, navigation Couvertures fonctionnelle, textes de provenance (seuil demandé −117, palier importé Pradel −118 et Labruguière −110), opacité répercutée sur contrôles importé et local : PASS.
+- Essai simulé d'œil de chaque nœud : relais masqué sans affecter les autres, Le Pradel masquant aussi son GeoJSON, Labruguière indépendante, aucune suppression de nœuds : PASS.
+- Tests reproductibles committés : `tests/sidebar-navigation.test.cjs` et `tests/network-visibility.test.cjs`. Exécution dans un checkout Node complet : NON EXÉCUTÉ.
+- Contrairement à une vraie validation physique, la nouvelle UI ne conclut pas qu'une couverture prédite est réelle. Le moteur local non validé est désactivé à l'ouverture ; il reste consultable après action explicite.
+- Comparaison de modèles : code et paramètres examinés, document [COVERAGE_AUDIT.md](COVERAGE_AUDIT.md). Deux GeoJSON personnels/HGT réel et configuration identique officielle **non utilisés pour une mesure de différence pixel ou dB**.
+- Tests Firefox réel du nouveau menu, source Site Planner et SRTM : NON EXÉCUTÉS.
