@@ -14,3 +14,6 @@
 - **ÉTAT ACTUEL / PAUSE obligatoire (24 octobre 2026) :** `docs/CHECKPOINT_PAUSE_2026-10-24.md` — prioritaire avant anciennes indications de ROADMAP ou états dépassés.
 - Objectifs multi-relais et UI cible : `docs/WHOLE_NETWORK_OPTIMIZATION_UX.md`.
 - Écarts de propagation et limites : `docs/COVERAGE_AUDIT.md`.
+
+
+- **RECETTE V0.1 ACTUELLE — Firefox T01–T24 (24 octobre 2026)** : `docs/RECETTE_V01_T01_T24_2026-10-24.md` ; **prioritaire à lire à la reprise**, avant d'envisager toute fusion.
