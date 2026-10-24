@@ -117,7 +117,7 @@ function rfInvalidate(id){
 function rfDraw(){
  const group=$('radioLayer');if(!group)return;group.replaceChildren();
  if(!RADIO.enabled)return;
- const t=RADIO.settings.threshold;const opacity=+($('rfOpacity')?.value||35)/100;
+ const t=RADIO.settings.threshold;
  for(const node of state.sites){
   if(!site(node.id)||RADIO.hidden.has(node.id))continue;
   const imported=RADIO.imports.get(node.id);
@@ -130,6 +130,7 @@ function rfDraw(){
   }else if(cv)path=cv.paths[t];
   if(!path)continue;
   const selected=node.id===state.selected;
+  const opacity=nodeOpacity(node.id);
   svg('path',{d:path,'fill-rule':'evenodd',fill:imported?'#426cab':'#0ea875',
     'fill-opacity':selected?opacity:opacity*.52,stroke:selected?'#0d876b':'none',
     'stroke-width':'.4','vector-effect':'non-scaling-stroke','data-model':imported?'Meshtastic-import':cv.kind},group);
