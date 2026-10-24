@@ -64,3 +64,12 @@
 - Vérifications : syntaxe `app.js/radio.js/world-map-adapter.js/mesh-resilience.js` PASS ; ordre de chargement contrôlé ; géométrie projection monde + zoom/fits testés en simulation JS ; DOM sans identifiants doublons. Script `tests/unified-map.test.cjs` ajouté.
 - À valider : affichage Firefox réel, opacité/polygones aux zooms extrêmes, calcul long, vraie matrice RF SRTM, import GeoJSON réel et conformité d’interaction dans une carte MapLibre.
 - Aucun merge, release, tag, force-push, branche supprimée, ni données utilisateur privées ajoutées au dépôt.
+
+
+## 2026-10-24 — Simplification de l'interface et provenance des couvertures
+- Prévol : branche distante `work/project-bootstrap-v0.1` HEAD `5a0e2b9b616ecbec822d2163dfd59530f1d9c388` avant corrections ; `main` à `bb853ccf45d86f194b70c1714275ac8edcb615f8`. Pas de checkout local : git status/diff/index N/A.
+- Modifications : `web/sidebar.js` nouveau (onglets et opacité), `web/index.html` (seuil visible unifié, source lisible), `web/app.js` (œil par nœud, synchronisation, persistance opacité), `web/radio.js` (estimations OFF par défaut, seuil/opacity internes masqués, provenance RF importée/local distincte), `web/style.css`.
+- Deux tests ajoutés : `tests/sidebar-navigation.test.cjs`, `tests/network-visibility.test.cjs`. Banc JavaScript simulé sur sources poussées : tab navigation, panneau de provenance avec paliers de GeoJSON, slider d'opacité synchronisé, masque par nœud indépendant, parse JS PASS. Exécution Node depuis checkout : NON EXÉCUTÉ.
+- `docs/COVERAGE_AUDIT.md` compare algorithmes et paramètres officiels mais ne prétend pas savoir lequel est le plus réaliste dans chaque secteur. GeoJSON/HGT réels, captures comparatives, PDR et mesures terrain : NON EXÉCUTÉS.
+- Prochain contrôle utilisateur : vérifier tabs, opacité, œil, maintien des deux importations et de la redondance optionnelle, puis vérifier 2-3 positions où les couvertures divergent ; comparer avec profils Site Planner mêmes paramètres.
+- Aucun merge/release/PR/force-push; main intacte et aucun contenu utilisateur privé publié.
