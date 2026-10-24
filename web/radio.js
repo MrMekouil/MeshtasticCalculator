@@ -458,22 +458,44 @@ function rfPanel(){
  };
  const oldRestore=restore;
  restore=async(file)=>{
-  const data=JSON.parse(await file.text());
-  await oldRestore(file);
-  RADIO.coverage.clear();RADIO.imports.clear();
-  RADIO.hidden=new Set((Array.isArray(data.hiddenCoverages)?data.hiddenCoverages:[])
-    .filter(id=>typeof id==='string'&&!!site(id)));
-  for(const [id,obj] of Object.entries(data.radioImports||{})){
+  let raw,data;
+  // Parse and validate *before* invoking any mutating restore logic.
+  try{
+   raw=await file.text();
+   data=JSON.parse(raw);
+  }catch(e){
+   updateStatus('Projet refusé : JSON illisible ou mal formé ('+e.message+').');
+   return false;
+  }
+  const accepted=await oldRestore({text:async()=>raw});
+  if(!accepted)return false;
+  try{
+   RADIO.optimToken++;
+   RADIO.suggestion=null;
+   const apply=$('rfApply');if(apply)apply.disabled=true;
+   const candidate=$('rfCandidate');if(candidate)candidate.textContent='Aucune position proposée.';
+   RADIO.coverage.clear();RADIO.imports.clear();
+   RADIO.hidden=new Set((Array.isArray(data.hiddenCoverages)?data.hiddenCoverages:[])
+     .filter(id=>typeof id==='string'&&!!site(id)));
+   const imports=data.radioImports&&typeof data.radioImports==='object'&&!Array.isArray(data.radioImports)
+      ?data.radioImports:{};
+   for(const [id,obj] of Object.entries(imports)){
     if(!site(id)||!obj||obj.type!=='FeatureCollection'||!Array.isArray(obj.features))continue;
     const groups={};
     for(const f of obj.features){
-      const dbm=Number(f.properties?.dbm);
-      if(Number.isFinite(dbm)&&['Polygon','MultiPolygon'].includes(f.geometry?.type))
-        (groups[dbm]??=[]).push(f);
+     const dbm=Number(f?.properties?.dbm);
+     if(Number.isFinite(dbm)&&['Polygon','MultiPolygon'].includes(f?.geometry?.type))
+       (groups[dbm]??=[]).push(f);
     }
     if(Object.keys(groups).length)RADIO.imports.set(id,{file:'Projet importé',obj,groups});
+   }
+   rfDraw();rfSummary();rfRefreshVisibility();renderMarkers();
+   return true;
+  }catch(e){
+   updateStatus('Projet restauré, certaines couvertures supplémentaires sont invalides : '+e.message);
+   RADIO.imports.clear();rfDraw();rfSummary();rfRefreshVisibility();
+   return true;
   }
-  rfDraw();rfSummary();rfRefreshVisibility();
 };
  rfSummary();rfRefreshVisibility();
  rfRestoreTiles();
