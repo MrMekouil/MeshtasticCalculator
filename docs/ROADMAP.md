@@ -66,3 +66,12 @@ Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototy
 - **Redondance = choix facultatif** dans le panneau Optimisation, non activé au lancement : vérifie les chemins de secours et relais critiques dans le graphe issu du modèle radio simplifié, y compris pour un déplacement proposé ; n’ajoute pas de relais automatiquement.
 - **À compléter avant CP-U1 terminé** : remplacer la surcouche SVG par des couches MapLibre natives, tests Firefox/rendu et import des vrais GeoJSON, performances, comportement offline.
 - **CP-U4 non terminé** : recherche automatique 0..N relais selon objectif minimum/marge/redundance et vraie évaluation RF bidirectionnelle par nœud, source terrain mondiale automatique.
+
+
+### 2026-10-24 — CP-UX/Radio : navigation et audit de divergences
+- Menu en quatre onglets courts, sections historiques conservées, optimisation déplacée dans son propre onglet.
+- Bouton œil indépendant par nœud dans Réseau ; agit sur les couches importées et calculées correspondantes, et n'efface jamais un relais. Opacité globale déplacée près du réseau.
+- Un seuil d'affichage souhaité visible avec palier **effectif** de chaque GeoJSON importé : préserver les sources, ne pas inventer un −117 dBm non présent si seuls −118/−110 existent.
+- Modèle local expérimental masqué par défaut et identifiable par provenance/couleur ; l'import du Site Planner n'est pas une mesure réelle.
+- [Audit des différences radio](COVERAGE_AUDIT.md) documenté, mais **comparaison RF mesurée et calibration physique non effectuées**.
+- Prochain checkpoint : aligner les paramètres site, récepteur et terrain dans les deux moteurs, comparer profils et RSSI sur des points de contrôle, puis moteur Longley-Rice validé.
