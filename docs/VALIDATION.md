@@ -75,3 +75,12 @@
 - Contrairement à une vraie validation physique, la nouvelle UI ne conclut pas qu'une couverture prédite est réelle. Le moteur local non validé est désactivé à l'ouverture ; il reste consultable après action explicite.
 - Comparaison de modèles : code et paramètres examinés, document [COVERAGE_AUDIT.md](COVERAGE_AUDIT.md). Deux GeoJSON personnels/HGT réel et configuration identique officielle **non utilisés pour une mesure de différence pixel ou dB**.
 - Tests Firefox réel du nouveau menu, source Site Planner et SRTM : NON EXÉCUTÉS.
+
+
+## 2026-10-24 — Liste flottante, transparences individuelles et capture LOS
+- La capture utilisateur indique explicitement « Visibilité calculée : 362/9000 cellules géométriquement dégagées (pas une couverture radio) ». Les surfaces hachurées montrées ne sauraient valider la prédiction radio.
+- Code versionné : dock réseau flottant repliable, contrôles basemap déplaçés au coin haut droit, édition conservée à gauche, réglages d'opacité par nœud repliés et opacité globale repliée, export/import de `coverageOpacities`. Typographie du bandeau réduite.
+- Contrôle syntaxe JavaScript des trois modules modifiés : PASS sur sources distantes.
+- Tests basés sur deux scripts versionnés (`tests/sidebar-navigation.test.cjs`, `tests/network-visibility.test.cjs`) lancés dans un contexte JavaScript V8 avec objets CommonJS et DOM simulés : PASS. **Cela ne remplace pas une exécution Node standard ni une validation Firefox.**
+- La carte MapLibre, le chargement de terrains et les modèles d'échantillonnage ne sont pas modifiés lors de ce checkpoint ; optimisation multi-objectifs / Longley-Rice non implémentés.
+- Risques à tester : position du dock et conflits d'overlay sur zoom carte, fermeture/repli et accessibilité clavier, restaurations JSON anciennes/nouvelles, impact sur couches RF et affichage des points nombreux, détails mobiles.
