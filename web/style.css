@@ -43,3 +43,25 @@ body.world-active #mapStack>svg#map #linksLayer{pointer-events:none}
 body.world-active #mapStack>svg#map .point text{pointer-events:none}
 #mapStack .maplibregl-control-container{z-index:3}
 @media(max-width:750px){#mapStack{min-height:350px}}
+
+/* Compact navigation: only the selected sidebar panel scrolls, never the full menu. */
+main>aside{display:flex;flex-direction:column;overflow:hidden;padding:0;min-height:0}
+#sidebarTabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:10px 12px;background:#fff;border-bottom:1px solid #dce6ea;flex:none}
+#sidebarTabs button{font-weight:600;font-size:12px;min-height:36px;padding:7px 3px}
+#sidebarTabs button.active{background:#0d757b;color:white;border-color:#0d757b}
+#sidebarTabs button:focus-visible{outline:3px solid #e7a037;outline-offset:1px}
+main>aside .sidebar-pane{flex:1;overflow:auto;overscroll-behavior:contain;min-height:0;padding:0 13px 20px}
+main>aside .sidebar-pane[hidden]{display:none!important}
+main>aside .sidebar-pane .sidebar-section{padding:13px 2px;border-bottom:1px solid #dce6ea}
+.site-line{display:flex;align-items:center;gap:6px;min-width:0}
+.site-line>.site{min-width:0;flex:1}
+.site-line .site span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coverage-eye{min-width:36px;width:36px;height:36px;flex:none;font-size:20px;padding:2px;justify-content:center;line-height:1}
+.coverage-eye[aria-pressed="false"]{color:#8095a1;background:#f3f6f8}
+.coverage-eye:hover{border-color:#0d757b}
+.network-opacity{display:block;margin:12px 2px 8px}
+.network-opacity input{margin-top:6px;display:block}
+.threshold-provenance{margin:10px 0;padding:9px;border:1px solid #d3e3e8;border-radius:8px;background:#f4f9fb;font-size:11px;line-height:1.5}
+.threshold-provenance strong{display:block;margin-bottom:5px}
+.threshold-provenance p{margin:3px 0;color:#4d6676}
+@media(max-width:750px){main>aside .sidebar-pane{overflow:visible;max-height:none}main>aside{overflow:visible}#sidebarTabs{position:sticky;top:0;z-index:8}}
