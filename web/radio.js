@@ -212,7 +212,7 @@ function rfFailureReport(override={}){
  const maxLinks=Number($('rfMaxHops').value);
  return {...globalThis.MeshtasticResilience.assessSingleRelayFailure({
   nodes,links,source:'pradel',target:'labru',minMarginDb,maxLinks
- }),unknown,known:links.length};
+ }),unknown,known:links.length,links};
 }
 function rfCheckRedundancy(overrides={},preview=false){
  const target=$('rfRedundancyResult');if(!target)return null;
@@ -231,6 +231,24 @@ function rfCheckRedundancy(overrides={},preview=false){
  details.textContent=(preview?'Position proposée (pas encore appliquée). ':'')+
    report.known+' liaisons évaluées, '+report.unknown+' inconnues. Modèle radio simplifié non validé.';
  target.append(details);
+ const detailsLinks=document.createElement('details');detailsLinks.className='rf-link-audit';
+ const head=document.createElement('summary');
+ head.textContent='Voir les marges des '+report.known+' liaisons radio estimées';
+ detailsLinks.append(head);
+ const required=Number($('rfMinMargin').value);
+ for(const l of report.links.slice().sort((a,b)=>
+  Math.min(a.marginForwardDb,a.marginReverseDb)-Math.min(b.marginForwardDb,b.marginReverseDb))){
+  const min=Math.min(l.marginForwardDb,l.marginReverseDb);
+  const line=document.createElement('p');line.className='hint';
+  const first=site(l.from)?.name||l.from,second=site(l.to)?.name||l.to;
+  line.textContent=first+' ↔ '+second+' : '+min.toFixed(1)+
+    ' dB de marge minimale ('+(min>=required?'admissible':'insuffisante')+
+    ', seuil '+required.toFixed(1)+' dB)';
+  detailsLinks.append(line);
+ }
+ const warning=document.createElement('p');warning.className='hint';
+ warning.textContent='Une liaison évaluée n’est pas forcément admissible. Liens pointillés sur la carte = ordre géographique, pas preuve de réception radio.';
+ detailsLinks.append(warning);target.append(detailsLinks);
  for(const c of report.cases){
   const row=document.createElement('p');row.className='hint';
   row.textContent=c.nodeName+' hors ligne : '+(c.remainsConnected
