@@ -46,7 +46,7 @@
   },
   sync:refreshOverlay,
   setIntensity(value){
-   const amount=Math.max(0.05,Math.min(1,Number(value)||0));
+   const amount=Math.max(0,Math.min(1,Number(value)||0));
    // Fade *only* the basemap canvas against white, not RF polygons or controls.
    const canvas=map.getCanvas();
    if(canvas)canvas.style.opacity=String(amount);
