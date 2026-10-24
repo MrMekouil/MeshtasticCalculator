@@ -65,3 +65,47 @@ main>aside .sidebar-pane .sidebar-section{padding:13px 2px;border-bottom:1px sol
 .threshold-provenance strong{display:block;margin-bottom:5px}
 .threshold-provenance p{margin:3px 0;color:#4d6676}
 @media(max-width:750px){main>aside .sidebar-pane{overflow:visible;max-height:none}main>aside{overflow:visible}#sidebarTabs{position:sticky;top:0;z-index:8}}
+
+/* CP-UX1: unobtrusive network dock over the interactive world map. */
+#networkDock{position:absolute;z-index:10;right:14px;bottom:14px;
+ width:min(265px,calc(100% - 28px));background:rgba(255,255,255,.97);
+ border:1px solid #c5d8df;border-radius:11px;box-shadow:0 5px 24px #172f3f2c;
+ overflow:hidden;backdrop-filter:blur(6px)}
+#networkDockToggle{display:block;width:100%;text-align:left;font-size:13px;font-weight:700;
+ padding:9px 12px;border:0;border-radius:0;background:#f3f9fa;color:#143c4b}
+#networkDockBody{max-height:min(40vh,370px);overflow:auto;overscroll-behavior:contain;
+ padding:7px 10px}
+#networkDockBody[hidden]{display:none!important}
+#networkDockBody>section{padding:0;border:0}
+#networkDockBody section>h2{display:none}
+#networkDockBody section>p.muted,
+#networkDockBody section>p.hint{display:none}
+#networkDockBody #sites{gap:4px;margin:0}
+#networkDockBody .actions{margin:7px 0;gap:5px}
+#networkDockBody .actions button{font-size:11px;padding:7px 4px}
+#networkDockBody .site-line{gap:4px;flex-wrap:wrap;position:relative}
+#networkDockBody .site-line>.site{flex:1;min-width:0;padding:7px 5px}
+#networkDockBody .coverage-eye{height:32px;width:32px;min-width:32px}
+#networkDockBody .node-coverage-options{width:27px;flex:0 0 27px;margin:0;min-width:0}
+#networkDockBody .node-coverage-options>summary{cursor:pointer;font-size:18px;text-align:center;
+ list-style:none;padding:3px 0;border-radius:5px;border:1px solid #d9e6e9}
+#networkDockBody .node-coverage-options>summary::-webkit-details-marker{display:none}
+#networkDockBody .node-coverage-options[open]{flex:0 0 100%;width:100%;background:#f4fafb;
+ border-radius:7px;padding:5px 7px}
+#networkDockBody .node-coverage-options[open]>summary{width:32px;margin-left:auto}
+#networkDockBody .node-coverage-options label{font-size:11px;margin:3px 0}
+#networkDockBody .node-coverage-options input{width:100%}
+#networkDockBody .network-global-options{margin:6px 0;border-top:1px solid #d7e5e9;padding-top:6px}
+#networkDockBody .network-global-options summary{cursor:pointer;font-size:11px;color:#446777}
+#networkDockBody .network-global-options label{margin:5px 0;font-size:11px}
+header{min-height:48px;height:48px;padding:6px 12px}
+header strong{font-size:15px}header .small{font-size:10px}
+header .headright button,header .headright .btn{padding:6px 9px;font-size:12px}
+main{height:calc(100vh - 48px)}
+/* Explicitly distinguish geometric line-of-sight from any simulated RSSI. */
+.estimate{fill:#7e8d9b!important;stroke:none;opacity:.32}
+@media(max-width:750px){
+ #networkDock{right:9px;bottom:9px;width:min(255px,calc(100% - 18px))}
+ #networkDockBody{max-height:30vh}
+ header{height:auto;min-height:48px}main{height:auto}
+}
