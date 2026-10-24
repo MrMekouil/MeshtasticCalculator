@@ -5,7 +5,7 @@
 'use strict';
 const RADIO={
   settings:{freq:869.525,eirp:20,rxGain:0,extraLoss:12,sensitivity:-130,rxHeight:2,maxKm:25,quality:'normal',threshold:-117},
-  coverage:new Map(),imports:new Map(),versions:new Map(),hidden:new Set(),enabled:false,active:true,dragPreview:null,dragged:null,suggestion:null,optimToken:0,demPersistent:false
+  coverage:new Map(),imports:new Map(),versions:new Map(),hidden:new Set(),enabled:true,active:true,dragPreview:null,dragged:null,suggestion:null,optimToken:0,demPersistent:false
 };
 const RADIO_QUALITY={preview:{rays:72,step:.35,profileStep:180},normal:{rays:180,step:.15,profileStep:100},fine:{rays:360,step:.10,profileStep:70}};
 function rfPoint(lat,lon,theta,km){
@@ -383,7 +383,7 @@ function rfPanel(){
   '<p id="rfStatus" class="hint">Pour calculer la couverture d’un nouveau point, charge d’abord son relief SRTM (si non mémorisé).</p>'+
   '<button id="rfChooseTerrain" class="block">Charger un terrain SRTM (HGT)</button>'+
   '<div class="actions"><label class="btn">Importer GeoJSON du point sélectionné<input id="rfImport" type="file" accept=".geojson,.json" hidden></label><button id="rfClearImport">Retirer import</button></div>'+
-  '<div class="toggles"><label><input id="rfShow" type="checkbox"> Afficher les estimations expérimentales (non validées)</label></div>'+ '<p class="hint">Pour afficher ou masquer un nœud, utilise l’œil dans « Réseau ».</p>'+
+  '<div class="toggles"><label><input id="rfShow" type="checkbox" checked> Afficher les estimations expérimentales (non validées)</label></div>'+ '<p class="hint">Pour afficher ou masquer un nœud, utilise l’œil dans « Réseau ».</p>'+
   '<label hidden>Seuil interne synchronisé<select id="rfThreshold"><option value="-130">≥ −130 dBm</option><option value="-117" selected>≥ −117 dBm</option><option value="-109">≥ −109 dBm</option></select></label>'+
   '<label>Résolution<select id="rfPrecision"><option value="preview">Rapide (72 directions)</option><option value="normal" selected>Standard (180 directions)</option><option value="fine">Fine (360 directions)</option></select></label>'+
   '<label hidden>Opacité interne<input id="rfOpacity" type="range" min="10" max="90" value="38"></label>'+
