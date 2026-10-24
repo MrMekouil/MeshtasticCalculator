@@ -49,7 +49,7 @@ function renderSites(){
    const eye=document.createElement('button');eye.type='button';eye.className='coverage-eye';
    const legacy=p.id==='pradel'?$('showPradel'):p.id==='labru'?$('showLabru'):null;
    const visible=!(typeof RADIO!=='undefined'&&RADIO.hidden.has(p.id))&&(!legacy||legacy.checked);
-   eye.textContent=visible?'◉':'◌';
+   eye.textContent=visible?'👁':'◌';
    eye.title=(visible?'Masquer':'Afficher')+' les couvertures de '+p.name;
    eye.setAttribute('aria-label',eye.title);eye.setAttribute('aria-pressed',String(visible));
    eye.onclick=event=>{
