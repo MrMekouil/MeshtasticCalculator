@@ -10,15 +10,15 @@ const registry={
 };
 const state={sites:[{id:'pradel',type:'home',name:'Le Pradel',height:10},
  {id:'r1',type:'relay',name:'Relais 1',height:8},
- {id:'labru',type:'home',name:'Labruguière',height:8}],selected:'pradel'};
+ {id:'labru',type:'home',name:'Labruguière',height:8}],selected:'pradel',opacity:.38,coverageOpacities:{}};
 const RADIO={hidden:new Set()};
 let drawImported=0,drawLocal=0;
 const site=id=>state.sites.find(x=>x.id===id);
 const run=new Function('state','$','document','RADIO','site','relayList','drawImported',
- 'rfDraw','renderMarkers','renderEditor',app.slice(a,b)+'\nreturn renderSites;')(
+ 'rfDraw','renderMarkers','renderEditor','nodeOpacity',app.slice(a,b)+'\nreturn renderSites;')(
   state,id=>registry[id],{createElement:tag=>new El(tag)},RADIO,site,
   ()=>state.sites.filter(x=>x.type==='relay'),()=>drawImported++,
-  ()=>drawLocal++,()=>{},()=>{});
+  ()=>drawLocal++,()=>{},()=>{},id=>state.coverageOpacities[id]??state.opacity);
 run();
 assert.equal(registry.sites.children.length,3);
 const relayEye=registry.sites.children[1].children[1];
@@ -33,5 +33,11 @@ const labruEye=registry.sites.children[2].children[1];
 labruEye.onclick({preventDefault(){},stopPropagation(){}});
 assert.equal(registry.showLabru.checked,false);
 assert(RADIO.hidden.has('labru'));
+const prefs=registry.sites.children[1].children[2];
+assert(prefs&&prefs.tag==='details','Relay row has compact advanced settings');
+const control=prefs.children[1].children[0];
+control.value='65';control.oninput();
+assert.equal(state.coverageOpacities.r1,.65);
+assert.equal(drawImported,4);assert.equal(drawLocal,4);
 assert.equal(state.sites.length,3,'Visibility changes must never remove nodes');
 console.log('PASS independent eyes: legacy and RF layers, no site deletion');
