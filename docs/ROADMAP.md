@@ -75,3 +75,22 @@ Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototy
 - Modèle local expérimental masqué par défaut et identifiable par provenance/couleur ; l'import du Site Planner n'est pas une mesure réelle.
 - [Audit des différences radio](COVERAGE_AUDIT.md) documenté, mais **comparaison RF mesurée et calibration physique non effectuées**.
 - Prochain checkpoint : aligner les paramètres site, récepteur et terrain dans les deux moteurs, comparer profils et RSSI sur des points de contrôle, puis moteur Longley-Rice validé.
+
+
+## Jalon prioritaire UX-RF-OPT — 24 octobre 2026
+
+**Contrat détaillé : [WHOLE_NETWORK_OPTIMIZATION_UX.md](WHOLE_NETWORK_OPTIMIZATION_UX.md)**
+
+| Checkpoint | Livraison cible | Statut |
+|---|---|---|
+| CP-UX1 | Carte dominante, dock Réseau flottant, sélection et œil, opacité individuelle dans un menu fermé | Implémentation expérimentale poussée, test Firefox nécessaire |
+| CP-UX2 | Éditeur de point/radio complet à gauche, carte/intensité haut droit, en-tête compact, choix mono-couleur/gradient | Partiel : carte/intensité et en-tête ; éditeur par radio, palettes à développer |
+| CP-RF1 | Audit comparatif LOS vs SRTM local vs ITM, paramètres/terrain harmonisés, profils de liaison | Diagnostic de source effectué ; confrontation numérique réelle à faire |
+| CP-RF2 | Évaluer licence et intégration Longley-Rice WASM, rendre les estimations reproductibles et calibrables | À développer |
+| CP-OPT1 | Optimisation conjointe de 0..N relais et scénarios alternatifs selon 4 objectifs : portée sous seuil, qualité réseau, redondance, nombre minimal | Spécifié, non développé |
+| CP-OPT2 | Comparaison de trajets et options par relais, redondance optionnelle, simulation de pannes/chemins distincts | Graphe de pannes initial en place ; optimisation globale non développée |
+| CP-E2E | Firefox, scénarios conservés/annulables, simulation cohérente, non publication des coordonnées privées | À valider |
+
+**Décision** : tout changement du réseau provoque une réévaluation des liaisons/contours utiles du graphe entier et de la qualité des scénarios. Le mode glouton « un seul voisin » ne peut pas constituer le moteur d'optimisation définitif. Aucun scénario n'écrase le projet sans action explicite.
+
+**Capture du 24/10** : le pied d'écran précise « Visibilité calculée : 362/9000 cellules géométriquement dégagées (pas une couverture radio) ». La couche des rectangles hachurés ne doit pas être comparée à une prévision dBm Site Planner. La couche de visibilité est recolorée en gris pour éviter la confusion avec le vert expérimental.
