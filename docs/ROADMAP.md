@@ -1,5 +1,9 @@
 # Roadmap — MeshtasticCalculator
 
+### CP-UX-DISPLAY-A.1 — Visibilité des sources (24 octobre 2026)
+Deux interrupteurs Site Planner / RF local regroupés et indépendants ; correctif prêt sur branche work, tests Firefox S1–S4 attendus avant CP-UX-DISPLAY-B.
+
+
 ## CP-UX-DISPLAY-A — Premier mode de palettes (24 octobre 2026)
 - Implémenté sur branche work (commit `629a269`) : choix **zone au seuil** vs **paliers dBm disponibles** pour les anciens GeoJSON et les couvertures radio importées/calculées. Pas de gradient continu inventé ; modes de masquage et opacité préservés.
 - Export/restauration : propriété facultative `coverageMode`, ancien format compatible. Test simulé PASS ; vrai Firefox et recette de sauvegarde T29/T30/T33 toujours reportés.

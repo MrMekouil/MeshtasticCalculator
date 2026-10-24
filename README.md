@@ -56,3 +56,6 @@ Lire [l'audit des divergences entre moteurs](docs/COVERAGE_AUDIT.md). Un même s
 
 ## Modes d'affichage des couvertures — CP-UX-DISPLAY-A
 Dans l'onglet **Couvertures**, choisir **Zone au seuil** (rendu initial, une teinte par provenance) ou **Paliers disponibles** (intensité croissante uniquement pour les niveaux dBm présents dans la source). En mode paliers, les niveaux sous le seuil sélectionné restent masqués. Les imports Site Planner et les simulations locales utilisent les mêmes commandes, mais **ne deviennent pas équivalents physiquement**. Ce n'est ni un gradient continu calculé ni une interpolation de signal : les données de base restent inchangées. Le choix est enregistré comme `coverageMode` dans le JSON ; les anciens projets restent compatibles grâce au repli sur `threshold`.
+
+## Masquer les sources de couverture indépendamment
+Dans l'onglet Couvertures, **Site Planner · couvertures importées (bleu/orange)** contrôle tous les GeoJSON importés (stations et relais), tandis que **Estimations expérimentales locales (vert)** contrôle uniquement les résultats calculés en local. Les deux sources peuvent coexister sur un même relais. L'œil du dock Réseau permet de masquer un nœud dans les deux sources. Rien n'est effacé ; le projet JSON garde `plannerVisible` et `experimentalVisible`, valeurs optionnelles et actives par défaut dans les anciens projets.
