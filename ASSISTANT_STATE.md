@@ -67,3 +67,16 @@
 - Important : gradients, optimiseur multi-relais global, quatre objectifs et hypothèses sont **des spécifications**, PAS de fonctions utilisables. Redondance actuelle = **analyse simple de panne**, pas optimisation de sites supplémentaires.
 - Priorité de reprise : CP-UX-FIX (suppressions sûres, auto couverture claire, visibilité géométrique), puis modes d'affichage, validation moteur radio et optimisation globale. Aucune nouvelle implémentation pendant la pause.
 - Sources GitHub contrôlées : travail pré-pause `e0bc6a5c3f7e75c3d6701c9e9671c347d935f1a6`; main `bb853ccf45d86f194b70c1714275ac8edcb615f8`. Lire HEAD actuel à la reprise. Pas de checkout local/CI navigateur ou mesures radio pendant ce checkpoint ; aucune fusion.
+
+
+## 2026-10-24 — Retours réels Firefox T01–T24 / recette ouverte
+- SOURCE DE VÉRITÉ : `docs/RECETTE_V01_T01_T24_2026-10-24.md` ; conserve la matrice 24 tests (16 PASS, 6 PARTIELS/anomalies, 2 NON TESTÉS), causes code et portes de fusion.
+- Les fonds 4/4, carte, navigation, réglages des points, masquage/opacité, suppression depuis gauche et seuils fonctionnent d'après retour utilisateur.
+- T06 : changement de fond PASS mais opacité du fond N/A en pratique : `baseOpacity` ne pilote que l'ancienne couche SVG, pas MapLibre ; message `baseInfo` redondant.
+- T18/T21 : masquer un nœud via dock et masquer TOUTES estimations RF via une case globale sont deux mécanismes dispersés ; visibilité LOS troisième mécanisme. UX à harmoniser.
+- T24 : `web/world-map-adapter.js` annule `state.estimate` à la reprojection suite au mouvement, donc le LOS calculé disparaît ; fonctionnalité diagnostique confuse. Corriger avant qualification propre.
+- T16/T19 : utilisateur veut une application sans fichiers à charger. GeoJSON auto chargé uniquement depuis `coverages.local.js` privé s'il existe, HGT restore depuis cache facultatif ; aucune acquisition mondiale à la demande.
+- T20/T22/T23 uniquement « semble OK » / contrôle incomplet, à re-tester. T25–T34 pas encore communiqués.
+- T33 : parse du JSON en wrapper `restore` dans `web/radio.js` avant gestion d'erreur locale : risque de rejet non géré, essentiel de tester en copie après export.
+- Cadenas de position : idée future, n'est pas implémenté ; corbeille flottante et couverture automatique à l'ajout toujours en backlog.
+- Pas de code modifié pendant cette consignation, branche `work/project-bootstrap-v0.1` seulement. Aucune autorisation de fusion main.
