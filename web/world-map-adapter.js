@@ -44,9 +44,16 @@
    activeStyle=id;styleError=0;
    try{map.setStyle(STYLE[id]);}catch(err){updateStatus('Fond refusé : '+err.message);}
   },
-  sync:refreshOverlay
+  sync:refreshOverlay,
+  setIntensity(value){
+   const amount=Math.max(0.05,Math.min(1,Number(value)||0));
+   // Fade *only* the basemap canvas against white, not RF polygons or controls.
+   const canvas=map.getCanvas();
+   if(canvas)canvas.style.opacity=String(amount);
+  }
  };
  globalThis.MeshtasticWorldMap=world;
+ world.setIntensity(state.baseOpacity);
  document.body.classList.add('world-active');
  // MapLibre may otherwise interpret double clicks as both zoom and add-relay.
  map.doubleClickZoom.disable();
