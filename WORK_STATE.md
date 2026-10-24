@@ -92,3 +92,11 @@
 - Vérification statique ciblée : `web/app.js` crée les nouveaux relais sans appeler calcul RF ; `web/radio.js` initialise `RADIO.enabled=false` ; case LOS `showEstimate` n'appelle que `drawEstimate`, qui exige `state.estimate` ; l'optimiseur `rfSuggestPosition()` ne traite que le relais sélectionné et ses deux voisins. La redondance actuelle analyse les pannes mais n'optimise pas 0..N sites.
 - Rien de fonctionnel modifié pendant ce checkpoint ; **aucune validation Firefox ni simulation Longley-Rice ajoutée**, aucun test d'exécution revendiqué.
 - À la reprise : prévol du nouveau HEAD, lire le checkpoint, choisir uniquement CP-UX-FIX puis planifier tests/export et retour utilisateur. Ne pas toucher `main` ni aux GeoJSON privés.
+
+
+## 2026-10-24 — Recette manuelle T01–T24 consignée sans modification du programme
+- Prévol distant : branch work HEAD `e2d3fedec2bebd5f82eff79f778c7e1c48f3e074` avant nouvelle documentation ; main `bb853ccf45d86f194b70c1714275ac8edcb615f8`. Liste GitHub PR ouvertes : aucune. Historique récent consulté. Pas de checkout local, donc git status/diff/index N/A.
+- Document ajouté : `docs/RECETTE_V01_T01_T24_2026-10-24.md`. Résultats utilisateur 16 PASS / 6 partiels ou anomalies / 2 non testés. Les T16/T19 sont de véritables demandes produit encore manquantes.
+- Code consulté en lecture seule : `baseOpacity` appelle `mapBase()` sans effet en MapLibre ; `world-map-adapter.js` remet `state.estimate=null` après pan ; RF display utilise `RADIO.enabled` distinct des yeux et du LOS ; restauration JSON externe sans `try/catch` local dans wrapper `radio.js`.
+- À faire maintenant : T25–T34 + retests ciblés R06/R18/R20/R22/R23/R24 ; valider que projet/sauvegardes ne sont pas perdus. Ne pas répéter T01–T05/T07–T15/T17/T21 sans raison, sauf régression après correctif.
+- Cette intervention est **documentaire seulement** ; ni test navigateur/Node/radio nouveau, ni modification `web/`, ni merge/PR/release.
