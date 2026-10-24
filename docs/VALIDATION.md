@@ -122,3 +122,11 @@
 - **T34 = PASS pour l'absence de terrain sur le scénario testé.** Pas de faux calcul de couverture verte détecté.
 - État T25–T34 corrigé : 4 PASS, 3 PARTIELS, 3 REPORTÉS. T29/T30/T33 encore non exécutés ; `main` inchangée.
 - Journal source : `docs/RECETTE_V01_T01_T24_2026-10-24.md` §8.
+
+
+## 2026-10-24 — CP-UX-FIX implémenté mais non validé en navigateur
+- Modification de code confirmée sur branche `work/project-bootstrap-v0.1` : dock suppressions (confirm), aperçu du candidat (T25), intensité MapLibre (T06), LOS géographique conservé au pan (T24), radio expérimentale calculée pour nouveau relais si DEM, lecture JSON mal formé protégée, marges redondance explicites.
+- Contrôles V8 en session : syntaxe `app.js/radio.js/world-map-adapter.js` PASS, suppression annulée + A/B protégées + RF et opacités nettoyées PASS, preview WGS84 non destructif PASS, rejet du JSON malformé **avant restauration** PASS, `tests/sidebar-navigation.test.cjs` et `tests/network-visibility.test.cjs` simulés PASS ; nouveau `tests/v01-ux-fixes.test.cjs` simulé PASS.
+- Le contrôle de réseau simulé ne vaut pas une exécution de tests Node dans un checkout, et aucune interface Firefox après correctif ni test radio terrain n'a été effectuée.
+- Recette T29/T30/T33 toujours reportée. L'intégrité réelle export → import d'un projet complexe reste une condition de fusion.
+- L'auto-affichage des prédictions RF **ne leur confère aucune fiabilité physique** ; le libellé expérimental/non validé reste obligatoire.
