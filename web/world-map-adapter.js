@@ -141,7 +141,6 @@
   const c=e.lngLat;
   addRelay({lat:+c.lat.toFixed(8),lon:+c.lng.toFixed(8)});
   rfRefreshVisibility();
-  if(state.terrain)rfCalculateSite(state.selected);
  });
  // Deliberately do not bind pointer events to map for SVG overlay points;
  // the legacy point-drag state machine keeps the coordinate editor synchronized.
