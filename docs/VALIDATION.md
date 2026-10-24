@@ -108,3 +108,10 @@
 - T28 : capture avec Le Pradel + Labruguière + trois relais, 10 paires calculées (0 inconnue), seuil de 10 dB et 7 sauts, mais aucune chaîne nominale admissible selon modèle ; **ne prouve aucune déconnexion réelle**.
 - T27 « OK ? » n'est pas PASS confirmé. T29/T30/T33 = tests de données toujours non exécutés ; aucun go fusion V0.1.
 - Analyse réalisée par lecture du code + screenshot utilisateur ; aucune exécution Firefox / tests RF nouveaux ici. Aucun changement `web/`.
+
+
+## 2026-10-24 — T34 : rejet explicite si SRTM absent
+- Retour utilisateur Firefox : « Terrain SRTM absent : charge un fichier .hgt(.gz) pour calculer les nouvelles couvertures. »
+- **Sous-critère message d'erreur : PASS. T34 global : PARTIEL** jusqu'à confirmation qu'aucune nouvelle couverture radio verte n'est apparue.
+- Les marges précédentes ne sont plus disponibles après Nouveau projet : ne pas demander leur reproduction ; ancienne étude T28 conservée comme simulation indicative sans validation terrain.
+- État lot T25–T34 : 3 PASS, 4 PARTIELS, 3 non exécutés/reportés. Voir `RECETTE_V01_T01_T24_2026-10-24.md` §7.
