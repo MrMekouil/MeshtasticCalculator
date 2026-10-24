@@ -133,3 +133,18 @@ Remarque : la numérotation V0.1–V0.4 plus bas reste **l'historique du prototy
 **Décision** : tout changement du réseau provoque une réévaluation des liaisons/contours utiles du graphe entier et de la qualité des scénarios. Le mode glouton « un seul voisin » ne peut pas constituer le moteur d'optimisation définitif. Aucun scénario n'écrase le projet sans action explicite.
 
 **Capture du 24/10** : le pied d'écran précise « Visibilité calculée : 362/9000 cellules géométriquement dégagées (pas une couverture radio) ». La couche des rectangles hachurés ne doit pas être comparée à une prévision dBm Site Planner. La couche de visibilité est recolorée en gris pour éviter la confusion avec le vert expérimental.
+
+
+## CP-UX-FIX — Développement repris après report des tests (24 octobre 2026)
+L'utilisateur a reporté T29/T30/T33 : **ils restent NON TESTÉS**. La demande de reprise autorise des correctifs ciblés, **pas** la fusion dans main.
+
+Implémentation poussée sur `work/project-bootstrap-v0.1` :
+- Suppression d'un relais par ✕ dans le dock Réseau, confirmation obligatoire, stations d'origine protégées, données RF / opacités / imports du nœud nettoyés, recherche d'emplacement en cours invalidée.
+- **T25** : suggestion d'emplacement en orange sur la carte, ligne « actuel → candidat », coordonnées/marge/gain dans l'onglet Optimisation, pas de mutation avant Appliquer.
+- **T06** : fond MapLibre atténué par opacité du canvas uniquement (pas les couvertures ni les commandes de carte), curseur désormais 0–100 %, valeur initiale 100 %, aide technique supprimée.
+- **T24** : cellules géométriques stockées en coordonnées WGS84 et reprojetées après pan ; LOS reste un diagnostic avancé, distinct du RF.
+- **T09/T20** : avec DEM existant, calcul expérimental lancé à l'ajout d'un relais ; les estimations sont affichées par défaut mais signalées comme **non validées** ; hors DEM pas de surface inventée.
+- **T33 sécurité** : JSON analysé avant la restauration et erreurs signalées sans changer le réseau pour un JSON mal formé. Tests manuels T29/30/33 restent à réaliser avant toute fusion.
+- **T28 intelligibilité** : détails de marges et verdict de chaque paire dans un sous-menu ; la géométrie pointillée n'est pas une preuve de liaison RF.
+
+**À valider ensuite dans Firefox** : un relais supprimé après confirmation et sans suppression des stations A/B, réglages d'intensité, position candidate, résultat RF de nouveau relais avec DEM, LOS maintenu au déplacement, projet sauvegardé/rechargé et JSON invalide. **Aucun solveur global 0…N n'a été développé.**
