@@ -115,3 +115,10 @@
 - **Sous-critère message d'erreur : PASS. T34 global : PARTIEL** jusqu'à confirmation qu'aucune nouvelle couverture radio verte n'est apparue.
 - Les marges précédentes ne sont plus disponibles après Nouveau projet : ne pas demander leur reproduction ; ancienne étude T28 conservée comme simulation indicative sans validation terrain.
 - État lot T25–T34 : 3 PASS, 4 PARTIELS, 3 non exécutés/reportés. Voir `RECETTE_V01_T01_T24_2026-10-24.md` §7.
+
+
+## 2026-10-24 — T34 PASS utilisateur (confirmé)
+- L'utilisateur confirme le message « Terrain SRTM absent : charge un fichier .hgt(.gz) pour calculer les nouvelles couvertures. » **et** « rien de vert n'est apparu ».
+- **T34 = PASS pour l'absence de terrain sur le scénario testé.** Pas de faux calcul de couverture verte détecté.
+- État T25–T34 corrigé : 4 PASS, 3 PARTIELS, 3 REPORTÉS. T29/T30/T33 encore non exécutés ; `main` inchangée.
+- Journal source : `docs/RECETTE_V01_T01_T24_2026-10-24.md` §8.
