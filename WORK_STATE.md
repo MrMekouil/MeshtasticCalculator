@@ -114,3 +114,10 @@
 - L'utilisateur a créé un nouveau projet, rendant les anciennes marges T28 indisponibles : ne pas les lui redemander.
 - T34 : message « Terrain SRTM absent : charge un fichier .hgt(.gz) pour calculer les nouvelles couvertures. » observé dans Firefox ; PASS du sous-critère signalement terrain manquant, mais absence de nouveau polygone radio pas encore confirmée, T34 global PARTIEL.
 - T29/T30/T33 restent reportés et bloquants pour qualifier l'import/export ; code inchangé. Voir `docs/RECETTE_V01_T01_T24_2026-10-24.md` §7.
+
+
+## 2026-10-24 — Confirmation T34 et suite de la recette
+- Nouveau retour utilisateur : **aucune zone RF verte** n'a été créée en l'absence de terrain, en plus du message explicite d'absence SRTM. T34 global marqué **PASS** pour le cas testé.
+- Statut lot T25–T34 : 4 PASS (T26/31/32/34), 3 PARTIELS (T25/27/28), 3 REPORTÉS (T29/30/33).
+- Priorité de test restante : export (T29), restauration (T30), JSON invalide sur copie en session isolée (T33). Corriger le parse JSON hors try/catch si problème constaté avant fusion.
+- Aucune modification de `web/`, aucune fusion `main`, aucune promesse de moteur RF validé.
