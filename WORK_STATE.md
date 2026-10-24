@@ -100,3 +100,11 @@
 - Code consulté en lecture seule : `baseOpacity` appelle `mapBase()` sans effet en MapLibre ; `world-map-adapter.js` remet `state.estimate=null` après pan ; RF display utilise `RADIO.enabled` distinct des yeux et du LOS ; restauration JSON externe sans `try/catch` local dans wrapper `radio.js`.
 - À faire maintenant : T25–T34 + retests ciblés R06/R18/R20/R22/R23/R24 ; valider que projet/sauvegardes ne sont pas perdus. Ne pas répéter T01–T05/T07–T15/T17/T21 sans raison, sauf régression après correctif.
 - Cette intervention est **documentaire seulement** ; ni test navigateur/Node/radio nouveau, ni modification `web/`, ni merge/PR/release.
+
+
+## 2026-10-24 — Consignation complément T25–T34 (lecture seule de l'application)
+- Prévol GitHub au début : work `e576ac1e3aba14e2452d644b933a2f2a811f6415`, main `bb853ccf45d86f194b70c1714275ac8edcb615f8`. Aucun checkout local (git status/diff/index N/A).
+- L'utilisateur fournit une capture de l'onglet Optimisation avec relais 2/4/5 : 10 paires RF évaluées, 0 inconnue, +10 dB minimum, 7 sauts maximum, aucun trajet A↔B démontré. Important : la présence des contours/traits pointillés ne garantit pas les marges.
+- Lecture source `web/radio.js` : `rfSuggestPosition()` n'affiche pas de marqueur candidat, sauvegarde `RADIO.suggestion`, l'écrit dans `#rfStatus` (déplacé vers Couvertures), puis rend « Appliquer » actif ; T25 UX partiel, T26 OK selon utilisateur.
+- T27 « OK ? » partiel ; T28 un rapport reçu mais pas une vérification de RF réel ; T31/T32 OK, T29/T30/T33/T34 non exécutés. Le journal complet est `docs/RECETTE_V01_T01_T24_2026-10-24.md` §6.
+- Modifications UNIQUEMENT documentaires, pas de changements `web/`, pas de merge, PR, release ni tag. À la reprise, cibler avertissement candidat/visibilité redondance, puis les tests de sauvegarde et cas négatifs.
