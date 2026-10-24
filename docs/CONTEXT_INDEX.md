@@ -17,3 +17,5 @@
 
 
 - **RECETTE V0.1 ACTUELLE — Firefox T01–T24 (24 octobre 2026)** : `docs/RECETTE_V01_T01_T24_2026-10-24.md` ; **prioritaire à lire à la reprise**, avant d'envisager toute fusion.
+
+- **Affichage V0.1 (CP-UX-DISPLAY-A, 2026-10-24)** : code `web/app.js`, `web/radio.js`, sélecteur `web/index.html` ; test reproductible `tests/coverage-display.test.cjs`, statut dans `docs/VALIDATION.md`.

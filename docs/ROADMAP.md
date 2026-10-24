@@ -1,5 +1,11 @@
 # Roadmap — MeshtasticCalculator
 
+## CP-UX-DISPLAY-A — Premier mode de palettes (24 octobre 2026)
+- Implémenté sur branche work (commit `629a269`) : choix **zone au seuil** vs **paliers dBm disponibles** pour les anciens GeoJSON et les couvertures radio importées/calculées. Pas de gradient continu inventé ; modes de masquage et opacité préservés.
+- Export/restauration : propriété facultative `coverageMode`, ancien format compatible. Test simulé PASS ; vrai Firefox et recette de sauvegarde T29/T30/T33 toujours reportés.
+- Reste CP-UX-DISPLAY-B : meilleure légende par source et niveaux, densité du rendu, ergonomie, contours/cellules ; puis vrai gradient seulement avec des valeurs RF spatiales valides et leur provenance.
+
+
 ## Recette V0.1 — complément T25–T34 du 24 octobre 2026
 
 Lire l'addendum [Recette V0.1 T01–T34](RECETTE_V01_T01_T24_2026-10-24.md) §6. Résultats T25–T34 : **3 PASS** (T26/T31/T32), **3 partiels** (T25/T27/T28), **4 reportés/non testés** (T29/T30/T33/T34).
