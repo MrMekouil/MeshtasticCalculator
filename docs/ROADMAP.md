@@ -1,5 +1,19 @@
 # Roadmap — MeshtasticCalculator
 
+## Recette V0.1 en cours — résultats T01–T24 reçus (24 octobre 2026)
+
+**Document prioritaire : [RECETTE_V01_T01_T24_2026-10-24.md](RECETTE_V01_T01_T24_2026-10-24.md)**
+
+- 16 PASS utilisateur : T01–T05, T07–T15, T17, T21.
+- 6 partiels/anomalies : T06 (intensité du fond MapLibre inopérante), T18 (trois mécanismes de visibilité), T20/T22/T23 (résultats encore insuffisamment contrôlés), T24 (LOS lent puis effacé quand la carte bouge).
+- 2 non testés/attente produit non satisfaite : T16 chargement GeoJSON sans import manuel, T19 relief mondial sans import HGT.
+- Idée : verrouiller la position d'un nœud via cadenas (future UX).
+- Priorité à la validation T25–T34, puis correctifs ciblés R06/R18/R24 ; **import JSON invalide T33 à surveiller** (wrapper `restore` parse hors try/catch dans radio.js).
+- **Aucun merge sur main autorisé** tant que sauvegarde/reprise, données manquantes et erreurs d'import ne sont pas sûres. Les calculs LOS et knife-edge restent expérimentaux.
+
+---
+
+
 ## ARRÊT DE DÉVELOPPEMENT — BILAN DE REPRISE (24 octobre 2026)
 
 **Lire impérativement [CHECKPOINT_PAUSE_2026-10-24.md](CHECKPOINT_PAUSE_2026-10-24.md) avant tout nouveau développement.** Cette section prime sur les formulations historiques « livré/validé » des versions ci-dessous. L'utilisateur a demandé une **pause** : aucune nouvelle fonctionnalité ne doit être engagée sans sélectionner un nouveau checkpoint.
