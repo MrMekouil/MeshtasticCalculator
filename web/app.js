@@ -14,7 +14,7 @@ function bundledLayer(key){
    && val.features.every(f=>['MultiPolygon','Polygon'].includes(f?.geometry?.type)&&Number.isFinite(Number(f?.properties?.dbm)))?val:null;
 }
 const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
-const state={sites:structuredClone(HOME),selected:'pradel',threshold:-118,layer:preloaded,quality:'normal',opacity:.38,
+const state={sites:structuredClone(HOME),selected:'pradel',threshold:-117,layer:preloaded,quality:'normal',opacity:.38,
  terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
@@ -44,7 +44,25 @@ function renderSites(){
    const b=document.createElement('button');b.className='site'+(state.selected===p.id?' active':'');
    const name=document.createElement('span');name.textContent=(p.type==='home'?'⌂ ':'⌁ ')+p.name;
    const info=document.createElement('em');info.textContent=p.type==='home'?'Station fixe':p.height+' m · relais';
-   b.append(name,info);b.onclick=()=>{state.selected=p.id;renderSites();renderMarkers();renderEditor();};list.append(b);
+   b.append(name,info);b.onclick=()=>{state.selected=p.id;renderSites();renderMarkers();renderEditor();};
+   const line=document.createElement('div');line.className='site-line';
+   const eye=document.createElement('button');eye.type='button';eye.className='coverage-eye';
+   const legacy=p.id==='pradel'?$('showPradel'):p.id==='labru'?$('showLabru'):null;
+   const visible=!(typeof RADIO!=='undefined'&&RADIO.hidden.has(p.id))&&(!legacy||legacy.checked);
+   eye.textContent=visible?'◉':'◌';
+   eye.title=(visible?'Masquer':'Afficher')+' les couvertures de '+p.name;
+   eye.setAttribute('aria-label',eye.title);eye.setAttribute('aria-pressed',String(visible));
+   eye.onclick=event=>{
+    event.preventDefault();event.stopPropagation();
+    const next=!visible;
+    if(typeof RADIO!=='undefined'){
+      if(next)RADIO.hidden.delete(p.id);else RADIO.hidden.add(p.id);
+      rfDraw();
+    }
+    if(legacy)legacy.checked=next;
+    drawImported();renderSites();
+   };
+   line.append(b,eye);list.append(line);
  });
  $('relayCount').textContent='· '+relayList().length+' relais';
  if(typeof rfRefreshVisibility==='function')rfRefreshVisibility();
@@ -313,8 +331,14 @@ async function restore(file){
   const ids=obj.sites.map(p=>p.id);
   if(!ids.includes('pradel')||!ids.includes('labru')||new Set(ids).size!==ids.length||obj.sites.length>100)throw Error('Stations de base manquantes ou doublons');
   if(obj.sites.some(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lon)||Math.abs(p.lat)>90||Math.abs(p.lon)>180))throw Error('Coordonnées invalides');
-  state.sites=obj.sites;state.layer={pradel:obj.layer?.pradel||preloaded.pradel||null,labru:obj.layer?.labru||preloaded.labru||null};state.selected='pradel';state.threshold=Number(obj.threshold)||-118;
-  $('threshold').value=String(state.threshold);invalidate();render();updateStatus('Projet restauré.');
+  state.sites=obj.sites;state.layer={pradel:obj.layer?.pradel||preloaded.pradel||null,labru:obj.layer?.labru||preloaded.labru||null};state.selected='pradel';
+  const stored=Number(obj.threshold);
+  state.threshold=[-130,-117,-109].reduce((a,b)=>Math.abs(b-stored)<Math.abs(a-stored)?b:a,-117);
+  $('threshold').value=String(state.threshold);
+  if(typeof RADIO!=='undefined'){$('rfThreshold').value=String(state.threshold);RADIO.settings.threshold=state.threshold;}
+  invalidate();render();
+  if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
+  updateStatus('Projet restauré.');
  }catch(e){updateStatus('Projet refusé : '+e.message);}
 }
 function wire(){
@@ -327,7 +351,12 @@ function wire(){
  for(const[field,id]of[['name','pointName'],['lat','pointLat'],['lon','pointLon'],['height','pointHeight']]){
   $(id).addEventListener('change',e=>{updateField(field,e.target.value);if(field!=='name')render();});
  }
- $('threshold').onchange=e=>{state.threshold=Number(e.target.value);drawImported();};
+ $('threshold').onchange=e=>{
+   const t=Number(e.target.value);state.threshold=t;
+   if(typeof RADIO!=='undefined'){RADIO.settings.threshold=t;$('rfThreshold').value=String(t);rfDraw();}
+   drawImported();
+   if(globalThis.MeshtasticSidebar?.updateThreshold)globalThis.MeshtasticSidebar.updateThreshold();
+ };
  for(const id of ['showPradel','showLabru'])$(id).onchange=drawImported;
  $('showEstimate').onchange=drawEstimate;
  $('coverageOpacity').oninput=e=>{state.opacity=Number(e.target.value)/100;drawImported();drawEstimate();};
