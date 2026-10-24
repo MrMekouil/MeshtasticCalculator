@@ -15,7 +15,7 @@ function bundledLayer(key){
 }
 const preloaded={pradel:bundledLayer('pradel'),labru:bundledLayer('labru')};
 const state={sites:structuredClone(HOME),selected:'pradel',threshold:-117,layer:preloaded,quality:'normal',opacity:.38,coverageOpacities:{},
- terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:.36,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
+ terrain:null,terrains:[],estimate:null,base:'positron',baseOpacity:1,view:{x:0,y:0,w:1130,h:930},drag:null,token:0};
 const status=(s)=>{$('status').textContent=s;};
 const rad=Math.PI/180;
 const project=(lon,lat)=>globalThis.MeshtasticWorldMap?.map
@@ -169,7 +169,7 @@ function grid(){
 function mapBase(){
  if(globalThis.MeshtasticWorldMap?.map){
   wipe('baseLayer');
-  $('baseInfo').textContent='Carte mondiale vectorielle : styles routiers et zoom adaptatif. Le fond blanc reste disponible.';
+  $('baseInfo').textContent='';
   return;
  }
  wipe('baseLayer');
@@ -438,7 +438,12 @@ function wire(){
   if(world?.map)world.switchStyle(state.base);
   else mapBase();
  };
- $('baseOpacity').oninput=e=>{state.baseOpacity=Number(e.target.value)/100;mapBase();};
+ $('baseOpacity').oninput=e=>{
+  state.baseOpacity=Number(e.target.value)/100;
+  const world=globalThis.MeshtasticWorldMap;
+  if(world?.map)world.setIntensity(state.baseOpacity);
+  else mapBase();
+};
  $('quality').onchange=e=>{state.quality=e.target.value;if(state.terrain&&site(state.selected)){calculate();}else updateStatus('Mode '+e.target.value+' sélectionné. Charge un terrain pour calculer.');};
  $('calculate').onclick=calculate;
  $('fit').onclick=$('resetView').onclick=fitSites;
